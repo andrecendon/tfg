@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Inicial de Proyecto</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <style>
+        .api-response {
+        margin-top: 30px;
+        border-top: 2px solid #28a745;
+        padding-top: 20px;
+    }
+
+    .response-section {
+        margin-bottom: 30px;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .mermaid {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 15px 0;
+        border: 1px solid #ddd;
+    }
+
+    .code-block {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+    }
+
+    .styled-table-container {
+        overflow-x: auto;
+    }
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    .styled-table th {
+        background-color: #28a745;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .styled-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .styled-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px; /* Ajusta el ancho */
+            margin: 0 auto;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            resize: none;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #28a745;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .row {
+            margin-bottom: 15px;
+        }
+        .bg-transparent {
+            background-color: transparent;
+        }
+        .border-0 {
+            border: none;
+        }
+        .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+        font-size: 0.9em;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        min-width: 600px; /* Ancho mínimo para evitar compresión */
+    }
+    
+    .styled-table thead tr {
+        background-color: #28a745;
+        color: #ffffff;
+        text-align: left;
+        position: sticky;
+        top: 0;
+    }
+    
+    .styled-table th {
+        padding: 12px 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85em;
+        letter-spacing: 0.5px;
+    }
+    
+    .styled-table td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: top;
+    }
+    
+    .styled-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .styled-table tbody tr:nth-of-type(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .styled-table tbody tr:last-of-type {
+        border-bottom: 2px solid #28a745;
+    }
+    
+    .styled-table tbody tr:hover {
+        background-color: #e9f7ef;
+        cursor: default;
+    }
+    
+    /* Contenedor responsive */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    /* Estilos para enlaces */
+    .styled-table a {
+        color: #28a745;
+        text-decoration: none;
+        word-break: break-all; 
+    }
+    
+    .styled-table a:hover {
+        text-decoration: underline;
+        color: #218838;
+    }
+    
+    /* Estilos para costos */
+    .styled-table td:nth-child(5) {
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: right;
+        white-space: nowrap; /* Evita salto de línea en números */
+    }
+    
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+
+        <h1>Simulación de línea de producción</h1>
+        
+        <div class="form-container">
+            <form action="/funciones/Fase3/simulacionProduccion/chatbot" method="POST">
+                <div class="input-group">
+                    <label for="prompt_flujo">Describa el diagrama de flujo: </label>
+                    <textarea id="prompt_flujo" name="prompt_flujo">{{prompt_flujo}}</textarea>
+                </div>
+                <button type="submit" name="flujo" class="btn">Generar flujo</button>
+                &nbsp;
+                <div class="input-group">
+                    <label for="prompt_tabla">Tabla: </label>
+                    <textarea id="prompt_tabla" name="prompt_tabla">{{prompt_tabla}}</textarea>
+                </div>
+                <button type="submit" name="tabla" class="btn">Generar tabla</button>
+                &nbsp;
+                <div class="input-group">
+                    <label for="prompt_imagen">Imagen: </label>
+                    <textarea id="prompt_imagen" name="prompt_imagen">{{prompt_imagen}}</textarea>
+                </div>
+                
+                <button type="submit" name="imagen" class="btn">Generar imagen</button>
+                &nbsp;
+            
+
+            
+        </div>
+
+            {% if project.simulacion_produccion.diagrama_flujo %}
+            <input type="hidden" name="response_flujo" value="{{ response_flujo }}">
+            <div class="response-section">
+                <h3>Diagrama de Flujo</h3>
+                <div class="mermaid">
+                    {{ project.simulacion_produccion.diagrama_flujo  }}
+                </div>
+                <pre class="code-block">{{  project.simulacion_produccion.diagrama_flujo  }}</pre>
+            </div>
+            {% endif %}
+
+            {% if  project.simulacion_produccion.tabla  %}
+            <input type="hidden" name="response_tabla" value="{{ response_tabla }}">
+            <div class="input-group">
+                <label>Respuesta de la tabla:</label>
+                <div class="table-responsive">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Etapa del Proceso</th>
+                                <th>Equipos Requeridos</th>
+                                <th>Proveedor en España</th>
+                                <th>Enlace de la Empresa</th>
+                                <th>Costo Estimado (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in project.simulacion_produccion.tabla%}
+                            <tr>
+                                <td>{{ f.etapa }}</td>
+                                <td>{{ f.equipo }}</td>
+                                <td>{{ f.proveedor }}</td>
+                                <td><a href="{{ f.enlace }}" target="_blank">{{ f.enlace }}</a></td>
+                                <td>{{ f.costo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% if response_imagen %}
+                <div class="input-group">
+                    <label for="response_imagen">Respuesta de la imagen: </label>
+                    <textarea id="response_imagen" name="response_imagen" readonly>{{response_imagen}}</textarea>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

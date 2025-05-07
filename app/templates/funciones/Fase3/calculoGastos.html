@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+    <style>
+        /* Estilos personalizados */
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            vertical-align: middle;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        .table td {
+            padding: 10px 15px;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .food-name-column {
+            width: 300px;  /* Ancho fijo para la columna de nombres */
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .number-column {
+            text-align: right;
+            width: 120px;
+        }
+        
+        .header-row {
+            background-color: #343a40;
+            color: white;
+        }
+        
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-top: 2px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .highlight-row {
+            background-color: #e9f7ef;
+        }
+        
+        .currency {
+            font-family: Arial, sans-serif;
+        }
+        
+        .form-control {
+            height: calc(1.5em + 0.75rem + 2px);
+            padding: 0.375rem 0.75rem;
+        }
+        
+        h2, h3 {
+            color: #2c3e50;
+        }
+        
+        .back-button {
+            transition: transform 0.2s;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-auto">
+                <a href="/funciones" class="border-0 bg-transparent back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+                </a>
+            </div>
+            <div class="col">
+                <h2 class="mb-0">Proyecto: {{proyecto.name}}</h2>
+            </div>
+        </div>
+        
+        <h3 class="mb-4">Tabla Nutricional</h3>
+        
+        <form action="/funciones/Fase1/prototipado/guardar_gramos" method="POST">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr class="header-row">
+                            <th style="width: 50px;">Nº</th>
+                            <th class="food-name-column">Alimento</th>
+                            {% for prototipo in proyecto.prototypes %}
+                                <th class="text-center">
+                                    <input type="text" name="prototipo_name_{{ prototipo.id }}" 
+                                        value="{{ prototipo.name if prototipo.name else '' }}" 
+                                        class="form-control form-control-sm" placeholder="Nombre Prototipo">
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            {% for prototipo in proyecto.prototypes %}
+                                <th class="text-center">Coste ($)</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for food in proyecto.foods %}
+                            <tr class="{{ 'highlight-row' if loop.index % 2 == 0 }}">
+                                <td>{{ loop.index }}</td>
+                                <td class="food-name-column" title="{{ food.food_description }}">{{ food.food_description }}</td>
+                                
+                                {% for prototipo in proyecto.prototypes %}
+                                    {% set fp = (prototipo.food_prototypes | selectattr('food_id', 'equalto', food.id) | list | first) %}
+                                    <td class="number-column currency">
+                                        {{ "%.2f"|format(fp.cantidad * fp.food.precio/100) if fp and fp.food.precio>0 else "0.00" }} $
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    
+                        <!-- Filas de resumen -->
+                        <tr class="total-row">
+                            <td colspan="2">Costes totales</td>
+                            {% for t in totales %}
+                                <td class="number-column currency">{{ "%.2f"|format(t) }} $</td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <td colspan="2">Peso esperado del producto final</td>
+                            {% for p in proyecto.prototypes %}
+                                <td class="number-column">{{ "%.1f"|format(p.peso_inicial) }} gr</td>
+                            {% endfor %}
+                        </tr>
+
+                        <tr class="highlight-row">
+                            <td colspan="2">Valor Receta Esperado (1 gr)</td>
+                            {% for p in proyecto.prototypes %}
+                                <td class="number-column currency">{{ "%.4f"|format(totales[loop.index0] / p.peso_inicial) }} $</td>
+                            {% endfor %}
+                        </tr>
+
+                        <tr class="total-row">
+                            <td colspan="2">Valor Receta Esperado (1000 gr)</td>
+                            {% for p in proyecto.prototypes %}
+                                <td class="number-column currency">{{ "%.2f"|format(totales[loop.index0] / p.peso_inicial * 1000) }} $</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

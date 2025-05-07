@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Estilo del contenedor principal */
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        /* Estilo de los mensajes del chat */
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .chat-box .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .chat-box .user-message {
+            background-color: #d1e7ff;
+            text-align: right;
+        }
+
+        .chat-box .bot-message {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+
+        /* Estilo para el input y el botón */
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-container input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .input-container button {
+            width: 20%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="row col-1">
+            <button onclick="window.history.back()" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </button>
+        </div>
+        <h2>Chatbot</h2>
+
+        <div class="chat-box" id="chat-box">
+            <!-- Los mensajes aparecerán aquí -->
+        </div>
+
+        <form action="/chatbot/chat", method="POST">
+        <div class="input-container">
+            <input type="text" id="prompt" name="prompt" placeholder="Escribe un mensaje" required>
+            <button type="submit">Enviar</button>
+        </div>
+        </form>
+    </div>
+    <div class="chat-container">
+        {% if response %}
+            <p><strong>Respuesta:</strong> {{ response }}</p>
+            <p><strong>Tiempo de ejecución:</strong> {{ time }} segundos</p>
+        {% else %}
+            <p>Esperando respuesta...</p>
+        {% endif %}
+    </div>
+
+    
+</body>
+</html>

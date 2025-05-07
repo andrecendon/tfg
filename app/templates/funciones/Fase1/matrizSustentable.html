@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Inicial de Proyecto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .form-container {
+            background: white;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+           
+            display: block;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            resize: none;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #28a745;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+            transition: 0.3s;
+        }
+
+        td a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+    <div class="row col-1">
+        <a href="/funciones" class="border-0 bg-transparent">
+            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+        </a>
+    </div>
+
+    <h1>Matriz de sustentabilidad de ingredientes</h1>
+    
+    <div class="form-container">
+        <form action="/funciones/Fase1/matrizSustentable/enviar" method="POST">
+            <div class="input-group">
+                <textarea id="prompt" name="prompt" required>{{prompt}}</textarea>
+            </div>
+
+            <button type="submit" class="btn">Generar</button>
+        </form>
+        
+        {% if alimentos %}
+            <p><strong>Tiempo de ejecución:</strong> {{ '%.3f' | format(time) }} segundos</p>
+        {% endif %}
+        </div>
+        {% if alimentos %}
+            <table >
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Nivel de sostenibilidad</th>
+                        <th>Análisis del ciclo de vida</th>
+                        <th>Cadena de suministro</th>
+                        <th>Huella de carbono</th>
+                        <th>Impacto Ambiental</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alimento in alimentos %}
+                    <tr>
+                        <td>{{ alimento.Ingrediente }}</td>
+                        <td>{{ alimento.NivelSostenibilidad }}</td>
+                        <td>{{ alimento.CicloVida }}</td>
+                        <td>{{ alimento.CadenaSuministro }}</td>
+                        <td>{{ alimento.HuellaCarbono }}</td>
+                        <td>{{ alimento.ImpactoAmbiental }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+        
+
+        
+    
+</div>
+</body>
+</html>

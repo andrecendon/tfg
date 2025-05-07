@@ -1,0 +1,34 @@
+.tarjeta {
+    position: relative;
+    width: 300px;  /* Ajusta el tamaño según lo necesites */
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tarjeta-img {
+    width: 100%;
+    height: auto;
+   
+}
+
+.tarjeta-texto {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.tarjeta-texto h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.tarjeta-texto p {
+    margin: 5px 0 0;
+    font-size: 14px;
+}

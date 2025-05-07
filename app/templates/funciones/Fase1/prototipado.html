@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+</head>
+
+<body>
+    <div class="container">
+        &nbsp;
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="row">
+            <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
+            
+        </div>
+        
+        &nbsp;
+        <h3>Tabla Nutricional</h3>
+        <form action="/funciones/Fase1/prototipado/guardar_gramos" method="POST">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Nombre prototipo</th>
+                        {% for prototipo in proyecto.prototypes %}
+                            <th class="header">
+                                <input type="text" name="prototipo_name_{{ prototipo.id }}" 
+                                    value="{{ prototipo.name if prototipo.name else '' }}" 
+                                    class="form-control" placeholder="Nombre Prototipo">
+                            </th>
+                        {% endfor %}
+                        <th class="header">
+                            <input type="text" name="nombre_prototipo" 
+                                class="form-control" placeholder="Nombre Prototipo">
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="header">Nº</th>
+                        <th class="header">Alimento</th>
+                        {% for prototipo in proyecto.prototypes %}
+                            <th class="header">Gramos receta {{ loop.index }}</th>
+                        {% endfor %}
+                        <th class="header">Nuevo Prototipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for food in proyecto.foods %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ food.food_description }}</td>
+                            
+                            {% for prototipo in proyecto.prototypes %}
+                                {% set fp = (prototipo.food_prototypes | selectattr('food_id', 'equalto', food.id) | list | first) %}
+                                <td>
+                                    <input type="hidden" name="food_ids" value="{{ food.id }}">
+                                    <input type="number" name="grams_{{ prototipo.id }}_{{ food.id }}"
+                                           class="form-control" step="0.1"
+                                           value="{{ fp.cantidad if fp else 0 }}" min="0">
+                                </td>
+                            {% endfor %}
+                
+                            <td>
+                                <input type="number" name="nuevo_grams_{{ food.id }}"
+                                       class="form-control" step="0.1" value="0" min="0">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                
+                    <tr> 
+                        <td></td><td></td>
+                        {% for prototipo in proyecto.prototypes %}
+                            <td>
+                                <button type="submit" name="accion" value="eliminar_{{ prototipo.id }}" 
+                                        class="btn btn-danger">
+                                    Eliminar Prototipo
+                                </button>
+                            </td>
+                        {% endfor %}
+                        <td>
+                            <button type="submit" name="accion" value="crear" 
+                                    class="btn btn-success">
+                                Crear Prototipo
+                            </button>
+                        </td>
+                    </tr>
+                
+                    <tr> 
+                        <td></td><td></td>
+                        {% for prototipo in proyecto.prototypes %}
+                            <td>
+                                <button type="submit" name="accion" value="actualizar_{{ prototipo.id }}" 
+                                        class="btn btn-primary">
+                                    Actualizar Prototipo
+                                </button>
+                            </td>
+                        {% endfor %}
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Receta</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <div class="tabla-container">
+        <table class="tabla-receta">
+            <thead>
+                <tr>
+                    <th colspan="4">Nombre: {{prototipo.name}}</th>
+                </tr>
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>%</th>
+                    <th>Cantidad en gramos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set cantidad = prototipo.peso_inicial %}
+                
+                {% for food in prototipo.food_prototypes %}
+                
+                {% set porcentaje = (food.cantidad / cantidad) * 100 %}
+                    <tr>
+                        <td>{{ food.food.food_description }}</td>
+                        <td>{{ "%.2f"|format(porcentaje) }}%</td>
+                        <td>{{ food.cantidad }}</td>
+                        
+                    </tr>
+                {% endfor %}
+                
+                <tr>
+                    <td colspan="2" class="label-cell">Total ingredientes producto (Pi)</td>
+                    <td><input type="number" name="total_pi" value="{{prototipo.peso_inicial}}"></td>
+                    
+                </tr>
+                <tr>
+                    <td colspan="2" class="label-cell">Total producto acabado (Pf)</td>
+                    <td><input type="number" name="total_pf" value="{{prototipo.peso_final}}"></td>
+                    
+                </tr>
+                {% set perdida = (prototipo.peso_inicial-prototipo.peso_final)/prototipo.peso_inicial * 100 %}
+                <tr>
+                    <td colspan="2" class="label-cell"> % de pérdida </td>
+                    <td>{{perdida}}</td>
+                    
+                </tr>
+
+                <tr class="">
+                    <td class="label-cell">Obervaciones importantes del proceso </td>
+                    <td colspan="2"><textarea class="form-control" id="prompt" name="prompt" rows="4"> </textarea> </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo de Empaque</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .empaque-card {
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            background: white;
+        }
+        .empaque-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .empaque-content {
+            display: flex;
+            height: 500px;
+        }
+        .text-section {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        .image-section {
+            width: 40%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .empaque-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .empaque-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .empaque-subtitle {
+            font-size: 1.1rem;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+        .price-tag {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+        }
+        .provider-link {
+            color: #3498db;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .provider-link:hover {
+            text-decoration: underline;
+        }
+        .notes-section {
+            margin-top: auto;
+        }
+        .notes-textarea {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px;
+            resize: none;
+            min-height: 60px;
+        }
+        .divider {
+            border-top: 1px dashed #ddd;
+            margin: 15px 0;
+        }
+        button {
+            background-color: green;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            }
+
+            button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            }
+
+            button:active {
+            transform: scale(0.98);
+            }
+
+       
+    </style>
+</head>
+<body>
+    <form name="empaque_IA" action="/funciones/Fase2/empaque/añadir" method="POST">
+    <div class="empaque-card position-relative">
+
+    
+        
+        <button type="submit">Añadir empaque a proyecto+</button>
+        <div class="empaque-content">
+            
+            <div class="text-section">
+                <input type="hidden" name="nombre" value="{{ empaque.Nombre }}">
+                <input type="hidden" name="caracteristicas" value="{{ empaque.Características }}">
+                <input type="hidden" name="proveedor" value="{{ empaque.Proveedor }}">
+                <input type="hidden" name="precio" value="{{ empaque.Precio }}">
+                <input type="hidden" name="web" value="{{ empaque.Web }}">
+                <input type="hidden" name="imagen" value="{{ empaque.Imagen }}">
+                <h1 class="empaque-title">{{ empaque.Nombre }}</h1>
+                <h2 class="empaque-subtitle">{{ empaque.Características }}</h2>
+                
+                <div class="price-tag">${{ empaque.Precio }}</div>
+                
+                {% if empaque.Proveedor %}
+                <div class="provider-info">
+                    <strong>Proveedor:</strong> {{ empaque.Proveedor }}<br>
+                    {% if empaque.Web %}
+                    <a href="{{ empaque.Web if empaque.Web.startswith('http') else 'http://' + empaque.Web }}" 
+                       class="provider-link" target="_blank">
+                       {{ empaque.Web }}
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="divider"></div>
+                
+                <div class="notes-section">
+                    <label for="notes"><strong>Notas:</strong></label>
+                    <textarea id="notas" class="notes-textarea" placeholder="Añade observaciones sobre este empaque..."></textarea>
+                </div>
+            </div>
+            
+            <div class="image-section">
+              <div class="card shadow-sm" style="width: 90%;">
+                
+                <img src="{{ url_for('static', filename=empaque.Imagen) }}" class="card-img-top img-fluid rounded">
+                <textarea class="form-control" id="prompt" name="prompt" rows="2" style="resize: vertical; min-height: 100px;"></textarea>
+                <button> Editar imagen</button>
+              </div>
+            </div>
+        </div>
+    </form>
+    </div>
+
+</body>
+</html>

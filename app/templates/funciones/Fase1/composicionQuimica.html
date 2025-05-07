@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+    
+        
+</head>
+
+<body>
+    <div class="container">
+    &nbsp;
+    <div class="row col-1">
+        <a href="/funciones" class="border-0 bg-transparent">
+            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+        </a>
+    </div>
+    &nbsp;
+    <div class="row">
+        <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
+        <div class="col"> <button> <a href="/funciones/Fase1/composicionQuimica/quitarAlimento"> Guardar Proyecto </a></button>
+        </div>
+    </div>
+    
+    &nbsp;
+    <h3>Tabla Nutricional</h3>
+    <table>
+        <thead>
+            <tr>
+                <th class="header">Número</th>
+                <th class="header">Nombre</th>
+                <th class="header">Gramos</th>
+                <th class="header">Energy (kcal)</th>
+                <th class="header">Protein (g)</th>
+                <th class="header">Carbohydrates (g)</th>
+                <th class="header">Sugars (g)</th>
+                <th class="header">Fiber (g)</th>
+                <th class="header">Total Fat (g)</th>
+                <th class="header">Saturated Fat (g)</th>
+                <th class="header">Monounsaturated Fat (g)</th>
+                <th class="header">Polyunsaturated Fat (g)</th>
+                <th class="header">Cholesterol (mg)</th>
+                <th class="header">Sodium (mg)</th>
+                <th class="header">Water (g)</th>
+                <th class="header">Potassium (mg)</th>
+                <th class="header">Calcium (mg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for food in foods %}
+            <tr>
+                <td><a href="/funciones/Fase1/composicionQuimica/quitarAlimento?food_id={{ food.id }}"> Quitar alimento </a></td>
+                <td>{{ food.food_description }}</td>
+                <td>{{ food.grams }}</td>
+                <td>{{ food.energy_kcal }}</td>
+                <td>{{ food.protein }}</td>
+                <td>{{ food.carbohydrates }}</td>
+                <td>{{ food.sugars }}</td>
+                <td>{{ food.fiber }}</td>
+                <td>{{ food.total_fat }}</td>
+                <td>{{ food.saturated_fat }}</td>
+                <td>{{ food.monounsaturated_fat }}</td>
+                <td>{{ food.polyunsaturated_fat }}</td>
+                <td>{{ food.cholesterol }}</td>
+                <td>{{ food.sodium }}</td>
+                <td>{{ food.water }}</td>
+                <td>{{ food.potassium }}</td>
+                <td>{{ food.calcium }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td><strong>Total</strong></td>
+                <td></td> <!-- Deja en blanco la columna de nombre -->
+                <td></td> <!-- Deja en blanco la columna de gramos -->
+                <td><strong>{{ totales['energy'] }}</strong></td>
+                <td><strong>{{ totales['protein'] }}</strong></td>
+                <td><strong>{{ totales['carbs'] }}</strong></td>
+                <td><strong>{{ totales['sugars'] }}</strong></td>
+                <td><strong>{{ totales['fiber'] }}</strong></td>
+                <td><strong>{{ totales['fat'] }}</strong></td>
+                <td></td> <!-- Puedes agregar más cálculos si lo necesitas -->
+                <td></td>
+                <td></td>
+                <td><strong>{{ totales['cholesterol'] }}</strong></td>
+                <td><strong>{{ totales['sodium'] }}</strong></td>
+                <td><strong>{{ totales['water'] }}</strong></td>
+                <td><strong>{{ totales['potassium'] }}</strong></td>
+                <td><strong>{{ totales['calcium'] }}</strong></td>
+            </tr>
+            <tr> 
+                <td> <a href="/funciones/Fase1/composicionQuimica/añadirAlimento" style="color: inherit; text-decoration: none;">Añadir Alimento +</a></td>
+            </tr>
+        </tbody>
+        
+        
+    </table>
+    </div>
+</body>
+</html>

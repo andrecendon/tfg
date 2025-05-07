@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+</head>
+
+<body>
+    <div class="container">
+        &nbsp;
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="row">
+            <div class="col"><h2>Simulación de costes</h2></div>
+            
+        </div>
+        
+        &nbsp;
+        <div>Rellena el peso del producto acabado</div>
+        &nbsp;
+
+        <form action="/funciones/Fase1/prototipado/guardar_gramos" method="POST">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25px;"></th>
+                        <th style="width: 300px;">Nombre prototipo</th> <!-- MÁS ANCHA -->
+                        {% for prototipo in proyecto.prototypes %}
+                            <th class="header"> <!-- MÁS ESTRECHA -->
+                                <input type="text" name="prototipo_name_{{ prototipo.id }}" 
+                                       value="{{ prototipo.name if prototipo.name else '' }}" 
+                                       class="form-control" placeholder="Nombre Prototipo">
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th class="header">Nº</th>
+                        <th class="header">Alimento</th>
+                        {% for prototipo in proyecto.prototypes %}
+                            <th class="header" style="width: 240px;">Gramos receta {{ loop.index }}</th> <!-- MÁS ESTRECHA -->
+                        {% endfor %}
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    {% for food in proyecto.foods %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ food.food_description }}</td>
+                
+                        {% for prototipo in proyecto.prototypes %}
+                            {% set fp = (prototipo.food_prototypes | selectattr('food_id', 'equalto', food.id) | list | first) %}
+                            <td>
+                                {% if fp %}
+                                    {{ fp.cantidad }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                
+                    {# Fila: Peso Inicial #}
+                    <tr>
+                        <td colspan="2" class="label-cell">Total peso producto inicial (Pi)</td>
+                        {% for prototipo in proyecto.prototypes %}
+                            <td>{{ prototipo.peso_inicial }} grs</td>
+                        {% endfor %}
+                    </tr>
+                
+                    {# Fila: Peso Final #}
+                    <tr>
+                        <td colspan="2" class="label-cell">Total peso producto acabado (Pf)</td>
+                        {% for prototipo in proyecto.prototypes %}
+                            <td>
+                                <input type="number" 
+                                       class="form-control peso-final" 
+                                       data-id="{{ prototipo.id }}" 
+                                       data-peso-inicial="{{ prototipo.peso_inicial }}" 
+                                       value="{{ prototipo.peso_final }}">
+                            </td>
+                        {% endfor %}
+                    </tr>
+                
+                    {# Fila: % Perdida #}
+                    <tr>
+                        <td colspan="2" class="label-cell">% de pérdida</td>
+                        {% for prototipo in proyecto.prototypes %}
+                            {% if prototipo.peso_final > 0 %}
+                                {% set perdida = (prototipo.peso_inicial - prototipo.peso_final) / prototipo.peso_inicial * 100 %}
+                            {% else %}
+                                {% set perdida = None %}
+                            {% endif %}
+                            <td id="perdida-{{ prototipo.id }}">
+                                {% if perdida is not none %}
+                                    {{ perdida|round(2) }}%
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputs = document.querySelectorAll('.peso-final');
+
+        inputs.forEach(input => {
+            input.addEventListener('input', function () {
+                const pesoFinal = parseFloat(this.value);
+                const pesoInicial = parseFloat(this.dataset.pesoInicial);
+                const id = this.dataset.id;
+
+                const perdidaCell = document.getElementById(`perdida-${id}`);
+
+                if (!isNaN(pesoFinal) && pesoFinal > 0 && pesoInicial > 0) {
+                    const perdida = ((pesoInicial - pesoFinal) / pesoInicial) * 100;
+                    perdidaCell.textContent = perdida.toFixed(2) + '%';
+                } else {
+                    perdidaCell.textContent = '';
+                }
+            });
+        });
+    });
+</script>

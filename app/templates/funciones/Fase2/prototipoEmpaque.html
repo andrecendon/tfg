@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+    
+        
+</head>
+
+<body>
+    <div class="container">
+    <!-- Botón de volver -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="/funciones" class="btn btn-light border">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 20px; height: 20px;">
+            </a>
+        </div>
+        <h2 class="mb-0">Proyecto: {{proyecto.name}}</h2>
+        <div></div> <!-- Espaciador -->
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/upload" enctype="multipart/form-data" class="d-flex align-items-center">
+                <div class="custom-file mr-3" style="width: 80%;">
+                    <input type="file" class="custom-file-input" name="files" id="customFile" webkitdirectory directory multiple>
+                    <label class="custom-file-label" for="customFile">Seleccionar carpeta...</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Subir carpeta</button>
+            </form>
+        </div>
+    </div>
+
+     <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+          <form method="POST" action="/upload" enctype="multipart/form-data" class="d-flex align-items-center">
+              <div class="custom-file mr-3" style="width: 80%;">
+                  <input type="file" class="custom-file-input" name="files" id="customFile" webkitdirectory directory multiple>
+                  <label class="custom-file-label" for="customFile">Seleccionar carpeta...</label>
+              </div>
+              <button type="submit" class="btn btn-primary">Subir carpeta</button>
+          </form>
+      </div>
+  </div>
+
+  
+  <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+          <h3 class="card-title mb-4">Generar prototipos con IA</h3>
+          <form action="/funciones/Fase2/empaque/generar" method="POST">
+              <div class="form-group">  
+                  <label for="promptInput">Rellena los [   ] para generar el prompt:</label>
+                  <textarea class="form-control" id="prompt" name="prompt" rows="4" style="resize: vertical; min-height: 100px;">{{ prompt if prompt else '' }}</textarea>
+              </div>
+              <button type="submit" class="btn btn-primary mt-2">Generar</button>
+          </form>
+      </div>
+  </div>
+
+  <!-- Sección de empaques del proyecto -->
+  <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+          <h3 class="card-title">Empaques del Proyecto</h3>
+          {% if proyecto.empaques %}
+              <div class="row">
+                  {% for empaque in proyecto.empaques %}
+                      <div class="col-12 mb-3">
+                          <div class="card empaque-card">
+                              <div class="card-body">
+                                  {% include 'funciones/Fase2/empaque.html' %}
+                              </div>
+                          </div>
+                      </div>
+                  {% endfor %}
+              </div>
+          {% else %}
+              <p class="text-muted">No hay empaques en este proyecto</p>
+          {% endif %}
+      </div>
+  </div>
+
+  <!-- Sección de empaques generados por IA -->
+  <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+          <h3 class="card-title">Empaques Generados por IA</h3>
+          {% if empaques_IA %}
+              {% if tiempo %}
+              <div class="text-muted mb-3">Tiempo de respuesta: {{ "%.2f"|format(tiempo) }} segundos</div>
+              {% endif %}
+              <div class="row">
+                  {% for empaque in empaques_IA %}
+                      <div class="col-12 mb-3">
+                          <div class="card empaque-card">
+                              <div class="card-body">
+                                  {% include 'funciones/Fase2/empaque_IA.html' %}
+                              </div>
+                          </div>
+                      </div>
+                  {% endfor %}
+              </div>
+          {% else %}
+              <p class="text-muted">No hay empaques generados por IA</p>
+          {% endif %}
+      </div>
+  </div>
+</div>
+
+    
+</body>
+</html>

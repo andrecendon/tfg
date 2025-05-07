@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+</head>
+
+<body>
+    <div class="container">
+        &nbsp;
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="row">
+            <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
+            
+        </div>
+        
+        &nbsp;
+        <h3>Tabla Nutricional</h3>
+        <form action="/funciones/Fase3/preciosIngredientes/actualizar" method="POST">
+            <table >
+                <thead>
+                    <tr>
+                        <th class="header" style="width: 50px;">Nº</th>
+                        <th class="header" style="width: 250px;">Alimento</th>
+                        <th class="header" style="width: 150px;">Precio ($/kg)</th> <!-- Nueva columna de precio -->
+                        
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for food in proyecto.foods %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ food.food_description }}</td>
+                
+                           
+                            <td class="d-flex">
+                                <input type="number" step="0.01" min="0" name="precio_{{food.id}}" 
+                                       class="form-control mr-2" value="{{ food.precio if food.precio else '0' }}">
+                                <button type="submit" name="actualizar" value="{{ food.id }}" 
+                                        class="btn btn-sm btn-warning">
+                                    Actualizar
+                                </button>
+                            </td>
+
+                            
+
+                        </tr>
+                    {% endfor %}
+                
+                </tbody>
+            </table>
+        </form>
+    </div>
+</body>
+</html>

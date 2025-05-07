@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador Alimentos</title>
+</head>
+<body>
+    <form method="get" action="/funciones/Fase1/composicionQuimica/añadirAlimento" oninput="this.submit()">
+        <input type="text" id="alimento" name="alimento" value="{{ termino }}" placeholder="Buscar alimento..." autofocus>
+    </form>
+
+    {% if resultados %}
+        <ul>
+            {% for alimento in resultados %}
+                <li>{{ alimento.food_description }}</li>
+                <form method="post" action="/funciones/Fase1/composicionQuimica/añadirComida">
+                    <input type="hidden" name="food_id" value="{{ alimento.id }}">
+                    <button type="submit">Añadir alimento</button>
+                </form>
+            {% endfor %}
+        </ul>
+    {% elif termino %}
+        <p>No se encontraron resultados.</p>
+    {% endif %}
+
+    <script>
+        window.onload = function() {
+            var input = document.getElementById("alimento");
+            if (input) {
+                input.selectionStart = input.selectionEnd = input.value.length;
+            }
+        };
+    </script>
+</body>
+</html>

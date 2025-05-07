@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Prueba de Ordenamiento</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row col-1">
+        <a href="/funciones/Fase3/analisisSensorial" class="border-0 bg-transparent">
+            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+        </a>
+    </div>
+    &nbsp;
+    
+    <h2>Formulario Prueba de Ordenamiento</h2>
+    <form action="/funciones/Fase3/analisisSensorial/guardarBasico" method="POST">
+        <div class="form-group">
+            <label>Nombre del evaluador:</label>
+            <input type="text" name="evaluador" value="{{ test.nombre_evaluador | default('') }}" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Fecha:</label>
+            <input type="date" name="fecha" value="{{ test.fecha | default('') }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Atributo a evaluar:</label>
+            <input type="text" name="atributo" value="{{ test.atributo | default('') }}" class="form-control" required>
+        </div>
+        <p>Por favor, ordene las siguientes muestras desde la que presenta el <strong>MAYOR</strong> nivel de [atributo] hasta la de <strong>MENOR</strong> nivel.</p>
+        
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Código de muestra</th>
+                    <th>Orden de preferencia (1 = mayor, n = menor)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if test %}
+                {% set total_muestras = test.muestras|length %}
+                {% for key, value in test.muestras.items() %}
+                <tr>
+                    <td>
+                        <input type="text" name="muestra_{{ loop.index0 }}" class="form-control" value="{{ key }}">
+                    </td>
+                    <td>
+                        <input type="number" name="orden_{{ loop.index0 }}" class="form-control" value="{{ value }}" min="1" max="10">
+                    </td>   
+                </tr>
+                {% endfor %}
+                {% for i in range(total_muestras, 10) %}
+                <tr>
+                    <td>
+                        <input type="text" name="muestra_{{ i }}" class="form-control" >
+                    </td>
+                    <td>
+                        <input type="number" name="orden_{{ i }}" class="form-control" value="" min="1" max="{{ project.muestras|length }}">
+                    </td>   
+                </tr>
+                {% endfor %}
+                
+
+                {% else %}
+                
+                {% for i in range(4) %}
+                <tr>
+                    <td>
+                        <input type="text" name="muestra_{{ i }}" class="form-control" placeholder="Ej. A, B1, M2...">
+                    </td>
+                    <td>
+                        <input type="number" name="orden_{{ i }}" class="form-control" min="1" max="10" >
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+
+        <div class="form-group">
+            <label>Comentarios opcionales:</label>
+            <textarea name="comentarios" value="{{ test.comentarios | default('') }}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+</body>
+</html>

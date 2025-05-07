@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+</head>
+
+<body>
+    <div class="container">
+        &nbsp;
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="row">
+            <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
+            
+        </div>
+        
+        &nbsp;
+        <h3>Tabla Nutricional</h3>
+
+        {% for prototipo in proyecto.prototypes %}
+        <div class="col my-2">
+            {% with prototipo=prototipo %}
+            {% include 'funciones/Fase2/proto.html' %}
+            {% endwith %}
+        </div>
+        {% endfor %}
+
+
+    </div>
+</body>
+</html>

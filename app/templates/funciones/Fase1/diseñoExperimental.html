@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
+    <title>Tabla Nutricional</title>
+    
+        
+</head>
+
+<body>
+    <div class="container">
+    &nbsp;
+    <div class="row col-1">
+        <a href="/funciones" class="border-0 bg-transparent">
+            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+        </a>
+    </div>
+    &nbsp;
+    <div class="row">
+        <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
+        </div>
+    </div>
+    <div class="text-center mb-3">
+        <h3>Generar prototipos con IA</h3>
+        <form action="/funciones/Fase1/diseñoExperimental/generarIA" method="POST">
+            <div class="form-group mx-auto" style="width: 60%;"> 
+                <label for="promptInput">Rellena los [   ] para generar el prompt:</label>
+                <div> <strong>Ingredientes del proyecto: </strong></div>
+                {% for food in proyecto.foods %}
+                    <div>* {{ food.food_description }}</div>
+                {% endfor %}
+                <textarea class="form-control" id="prompt" name="prompt" rows="4" style="resize: vertical; min-height: 100px;">{{ prompt if prompt else '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Generar</button>
+        </form>
+    </div>
+    &nbsp;
+    
+    
+    </div>
+</body>
+</html>

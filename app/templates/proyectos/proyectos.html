@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+</head>
+<body>
+    
+    <div class="container">
+        
+        <div class="row col-1">
+            <a href="/logout" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/logout.jpg') }}" alt="Macronutrientes" style="width: 80px; height: 80px;">
+            </a>
+        </div>
+        &nbsp;
+        <h1 class="row">Bienvenido a tus proyectos {{user.name}}</h1>
+        
+  
+        &nbsp;
+        {% for project in user.projects %}
+        <div class="row" style="margin-bottom: 15px;">  <!-- Agrega margen entre filas -->
+            {% with titulo=project.name, url="/funciones/?id=" ~ project.id %}
+                {% include 'proyectos/proyecto.html' %}
+            {% endwith %}
+        </div>
+        &nbsp;
+        {% endfor %}
+        
+        <div class="row proyecto" style="margin-bottom: 15px;">  <!-- Agrega margen entre filas -->
+            <a href="/proyectos/crearProyecto" class="btn btn-primary">Nuevo Proyecto</a>
+        </div>
+
+
+    </div>
+</body>
+</html>

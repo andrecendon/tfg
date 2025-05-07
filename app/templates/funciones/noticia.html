@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ title }}</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+<div class="tarjeta">
+    <form action={{url}} method="POST">
+    <button type="submit">
+    <img src="{{ imagen }}" alt="Noticia" class="tarjeta-img">
+    <div class="tarjeta-texto">
+        <h2>{{ titulo }}</h2>
+        
+    </div>
+    </button>
+    </form>
+</div>
+
+
+
+   
