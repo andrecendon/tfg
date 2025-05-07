@@ -1,5 +1,5 @@
 from flask import Flask, render_template, session, redirect
-from funciones.funciones import funciones_bp
+from .funciones.funciones import funciones_bp
 from login.login import login_bp, logout_user
 from chatbot.chatbot import chatbot_bp
 from proyectos.proyectos import proyectos_bp
