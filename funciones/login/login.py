@@ -1,5 +1,5 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session, flash
-from modelomodels import User, Session
+from modelo.models import User, Session
 from flask_login import login_user, current_user
 
 # Crear el Blueprint
