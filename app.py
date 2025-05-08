@@ -1,8 +1,8 @@
 from flask import Flask, render_template, session, redirect
-from login.login import login_bp, logout_user
-from chatbot.chatbot import chatbot_bp
-from proyectos.proyectos import proyectos_bp
-from models import User, Project, Food, Prototype, FoodProject, DatabaseSession, Test_Aceptacion, Test_Hedonico, Test_Sensorial_Inicial
+from app.login.login import login_bp, logout_user
+from app.chatbot.chatbot import chatbot_bp
+from app.proyectos.proyectos import proyectos_bp
+from app.models import User, Project, Food, Prototype, FoodProject, DatabaseSession, Test_Aceptacion, Test_Hedonico, Test_Sensorial_Inicial
 from flask_login import login_required, current_user, LoginManager, login_user, logout_user
 from datetime import timedelta
 import json
