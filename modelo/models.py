@@ -18,7 +18,7 @@ class DatabaseSession:
         if cls._instance is None:
             current_directory = os.path.dirname(os.path.abspath(__file__))
             parent_directory = os.path.dirname(current_directory)
-            db_directory = os.path.join(parent_directory, "DataBase")
+            db_directory = os.path.join(parent_directory, "database")
             dbr_url = f"sqlite:///{db_directory}/database.db"
 
             cls.engine = create_engine(dbr_url)
