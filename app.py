@@ -4,7 +4,7 @@ from datetime import timedelta
 import json
 import atexit
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__, static_folder="app/static", template_folder="app/templates")
 app.secret_key = 'your_secret_key'
 
 # Base de datos
