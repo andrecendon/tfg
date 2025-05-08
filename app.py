@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'
 # Base de datos
 @app.route("/")
 def home():
-    return render_template("app/templates/login/login.html")
+    return render_template("login/login.html")
 
 if __name__ == '__main__':
     app.run()
