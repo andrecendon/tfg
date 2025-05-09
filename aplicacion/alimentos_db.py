@@ -1,5 +1,5 @@
 import json
-from models import Food, DatabaseSession
+from modelo.models import Food, DatabaseSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
 from time import sleep

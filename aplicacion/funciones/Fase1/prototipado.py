@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
-from models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession
+from modelo.models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession
 from collections import defaultdict
 from flask_login import login_required
 from chatbot.chatbot import ModeloIA

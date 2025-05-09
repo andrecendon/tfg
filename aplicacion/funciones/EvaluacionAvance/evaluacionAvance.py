@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request, redirect, url_for, render_template, session, jsonify
 from sqlalchemy.orm import sessionmaker
-from models import Food,  Prototype, Project, User, Session, EvaluacionAvance
+from modelo.models import Food,  Prototype, Project, User, Session, EvaluacionAvance
 from flask_login import login_required
 from chatbot.chatbot import ModeloIA
 # Crear el Blueprint

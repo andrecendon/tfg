@@ -6,7 +6,7 @@ from flask import Blueprint, request, redirect, url_for, render_template
 import requests
 import time
 import ollama  # Usa ollama directamente
-from models import Prototype
+from modelo.models import Prototype
 from PIL import Image
 from io import BytesIO
 import base64
