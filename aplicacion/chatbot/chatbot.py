@@ -10,7 +10,7 @@ from modelo.models import Prototype
 from PIL import Image
 from io import BytesIO
 import base64
-from huggingface_hub import InferenceClient
+
 
 
 import google.generativeai as genai
@@ -124,25 +124,7 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     
     return (respuesta, elapsed_time)
 
-#Devuelve una imagen de la Biblioteca PIL
-def Modelo_Hugging(prompt, model=None, config=None, api_key=None, img_directory=None):
-    
 
-    client = InferenceClient(
-        provider="fal-ai",
-        api_key="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",
-    )
-
-    
-    image = client.text_to_image(
-    "Astronaut riding a horse",
-    model="black-forest-labs/FLUX.1-dev", )
-    image.save("astronaut_riding_a_horse.png")
-    print("Imagen guardada como astronaut_riding_a_horse.png")
-    return image
-
-    
-    
 
 
 ### Recibe prompts y los ejecuta devuelve respuesta y tiempo, tiene todos los casos de chat de 
