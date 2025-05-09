@@ -1,7 +1,7 @@
 
 from flask import Blueprint, request, redirect, url_for, render_template, session # type: ignore
 from sqlalchemy.orm import sessionmaker
-from models import User,  Project, Session
+from modelo.models import User,  Project, Session
 from flask_login import login_required
 
 
