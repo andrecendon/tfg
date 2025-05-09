@@ -7,7 +7,7 @@ gunicorn
 ollama
 flask-security
 flask-login
-PIL
+Pillow
 jinja2
 annotated-types==0.7.0
 asttokens==3.0.0
