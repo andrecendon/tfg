@@ -2,7 +2,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Food, Prototype, Session
-from chatbot.chatbot import ModeloIA, Suplemento
+from aplicacion.chatbot.chatbot import ModeloIA, Suplemento
 import time
 import base64
 from io import BytesIO
