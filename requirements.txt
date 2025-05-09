@@ -1,5 +1,5 @@
 Flask
-Flask
+google-generativeai
 SQLAlchemy
 sqlite-utils
 requests
