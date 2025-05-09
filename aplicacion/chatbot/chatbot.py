@@ -23,7 +23,6 @@ import textwrap
 from IPython.display import display
 from IPython.display import Markdown
 
-from google import genai
 from google.genai import types
 
 
