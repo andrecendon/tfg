@@ -3,18 +3,13 @@ from flask import Blueprint, request, redirect, url_for, render_template, sessio
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Food, Prototype, Session
 from aplicacion.chatbot.chatbot import ModeloIA, Suplemento
-import time
-import base64
-from io import BytesIO
-import pathlib
-import textwrap
+
 
 from IPython.display import display
 from IPython.display import Markdown
 
 from flask_login import login_required, current_user
-from google import genai
-from google.genai import types
+
 funciones_bp = Blueprint("funciones", __name__, template_folder="templates", url_prefix="/funciones")
 # Crear el Blueprint
 
