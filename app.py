@@ -1,6 +1,5 @@
 from flask import Flask, render_template, session, redirect
 from aplicacion.funciones.funciones import funciones_bp
-from aplicacion.login.login import login_bp, logout_user
 from aplicacion.chatbot.chatbot import chatbot_bp
 from aplicacion.proyectos.proyectos import proyectos_bp
 from modelo.models import User, Project, Food, Prototype, FoodProject, DatabaseSession, Fase, EvaluacionAvance, Test_Aceptacion, Test_Hedonico, Test_Sensorial, Test_Sensorial_Inicial
