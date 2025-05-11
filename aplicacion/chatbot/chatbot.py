@@ -13,7 +13,7 @@ import base64
 
 
 from google import genai
-import google.generativeai as genai
+
 import time
 import base64
 from io import BytesIO
