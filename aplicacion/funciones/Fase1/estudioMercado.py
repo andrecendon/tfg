@@ -40,7 +40,11 @@ def estudioMercadoEnv():
                 'response_schema': list[Suplemento],}
         
 
-        response, tiempo = ModeloIA(prompt, config=config)
-        respuesta: list[Suplemento] = response.parsed
+        respuesta, tiempo = ModeloIA(prompt, config=config)
+        respuesta: list[Suplemento] = respuesta.parsed
+
+        print("Respuesta:", respuesta)
+        
+        #respuesta: list[Suplemento] = response.parsed
 
     return render_template("funciones/Fase1/estudioMercado.html", suplementos=respuesta, time=tiempo)

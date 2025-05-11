@@ -106,14 +106,9 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     start_time = time.time()
     
     # Genera la respuesta
-    response = model.generate_content(prompt)
+    response = model.generate_content(prompt, config=config)
 
-    #response = client.models.generate_content(
-    #    model=model,
-    #    contents=prompt,
-     #   config=config,
-    #)
-
+   
     # Registra el tiempo de fin
     end_time = time.time()
 
