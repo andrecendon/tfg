@@ -13,8 +13,7 @@ from IPython.display import display
 from IPython.display import Markdown
 
 from flask_login import login_required, current_user
-from google import genai
-from google.genai import types
+
 resumen_bp = Blueprint("resumen", __name__, template_folder="aplicacion/templates", url_prefix="/resumen")
 # Crear el Blueprint
 
