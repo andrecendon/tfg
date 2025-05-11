@@ -2,6 +2,7 @@ Flask
 google-generativeai
 SQLAlchemy
 sqlite-utils
+pandas
 requests
 gunicorn
 ollama
