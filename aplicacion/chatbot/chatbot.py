@@ -96,16 +96,14 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
         model = "gemini-1.5-flash"
     if api_key is None:
         api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
-
-    genai.configure(api_key=api_key)
     
     start_time = time.time()
     # Crea el modelo generativo
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-    model=model,
-    contents=prompt,
-    config=config,
+        model=model,
+        contents=prompt,
+        config=config,
     )
     
 
