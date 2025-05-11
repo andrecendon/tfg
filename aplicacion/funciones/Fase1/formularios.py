@@ -1,9 +1,9 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
-from modelo.models import  Project, Session, DatabaseSession
+from modelo.models import  Project, Session, DatabaseSession, Food
 
 from flask_login import login_required
-
+from aplicacion.chatbot.chatbot import ModeloIA
 
 
 Session = DatabaseSession()
@@ -36,6 +36,19 @@ def IdeaInicialguardar():
         if request.form["idea_inicial"] != "":
             project.idea_inicial = request.form["idea_inicial"]
         Session.commit()
+
+        #Ahora vamos a llamar a la IA para que devuelva alimentos de acuerdo a la idea inicial
+    foods_description = Session.query(Food).all()
+    foods_list = [
+            {"id": food.id, "food_description": food.food_description} 
+            for food in foods_description
+        ]
+    print("MODELO IA para alimentos")
+    respuesta_ia = ModeloIA(
+            prompt=f"Filtra esta lista de alimentos manteniendo solo los que cumplan con: '{project.idea_inicial}'. Devuélvelos en el mismo formato. Los alimentos son los siguientes, en caso de que haya varios tipos selecciona solo uno, ej: flour potato, flour semolina, selecciona el más adecaudo para la receta, y en caso de duas selecciona menos ingredientes: {foods_list}",
+            model="gemini-1.5-flash"
+        )
+    print(respuesta_ia)
 
     return render_template("funciones/funciones.html", project=project)
 
