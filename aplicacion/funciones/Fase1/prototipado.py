@@ -4,9 +4,9 @@ from sqlalchemy.orm import sessionmaker
 from modelo.models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession
 from collections import defaultdict
 from flask_login import login_required
-from chatbot.chatbot import ModeloIA
+from aplicacion.chatbot.chatbot import ModeloIA
 # Crear el Blueprint
-prototipado_bp = Blueprint("prototipado", __name__, template_folder="templates")
+prototipado_bp = Blueprint("prototipado", __name__, template_folder="aplicacion/templates")
 
 
 Session = DatabaseSession()

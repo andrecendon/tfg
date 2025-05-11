@@ -1,7 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Food, Prototype, DatabaseSession
-from chatbot.chatbot import ModeloIA, Suplemento
+from aplicacion.chatbot.chatbot import ModeloIA, Suplemento
 import time
 from flask_login import login_required
 
@@ -11,7 +11,7 @@ Session = DatabaseSession()
 
 #####  ESTUDIO DE MERCADO #####
 
-estudioMercado_bp = Blueprint("estudioMercado", __name__, template_folder="templates", url_prefix="/funciones/Fase1/estudioMercado")
+estudioMercado_bp = Blueprint("estudioMercado", __name__, template_folder="aplicacion/templates", url_prefix="/funciones/Fase1/estudioMercado")
 
 @estudioMercado_bp.route('/', methods=["POST", "GET"])
 @login_required

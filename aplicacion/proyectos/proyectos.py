@@ -6,7 +6,7 @@ from flask_login import login_required
 
 
 # Crear el Blueprint
-proyectos_bp = Blueprint("proyectos", __name__, template_folder="templates")
+proyectos_bp = Blueprint("proyectos", __name__, template_folder="aplicacion/templates")
 
 #No funciona sessiones compartidas o crear una funcion que haga todo o nada
 

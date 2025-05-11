@@ -80,7 +80,7 @@ def to_markdown(text):
 
 
 # Crear el Blueprint
-chatbot_bp = Blueprint("chatbot", __name__, template_folder="templates")
+chatbot_bp = Blueprint("chatbot", __name__, template_folder="aplicacion/templates")
 
 #ya se ejecuta cuando /chatbot por el blueprint
 @chatbot_bp.route('/', methods=["POST", "GET"])

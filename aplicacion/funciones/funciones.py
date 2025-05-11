@@ -10,7 +10,7 @@ from IPython.display import Markdown
 
 from flask_login import login_required, current_user
 
-funciones_bp = Blueprint("funciones", __name__, template_folder="templates", url_prefix="/funciones")
+funciones_bp = Blueprint("funciones", __name__, template_folder="aplicacion/templates", url_prefix="/funciones")
 # Crear el Blueprint
 
 

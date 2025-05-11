@@ -2,7 +2,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Food, Prototype, Session
-from chatbot.chatbot import ModeloIA, Suplemento
+from aplicacion.chatbot.chatbot import ModeloIA, Suplemento
 import time
 import base64
 from io import BytesIO
@@ -15,7 +15,7 @@ from IPython.display import Markdown
 from flask_login import login_required, current_user
 from google import genai
 from google.genai import types
-resumen_bp = Blueprint("resumen", __name__, template_folder="templates", url_prefix="/resumen")
+resumen_bp = Blueprint("resumen", __name__, template_folder="aplicacion/templates", url_prefix="/resumen")
 # Crear el Blueprint
 
 

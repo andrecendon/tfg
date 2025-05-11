@@ -3,9 +3,9 @@ from flask import Blueprint, request, redirect, url_for, render_template, sessio
 from sqlalchemy.orm import sessionmaker
 from modelo.models import Food,  Prototype, Project, User, Session
 from flask_login import login_required
-from chatbot.chatbot import ModeloIA
+from aplicacion.chatbot.chatbot import ModeloIA
 # Crear el Blueprint
-composicionQuimica_bp = Blueprint("composicionQuimica", __name__, template_folder="templates")
+composicionQuimica_bp = Blueprint("composicionQuimica", __name__, template_folder="aplicacion/templates")
 
 
 

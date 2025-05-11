@@ -8,7 +8,7 @@ from flask_login import login_required
 
 Session = DatabaseSession()
 
-formularios_bp = Blueprint("formularios", __name__, template_folder="templates")
+formularios_bp = Blueprint("formularios", __name__, template_folder="aplicacion/templates")
 
 
 

@@ -3,7 +3,7 @@ from modelo.models import User, Session
 from flask_login import login_user, current_user
 
 # Crear el Blueprint
-login_bp = Blueprint("login", __name__, template_folder="templates", url_prefix='/login')
+login_bp = Blueprint("login", __name__, template_folder="aplicacion/templates", url_prefix='/login')
 
 # Página de inicio de sesión
 @login_bp.route('/')

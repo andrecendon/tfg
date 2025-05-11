@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker
 from modelo.models import Food, Prototype, Project, User, FoodPrototype, Session
 from collections import defaultdict
 from flask_login import login_required
-from chatbot.chatbot import ModeloIA
+from aplicacion.chatbot.chatbot import ModeloIA
 from sqlalchemy.orm import scoped_session
 # Crear el Blueprint
-diseñoExperimental_bp = Blueprint("diseñoExperimental", __name__, template_folder="templates")
+diseñoExperimental_bp = Blueprint("diseñoExperimental", __name__, template_folder="aplicacion/templates")
 
 
 
