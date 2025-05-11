@@ -101,7 +101,7 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     
     start_time = time.time()
     # Crea el modelo generativo
-    client = genai.Client(api_key="API_KEY")
+    client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
     model=model,
     contents=prompt,
