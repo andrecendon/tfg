@@ -10,6 +10,17 @@ from aplicacion.funciones.Fase1.estudioMercado import estudioMercado_bp
 from aplicacion.funciones.Fase1.prototipado import prototipado_bp
 from aplicacion.funciones.Fase1.diseñoExperimental import diseñoExperimental_bp
 from aplicacion.funciones.Fase1.matrizSustentable import matrizSustentable_bp
+from aplicacion.funciones.Fase2.analisisNormativo import analisisNormativo_bp
+from aplicacion.funciones.Fase2.empaque import empaque_bp
+from aplicacion.funciones.Fase2.prototipoMedio import prototipoMedio_bp
+from aplicacion.funciones.Fase2.simulacionCostes import simulacionCostes_bp
+from aplicacion.funciones.Fase3.preciosIngredientes import preciosIngredientes_bp
+from aplicacion.funciones.Fase3.prototipadoFinal import prototipoFinal_bp
+from aplicacion.funciones.Fase3.analisisSensorial import analisisSensorial_bp
+from aplicacion.funciones.Fase3.calculoGastos import calculoGastos_bp
+from aplicacion.funciones.Fase3.empaqueFidelidad import empaqueFidelidad_bp
+from aplicacion.funciones.Fase3.simulacionProduccion import simulacionProduccion_bp
+
 from aplicacion.funciones.EvaluacionAvance.evaluacionAvance import evaluacionAvance_bp
 from aplicacion.funciones.resumen import resumen_bp
 from aplicacion.login.login import login_bp
@@ -142,7 +153,18 @@ app.register_blueprint(diseñoExperimental_bp, url_prefix='/funciones/Fase1/dise
 app.register_blueprint(matrizSustentable_bp, url_prefix='/funciones/Fase1/matrizSustentable')
 
 
+app.register_blueprint(empaque_bp, url_prefix='/funciones/Fase2/empaque')
+app.register_blueprint(prototipoMedio_bp, url_prefix='/funciones/Fase2/prototipoMedio')
+app.register_blueprint(simulacionCostes_bp, url_prefix='/funciones/Fase2/simulacionCostes')
+app.register_blueprint(analisisNormativo_bp, url_prefix='/funciones/Fase2/analisisNormativo')
 
+
+app.register_blueprint(preciosIngredientes_bp, url_prefix='/funciones/Fase3/preciosIngredientes')
+app.register_blueprint(prototipoFinal_bp, url_prefix='/funciones/Fase3/prototipoFinal')
+app.register_blueprint(analisisSensorial_bp, url_prefix='/funciones/Fase3/analisisSensorial')
+app.register_blueprint(empaqueFidelidad_bp, url_prefix='/funciones/Fase3/empaqueFidelidad')
+app.register_blueprint(simulacionProduccion_bp, url_prefix='/funciones/Fase3/simulacionProduccion')
+app.register_blueprint(calculoGastos_bp, url_prefix='/funciones/Fase3/calculoGastos')
 
 app.register_blueprint(login_bp, url_prefix='/login')
 
