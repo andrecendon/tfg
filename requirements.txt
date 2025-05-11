@@ -5,6 +5,7 @@ sqlite-utils
 pandas
 requests
 gunicorn
+matplotlib
 ollama
 flask-security
 flask-login
