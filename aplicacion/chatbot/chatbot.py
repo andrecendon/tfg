@@ -99,14 +99,18 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
 
     genai.configure(api_key=api_key)
     
-    # Crea el modelo generativo
-    model = genai.GenerativeModel(model)  # Usa el nombre del modelo directamente
-    
-    # Registra el tiempo de inicio
     start_time = time.time()
+    # Crea el modelo generativo
+    client = genai.Client(api_key="API_KEY")
+    response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=config,
+    )
     
+
     # Genera la respuesta
-    response = model.generate_content(prompt, config=config)
+    
 
    
     # Registra el tiempo de fin
