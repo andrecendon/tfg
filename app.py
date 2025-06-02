@@ -4,6 +4,9 @@ from aplicacion.chatbot.chatbot import chatbot_bp
 from aplicacion.proyectos.proyectos import proyectos_bp
 from modelo.models import User, Project, Food, Prototype, FoodProject, DatabaseSession, Fase, EvaluacionAvance, Test_Aceptacion, Test_Hedonico, Test_Sensorial, Test_Sensorial_Inicial
 from sqlalchemy.orm import sessionmaker
+
+from aplicacion.chatbot.agente import agente_bp
+
 from aplicacion.funciones.Fase1.composicionQuimica import composicionQuimica_bp
 from aplicacion.funciones.Fase1.formularios import formularios_bp
 from aplicacion.funciones.Fase1.estudioMercado import estudioMercado_bp
@@ -19,13 +22,20 @@ from aplicacion.funciones.Fase3.prototipadoFinal import prototipoFinal_bp
 from aplicacion.funciones.Fase3.analisisSensorial import analisisSensorial_bp
 from aplicacion.funciones.Fase3.calculoGastos import calculoGastos_bp
 from aplicacion.funciones.Fase3.empaqueFidelidad import empaqueFidelidad_bp
+from aplicacion.funciones.Fase3.escalamiento import escalamiento_bp
 from aplicacion.funciones.Fase3.simulacionProduccion import simulacionProduccion_bp
-
+from aplicacion.funciones.Fase3.validacionNutricional import validacionNutricional_bp
+from aplicacion.funciones.Fase4.chequeo import chequeo_bp
+from aplicacion.funciones.Fase4.vidaUtil import vidaUtil_bp
+from aplicacion.funciones.Fase4.parametrosSustentables import parametrosSustentables_bp
+from aplicacion.funciones.Fase4.analisisSensorial2 import analisisSensorial2_bp
+from aplicacion.funciones.Fase4.validacionEmpaque import validacionEmpaque_bp
 from aplicacion.funciones.EvaluacionAvance.evaluacionAvance import evaluacionAvance_bp
 from aplicacion.funciones.resumen import resumen_bp
 from aplicacion.login.login import login_bp
 from flask_login import login_required, current_user, LoginManager, login_user, logout_user
 from datetime import timedelta
+
 # from aplicacion.funciones.Fase1.chatbot import Fase1_bp
 import json
 import atexit
@@ -64,7 +74,7 @@ proj = Session.query(Project).filter(Project.id == 1).first()
 estado=0
 h = Session.query(User).all()
 
-h2 = Session.query(Fase).all()
+h2 = Session.query(EvaluacionAvance).all()
 
 h3 = Session.query(Test_Sensorial).all()
 
@@ -85,11 +95,9 @@ if len(p)<1:
     Session.add_all([jo])
 
 ##Projecto 
-if len(h2)<1:
-     #Evalucacion 
-     ev = EvaluacionAvance(project_id=1)
-     Session.add(ev)
-     fases_data={
+
+if len(Session.query(Fase).all())<1:
+    fases_data = {
         "1. Idea inicial de proyecto": "0",
         "2. Empatizar con los usuarios": "0",
         "3. Base de datos composición química de alimentos": "0",
@@ -112,32 +120,50 @@ if len(h2)<1:
         "20. Escalamiento": "0",
         "21. Validación de costos": "0",
         "22. Prototipo de empaque 3 – Alta fidelidad": "0"
-        }
-     for nombre in fases_data.keys():
-            nueva_fase = Fase(nombre=nombre, evaluacion=ev)
-            Session.add(nueva_fase)
-        
-        # 4. Hacer commit para guardar en la base de datos
-     Session.commit()
+    }
+
+    # Crear una lista con todas las fases
+    todas_las_fases = []
+    for i, (nombre, estado) in enumerate(fases_data.items(), start=1):
+        fase = Fase(nombre=nombre, numero_paso=i, estado=int(estado))
+        todas_las_fases.append(fase)
+        Session.add(fase)
+
+    # Commit intermedio para que las fases tengan ID si fuera necesario
+    Session.commit()
+
+if len(h2)<1:
+    todas_las_fases = Session.query(Fase).all()
+
+    print("Todas las fases:", todas_las_fases)
+
+    # Crear una evaluación nueva
+    evaluacion = EvaluacionAvance(
+        id=1,  
+        avance=False,
+        comentarios="Evaluación inicial",
+        numero_fases=len(todas_las_fases),
+        fases=todas_las_fases,  # Asigna todas las fases directamente
+        project_id=1  # Asegúrate de que el proyecto con ID=1 exista
+    )
+
+    # Añadir y guardar
+    Session.add(evaluacion)
+    Session.commit()
+
+
 
 
 Session.commit()
 
 
-if (len(h3)<1):
-    #Test_Aceptacion
-    test = Test_Aceptacion(project_id=1)
-    Session.add(test)
-    #Test_Hedonico
-    test2 = Test_Hedonico(project_id=1)
-    Session.add(test2)
-    #Test_Sensorial_Inicial
-    test3 = Test_Sensorial_Inicial(project_id=1)
-    Session.add(test3)
-    Session.commit()
+
 
 
 # Rutas
+
+app.register_blueprint(agente_bp, url_prefix='/chatbot/agente')
+
 app.register_blueprint(funciones_bp, url_prefix='/funciones')
 app.register_blueprint(resumen_bp, url_prefix='/funciones/resumen')
 app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
@@ -165,6 +191,15 @@ app.register_blueprint(analisisSensorial_bp, url_prefix='/funciones/Fase3/analis
 app.register_blueprint(empaqueFidelidad_bp, url_prefix='/funciones/Fase3/empaqueFidelidad')
 app.register_blueprint(simulacionProduccion_bp, url_prefix='/funciones/Fase3/simulacionProduccion')
 app.register_blueprint(calculoGastos_bp, url_prefix='/funciones/Fase3/calculoGastos')
+app.register_blueprint(escalamiento_bp, url_prefix='/funciones/Fase3/escalamiento')
+app.register_blueprint(validacionNutricional_bp, url_prefix='/funciones/Fase3/validacionNutricional')
+
+
+app.register_blueprint(chequeo_bp, url_prefix='/funciones/Fase4/chequeo')
+app.register_blueprint(vidaUtil_bp, url_prefix='/funciones/Fase4/vidaUtil')
+app.register_blueprint(parametrosSustentables_bp, url_prefix='/funciones/Fase4/parametrosSustentables')
+app.register_blueprint(analisisSensorial2_bp, url_prefix='/funciones/Fase4/analisisSensorial2')
+app.register_blueprint(validacionEmpaque_bp, url_prefix='/funciones/Fase4/validacionEmpaque')
 
 app.register_blueprint(login_bp, url_prefix='/login')
 
@@ -177,4 +212,4 @@ def home():
     return render_template("login/login.html")
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

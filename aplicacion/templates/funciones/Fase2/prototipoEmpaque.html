@@ -2,113 +2,621 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
-    <title>Tabla Nutricional</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Nutricional - {{ proyecto.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
         
-</head>
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+            color: #333;
+        }
+        
+        .project-title {
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+        
+        /* Image Cards */
+        .empaque-card {
+            transition: all 0.3s;
+            border-radius: 8px;
+            background-color: white;
+            position: relative;
+        }
+        
+        .empaque-card.favorito {
+            border: 2px solid var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+        
+        .favorito-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--warning-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+        
+        .empaque-img {
+            max-height: 300px;
+            object-fit: contain;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        
+        /* Buttons */
+        .btn {
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border: none;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        /* File Input */
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .file-input-container input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 25px 15px;
+            background-color: #f8f9fa;
+            border: 2px dashed #bdc3c7;
+            border-radius: 5px;
+            text-align: center;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background-color: #e8f4fc;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .file-input-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Back button */
+        .back-button {
+            transition: transform 0.3s;
+            border: 1px solid #dee2e6;
+        }
+        
+        .back-button:hover {
+            transform: translateX(-3px);
+            background-color: #f8f9fa;
+        }
+        
+        /* Prompt section */
+        .prompt-section textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Time indicator */
+        .time-indicator {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
 
+        .empaque-card {
+        position: relative;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .empaque-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .favorito {
+        border-left: 4px solid #FFD700;
+    }
+    
+    .favorito-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #FFD700;
+        color: #000;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .empaque-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .empaque-text {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+        padding: 3px 0;
+    }
+    
+    .empaque-actions .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-label {
+        margin-bottom: 0.2rem;
+        font-size: 0.8rem;
+    }
+    </style>
+</head>
 <body>
     <div class="container">
-    <!-- Botón de volver -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <a href="/funciones" class="btn btn-light border">
-                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 20px; height: 20px;">
-            </a>
+        <!-- Header with Back Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="/funciones" class="btn back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 20px; height: 20px;">
+                </a>
+            </div>
+            <h2 class="project-title mb-0">
+                <i class="fas fa-box-open me-2"></i>Proyecto: {{ proyecto.name }}
+            </h2>
+            <div></div> <!-- Espaciador -->
         </div>
-        <h2 class="mb-0">Proyecto: {{proyecto.name}}</h2>
-        <div></div> <!-- Espaciador -->
-    </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <form method="POST" action="/upload" enctype="multipart/form-data" class="d-flex align-items-center">
-                <div class="custom-file mr-3" style="width: 80%;">
-                    <input type="file" class="custom-file-input" name="files" id="customFile" webkitdirectory directory multiple>
-                    <label class="custom-file-label" for="customFile">Seleccionar carpeta...</label>
+        <!-- Upload Folder Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-folder-upload me-2"></i>Subir Carpeta de Imágenes</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="file-input-container">
+                        <label for="folder-upload" class="file-input-label">
+                            <div class="file-input-icon"><i class="fas fa-folder-open"></i></div>
+                            <div>Selecciona una carpeta con imágenes</div>
+                            <small class="text-muted">Se cargarán todos los archivos de la carpeta</small>
+                        </label>
+                        <input id="folder-upload" type="file" name="files" webkitdirectory directory multiple>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Subir carpeta completa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Crear Prototipo Manualmente</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="crearPrototipo" >
+                    <!-- Nombre del empaque -->
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del empaque</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Ej: Botella PET 500ml">
+                    </div>
+                    
+                    <!-- Características -->
+                    <div class="mb-3">
+                        <label for="caracteristicas" class="form-label">Características</label>
+                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" rows="3"  
+                                  placeholder="Descripción detallada del empaque, materiales, dimensiones, etc."></textarea>
+                    </div>
+                    
+                    <!-- Precio -->
+                    <div class="mb-3">
+                        <label for="precio" class="form-label">Precio unitario (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="0"  
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <!-- Proveedor -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedor" class="form-label">Nombre del proveedor</label>
+                            <input type="text" class="form-control" id="proveedor" name="proveedor"  
+                                   placeholder="Ej: Empaques S.A.">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="web" class="form-label">Web del proveedor</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                <input  class="form-control" id="web" name="web" 
+                                       placeholder="https://www.proveedor.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de submit -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Prototipo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- AI Generation Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Generar Prototipos con IA</h3>
+            </div>
+            <div class="card-body prompt-section">
+                <form action="/funciones/Fase2/empaque/generar" method="POST">
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">Rellena los [ ] para generar el prompt:</label>
+                        <textarea class="form-control" id="prompt" name="prompt" rows="4">{{ prompt if prompt else '' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-magic me-2"></i>Generar prototipos
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Packages Section -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="fas fa-boxes me-2"></i>Empaques del Proyecto</h3>
+    </div>
+    <div class="card-body">
+        {% if proyecto.empaques %}
+            <div class="row">
+                {% for empaque in proyecto.empaques %}
+                <div class="col-12 mb-4">
+                <div class="empaque-card card h-100 {% if empaque.favorito %}favorito{% endif %}">
+                    {% if empaque.favorito %}
+                        <span class="favorito-badge">
+                            <i class="fas fa-star me-1"></i>Favorito
+                        </span>
+                    {% endif %}
+                    <div class="card-body">
+            
+                <input type="hidden" name="empaque_id" value="{{ empaque.id }}">
+                <div class="row">
+                    <!-- Columna de imagen -->
+                    <div class="col-md-4">
+                        <div class="text-center mb-3 position-relative">
+                            {% if empaque.imagen1 %}
+                            <img src="{{ url_for('static', filename='empaques/' + proyecto.name + '/' + empaque.imagen1) }}" 
+                                 class="empaque-img img-fluid rounded" 
+                                 alt="Empaque {{ loop.index }}">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/no-image.png') }}" 
+                                 class="empaque-img img-fluid rounded" 
+                                 alt="Empaque sin imagen">
+                            {% endif %}
+                            
+                            <!-- Formulario para añadir/actualizar imagen -->
+                            <form method="POST" action="subirImagen" enctype="multipart/form-data" class="mt-3">
+                                <input type="hidden" name="empaque_id" value="{{ empaque.id }}">
+                                <div class="input-group">
+                                    <input type="file" class="form-control form-control-sm" name="nueva_imagen" accept=".png,.jpg,.jpeg">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-upload"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna de detalles -->
+                    <div class="col-md-8">
+                        <form method="POST" action="guardar" class="prototipo-form">
+                        <input type="hidden" name="empaque_id" value="{{ empaque.id }}">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Nombre del empaque</label>
+                            <input type="text" class="form-control" name="nombre" value="{{ empaque.nombre or '' }}" placeholder="Nombre del empaque">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Características</label>
+                            <textarea class="form-control" name="caracteristicas" rows="3" placeholder="Descripción del empaque">{{ empaque.caracteristicas or '' }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Proveedor</label>
+                                <input type="text" class="form-control" name="proveedor" value="{{ empaque.proveedor or '' }}" placeholder="Nombre del proveedor">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Precio (USD)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" class="form-control" name="precio" value="{{ empaque.precio or '' }}" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Web del proveedor</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                <input class="form-control" name="web" value="{{ empaque.web or '' }}" placeholder="https://www.proveedor.com">
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            
+                            
+                            <div>
+                                <button type="submit" name="guardar" value="guardar" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-save me-1"></i>Guardar cambios
+                                </button>
+                            </div>
+
+                            
+                        </form>
+
+                        <div>
+                            <form method="POST" action="favorito" class="d-inline me-2">
+                                <input type="hidden" name="empaque_id" value="{{ empaque.id }}">
+                                <button type="submit" class="btn btn-sm {% if empaque.is_favourite %}btn-warning glow{% else %}btn-light border{% endif %}">
+                                    <i class="fas fa-star me-1 {% if empaque.is_favourite %}text-white{% else %}text-warning{% endif %}"></i>
+                                    {% if empaque.is_favourite %}
+                                        <span class="text-white">Favorito</span>
+                                    {% else %}
+                                        <span class="text-dark">Marcar favorito</span>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="eliminar" class="d-inline me-2">
+                            <input type="hidden" name="empaque_id" value="{{ empaque.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger me-2 cancelar-edicion">
+                                <i class="fas fa-times me-1"></i>Eliminar empaque
+                            </button>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Subir carpeta</button>
-            </form>
+            
         </div>
     </div>
+</div>
+{% endfor %}
 
-     <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-          <form method="POST" action="/upload" enctype="multipart/form-data" class="d-flex align-items-center">
-              <div class="custom-file mr-3" style="width: 80%;">
-                  <input type="file" class="custom-file-input" name="files" id="customFile" webkitdirectory directory multiple>
-                  <label class="custom-file-label" for="customFile">Seleccionar carpeta...</label>
-              </div>
-              <button type="submit" class="btn btn-primary">Subir carpeta</button>
-          </form>
-      </div>
-  </div>
-
-  
-  <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-          <h3 class="card-title mb-4">Generar prototipos con IA</h3>
-          <form action="/funciones/Fase2/empaque/generar" method="POST">
-              <div class="form-group">  
-                  <label for="promptInput">Rellena los [   ] para generar el prompt:</label>
-                  <textarea class="form-control" id="prompt" name="prompt" rows="4" style="resize: vertical; min-height: 100px;">{{ prompt if prompt else '' }}</textarea>
-              </div>
-              <button type="submit" class="btn btn-primary mt-2">Generar</button>
-          </form>
-      </div>
-  </div>
-
-  <!-- Sección de empaques del proyecto -->
-  <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-          <h3 class="card-title">Empaques del Proyecto</h3>
-          {% if proyecto.empaques %}
-              <div class="row">
-                  {% for empaque in proyecto.empaques %}
-                      <div class="col-12 mb-3">
-                          <div class="card empaque-card">
-                              <div class="card-body">
-                                  {% include 'funciones/Fase2/empaque.html' %}
-                              </div>
-                          </div>
-                      </div>
-                  {% endfor %}
-              </div>
-          {% else %}
-              <p class="text-muted">No hay empaques en este proyecto</p>
-          {% endif %}
-      </div>
-  </div>
-
-  <!-- Sección de empaques generados por IA -->
-  <div class="card mb-4 shadow-sm">
-      <div class="card-body">
-          <h3 class="card-title">Empaques Generados por IA</h3>
-          {% if empaques_IA %}
-              {% if tiempo %}
-              <div class="text-muted mb-3">Tiempo de respuesta: {{ "%.2f"|format(tiempo) }} segundos</div>
-              {% endif %}
-              <div class="row">
-                  {% for empaque in empaques_IA %}
-                      <div class="col-12 mb-3">
-                          <div class="card empaque-card">
-                              <div class="card-body">
-                                  {% include 'funciones/Fase2/empaque_IA.html' %}
-                              </div>
-                          </div>
-                      </div>
-                  {% endfor %}
-              </div>
-          {% else %}
-              <p class="text-muted">No hay empaques generados por IA</p>
-          {% endif %}
-      </div>
-  </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h4>No hay empaques en este proyecto</h4>
+                <p class="text-muted">Sube imágenes para comenzar</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
-    
+        <!-- AI Generated Packages Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-brain me-2"></i>Empaques Generados por IA</h3>
+            </div>
+            <div class="card-body">
+                {% if tiempo %}
+                    <div class="time-indicator mb-3">
+                        <i class="fas fa-clock me-1"></i>Tiempo de generación: {{ "%.2f"|format(tiempo) }} segundos
+                    </div>
+                {% endif %}
+                
+                {% if empaques_IA %}
+                    <div class="row">
+                    {% for empaque in empaques_IA %}
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="empaque-card card h-100 {% if empaque.favorito %}favorito{% endif %}">
+                            <form method="POST" action="guardarEmpaqueIA" class="d-inline">
+                            <div class="card-body p-3">
+                                
+                                <div class="empaque-header mb-3">
+                                    <h5 class="empaque-title mb-1" name="nombre" value="{{ empaque.Nombre }}">{{ empaque.Nombre or 'Sin nombre' }}</h5>
+                                    
+                                </div>
+                                
+                                <div class="empaque-details">
+                                    <div class="row">
+                                        <div class="col-12 mb-2">
+                                            <label class="form-label text-muted small" >Características</label>
+                                            <p class="empaque-text" name="caracteristicas" value="{{ empaque.Caracteristicas }}">{{ empaque.Caracteristicas or 'No especificado' }}</p>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label text-muted small">Proveedor</label>
+                                            <p class="empaque-text" name="proveedor" value="{{ empaque.Proveedor }}">{{ empaque.Proveedor or 'No especificado' }}</p>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-2">
+                                            <label class="form-label text-muted small" >Precio</label>
+                                            <p class="empaque-text" name="precio" value="{{ empaque.Precio }}">{{ '${:,.2f}'.format(empaque.Precio) if empaque.Precio else 'No especificado' }}</p>
+                                        </div>
+                                        
+                                        <div class="col-12 mb-2">
+                                            <label class="form-label text-muted small">Web</label>
+                                            {% if empaque.Web %}
+                                                <p class="empaque-text" name="web" value="{{ empaque.Web }}"><a href="{{ empaque.Web }}" target="_blank">{{ empaque.Web|truncate(30) }}</a></p>
+                                            {% else %}
+                                                <p class="empaque-text">No especificado</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="empaque-actions mt-3 text-end">
+                                    
+                                        <input type="hidden" name="nombre" value="{{ empaque.Nombre }}">
+                                        <input type="hidden" name="caracteristicas" value="{{ empaque.Caracteristicas }}">
+                                        <input type="hidden" name="proveedor" value="{{ empaque.Proveedor }}">
+                                        <input type="hidden" name="precio" value="{{ empaque.Precio }}">
+                                        <input type="hidden" name="web" value="{{ empaque.Web }}">
+
+                                        <button type="submit" name="guardar_empaque" value="guardar" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-save me-1"></i>Guardar Empaque
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-robot"></i>
+                        <h4>No hay empaques generados por IA</h4>
+                        <p class="text-muted">Usa el generador de IA para crear prototipos</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar nombre de archivo seleccionado
+        document.getElementById('folder-upload').addEventListener('change', function(e) {
+            const label = document.querySelector('#folder-upload + .file-input-label');
+            if(this.files.length > 0) {
+                label.innerHTML = `<div class="file-input-icon"><i class="fas fa-folder-open"></i></div>
+                                  <div>${this.files.length} archivos seleccionados</div>
+                                  <small class="text-muted">Se cargarán todos los archivos de la carpeta</small>`;
+                label.style.borderColor = '#3498db';
+                label.style.backgroundColor = '#e8f4fc';
+                label.style.color = '#3498db';
+            }
+        });
+
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            const label = document.querySelector('#file-upload + .file-input-label');
+            if(this.files.length > 0) {
+                label.innerHTML = `<div class="file-input-icon"><i class="fas fa-image"></i></div>
+                                  <div>${this.files[0].name}</div>
+                                  <small class="text-muted">Formatos aceptados: .png, .jpg, .jpeg</small>`;
+                label.style.borderColor = '#3498db';
+                label.style.backgroundColor = '#e8f4fc';
+                label.style.color = '#3498db';
+            }
+        });
+
+        // Confirmación antes de eliminar
+        document.querySelectorAll('form[action="/eliminar"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if(!confirm('¿Estás seguro de que quieres eliminar este empaque?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

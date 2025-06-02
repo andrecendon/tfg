@@ -45,6 +45,7 @@ def fav():
                     if p.is_favourite == True:
                         p.is_favourite = False
                 prot.is_favourite = True
+                session['prototype_id'] = prot.id
                 print("Favorito cambiado a True")
                 Session.commit()
                 return redirect(url_for("prototipoMedio.inicio"))

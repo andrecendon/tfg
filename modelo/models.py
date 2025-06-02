@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from typing import List
 from flask_login import UserMixin
 from sqlalchemy import Table, UniqueConstraint
+from sqlalchemy.ext.mutable import MutableDict
 # Ensure the directory exists
 
 Base = declarative_base()
@@ -117,11 +118,13 @@ class Test_Sensorial(BaseModel):
     
     id = Column(Integer, primary_key=True)
     nombre_evaluador = Column(String)
+
     atributo = Column(String)
     fecha = Column(Date, nullable=True)
-    resultados = Column(JSON) 
+    resultados = Column(MutableDict.as_mutable(JSON)) 
     comentarios = Column(String)
-    type = Column(String)  # Columna discriminadora
+    type = Column(String)
+    numero_muestras = Column(Integer, nullable=True)  # Número de muestras evaluadas
     
     # Relación con proyectos
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
@@ -131,6 +134,9 @@ class Test_Sensorial(BaseModel):
         'polymorphic_on': type,
         'polymorphic_identity': 'sensorial'
     }
+
+    def __repr__(self):
+        return f"Test_Sensorial(id={self.id}, nombre_evaluador={self.nombre_evaluador}, atributo={self.atributo}, fecha={self.fecha}, resultados={self.resultados}, comentarios={self.comentarios}, numero_muestras={self.numero_muestras}, type={self.type})"
 
 class Test_Sensorial_Inicial(Test_Sensorial): 
     __tablename__ = 'tests_sensoriales_iniciales'
@@ -144,7 +150,14 @@ class Test_Hedonico(Test_Sensorial):
     __mapper_args__ = {'polymorphic_identity': 'hedonico'}
     
     id = Column(Integer, ForeignKey('tests_sensoriales.id'), primary_key=True)
-    muestras = Column(JSON)  # Formato: {"muestra1": {"puntuacion": 5, "comentarios": ""}}
+
+    #Codigo de la muestra, en hedonico solo se usa una por fila
+    muestra = Column(String)  
+    puntuacion = Column(Integer)  # Cambiado a Integer para puntuación
+
+
+    def __repr__(self):
+        return f"Test_Hedonico(id={self.id}, nombre_evaluador={self.nombre_evaluador}, atributo={self.atributo}, fecha={self.fecha}, resultados={self.resultados}, comentarios={self.comentarios}, numero_muestras={self.numero_muestras}, type={self.type}, muestra={self.muestra})"
 
 class Test_Aceptacion(Test_Sensorial): 
     __tablename__ = 'tests_aceptacion'
@@ -152,13 +165,64 @@ class Test_Aceptacion(Test_Sensorial):
     
     id = Column(Integer, ForeignKey('tests_sensoriales.id'), primary_key=True)
     muestra = Column(String)
-    agrado = Column(String)  # Cambiado a Integer para puntuación
+    agrado = Column(String)  # Cambiado a String
     sabor = Column(String)
     textura = Column(String)
     apariencia = Column(String)
     compra = Column(String)  # Mejor como booleano para intención de compra
      
+class Costos(BaseModel):
+    __tablename__ = 'costos'
+    id = Column(Integer, primary_key=True)
+    empaque = Column(MutableDict.as_mutable(JSON), default={"empaque":{"descripcion": "envase primario", "cantidad":1, "costo": 1}, "etiqueta":{"descripcion": "envase primario", "cantidad":1, "costo": 1}, "otros":{"descripcion": "envase primario", "cantidad":1, "costo": 1, "precio_total": 1}})  # Precio del empaque en dolares #Guardar en json: lista de materiales etiqueta:{"descripcion": "envase primario", "cantidad":1, "precio": 0.5, "precio_total": 0.5}
+    ingredientes = Column(MutableDict.as_mutable(JSON))  # Precio total de los ingredientes en dolares. tomate:{"descripcion": "primario", "cantidad":1, "precio": 0.5}
+    mano_obra = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio de la mano de obra en JSON
+    electricidad = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio de la electricidad en JSON
+    agua = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio del agua en JSON
+    depreciacion_equipos = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio de la depreciación de equipos en JSON
+    transporte = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio del transporte en JSON
+    mermas = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio de las mermas en JSON
+    adicionales = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 0, "costo": 0})
     
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project: Mapped["Project"] = relationship(back_populates="costos")
+
+    def asignar_ingredientes(self):
+        for p in self.project.prototypes:
+            if p.is_favourite:
+                for food in p.food_prototypes:
+                    
+                    if food.food.precio >= 0:
+                            if self.ingredientes is None:
+                                self.ingredientes = {}
+                            self.ingredientes[food.food_description] = {
+                                "descripcion": " ",
+                                "cantidad": food.cantidad,
+                                "costo": food.food.precio,
+                                
+                            }
+                            print("Alimentos asignados a costos: ", self.ingredientes)
+                    else:
+                        print(f"Alimento {food.food_description} no encontrado en la base de datos.")
+            Session.commit()
+    #Constructor 
+    def __init__(self, project):
+        self.project = project
+        self.project_id = project.id
+        self.ingredientes = {}
+        self.empaque = {"empaque":{"descripcion": "envase primario", "cantidad":1, "costo": 1}, "etiqueta":{"descripcion": "envase primario", "cantidad":1, "costo": 1}, "otros":{"descripcion": "envase primario", "cantidad":1, "costo": 1, "precio_total": 1}}
+        self.mano_obra = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.electricidad = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.agua = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.depreciacion_equipos = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.transporte = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.mermas = {"descripcion": " ", "cantidad": 1, "costo": 1}
+        self.adicionales = {"descripcion": " ", "cantidad": 0, "costo": 0}
+
+        self.asignar_ingredientes()
+    def __repr__(self):
+        return f"Costos(id={self.id}, empaque={self.empaque}, ingredientes={self.ingredientes}, mano_obra={self.mano_obra}, electricidad={self.electricidad}, agua={self.agua}, depreciacion_equipos={self.depreciacion_equipos}"
+
 
 class Project(BaseModel):
     __tablename__ = 'projects'
@@ -183,6 +247,8 @@ class Project(BaseModel):
 
     # Relación 1:1 con simulacion_produccion
     simulacion_produccion = relationship("SimulacionProduccion", back_populates="project",  cascade="all, delete-orphan", uselist=False)
+    parametros_sustentables = relationship("ParametrosSustentables", back_populates="project",  cascade="all, delete-orphan", uselist=False)
+    costos = relationship("Costos", back_populates="project",  cascade="all, delete-orphan", uselist=False)
 
     #Relación 1:N con prototypes, mejor mapeada
     prototypes: Mapped[List["Prototype"]] = relationship(back_populates="project")
@@ -249,11 +315,17 @@ class Empaque(BaseModel):
     id = Column(Integer, primary_key=True)
     nombre = Column(String)
     caracteristicas = Column(String)
-    precio = Column(String)
+    precio = Column(Float, default=0.0)  # Precio en dolares
+    is_favourite = Column(Boolean, default=False) 
     proveedor = Column(String)
     web = Column(String)
-    imagen = Column(String)
+    imagen1 = Column(String) #cada empaque un maximo de 3 imagenes
+    imagen2 = Column(String)
+    imagen3 = Column(String)
     notas = Column(String)
+
+    chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
+
 
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="empaques")
@@ -282,6 +354,7 @@ class FoodPrototype(BaseModel):
     prototype_id = Column('prototype_id', Integer, ForeignKey('prototypes.id', ondelete="CASCADE"))
     cantidad = Column(Float, nullable=False, default=0)
     food_description = Column(String)
+    
 
     prototype = relationship('Prototype', back_populates='food_prototypes')
     food = relationship("Food")
@@ -303,48 +376,219 @@ class FoodPrototype(BaseModel):
                 self.food_description = None
         
         
+fase_evaluacion_avance = Table(
+    "fase_evaluacion_avance",
+    Base.metadata,
+    Column("fase_id", ForeignKey("fases.id"), primary_key=True),
+    Column("evaluacion_id", ForeignKey("evaluacion_avance.id"), primary_key=True)
+)
+
 class Fase(BaseModel):
     __tablename__ = 'fases'
     id = Column(Integer, primary_key=True)
     nombre = Column(String)
-    estado = Column(Integer, nullable=False, default=0)  
-    #porcentaje de avance
+    numero_paso = Column(Integer, nullable=False, default=0)
+    estado = Column(Integer, nullable=False, default=0)
     fecha_inicio = Column(Date)
     fecha_fin = Column(Date)
-    evaluacion_id: Mapped[int] = mapped_column(ForeignKey("evaluacion_avance.id"))
-    evaluacion: Mapped["EvaluacionAvance"] = relationship(back_populates="fases")
+
+    evaluaciones: Mapped[List["EvaluacionAvance"]] = relationship(
+        "EvaluacionAvance",
+        secondary=fase_evaluacion_avance,
+        back_populates="fases"
+    )
+
 
 class EvaluacionAvance(BaseModel):
     __tablename__ = 'evaluacion_avance'
     id = Column(Integer, primary_key=True)
-    avance = Column(String)
+    avance = Column(Boolean, default=False)
     comentarios = Column(String)
     numero_fases = Column(Integer, nullable=False, default=0)
 
-    #lista de fases
-    fases: Mapped[List["Fase"]] = relationship(back_populates="evaluacion")
+    # Relación muchos a muchos con Fase
+    fases: Mapped[List["Fase"]] = relationship(
+        "Fase",
+        secondary=fase_evaluacion_avance,
+        back_populates="evaluaciones"
+    )
 
-
-    # Relación 1:N con proyectos, mejor mapeada
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="evaluaciones_avances")
 
-
     def __repr__(self):
-        return f"EvaluacionAvance(avance={self.avance})"
+        return f"EvaluacionAvance(id={self.id}, avance={self.avance}, comentarios={self.comentarios}, numero_fases={self.numero_fases}, fases={[fase.nombre for fase in self.fases]})"
+
+
+
+class ParametrosSustentables(BaseModel):
+    __tablename__ = 'parametros_sustentables'
+    id = Column(Integer, primary_key=True)
+    comentarios = Column(String)
+    chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
+
+    consumo_agua = Column(Float)  # m³/mes
+    consumo_electricidad = Column(Float)  # kWh/mes
+    consumo_gas_licuado = Column(Float)  # L/mes
+    materia_prima_usada = Column(Float)  # kg/mes
+    uso_empaques = Column(Float)  # kg/mes
+    residuos_solidos_generados = Column(Float)  # kg/mes
+    residuos_liquidos = Column(Float)  # L/mes
+    emisiones_directas_co2 = Column(Float)  # kg CO2/mes
+    emisiones_indirectas_electricidad = Column(Float)  # kg CO2/mes
+    subproductos_valorizados = Column(Float)  # kg/mes
+    km_recorridos_insumos = Column(Float)  # km/mes
+    tipo_transporte_principal = Column(String)  # e.g., "Camión refrigerado"
+    carga_total_transportada = Column(Float)  # kg/mes
+    produccion_mensual_batido = Column(Float)  # kg de batido/mes
+    mermas_proceso = Column(Float)  # porcentaje
+    uso_productos_limpieza = Column(Float)  # L/mes
+    ubicacion_proveedores = Column(String)  # texto libre
+    origen_insumos_local= Column(Float)  
+    origen_insumos_importado= Column(Float) 
+    consumo_energia_renovable = Column(Float)  # kWh/mes
+
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project: Mapped["Project"] = relationship(back_populates="parametros_sustentables")
+
+
+
+class EtapaProduccion(BaseModel):
+    __tablename__ = 'etapas_produccion'
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String)
+    descripcion = Column(String)
+    equipos_requeridos = Column(String)  # Lista de equipos requeridos en formato JSON
+    proveedor = Column(String)  # Proveedor del equipo
+    web_proveedor = Column(String)  # Web del proveedor del equipo
+    costo_estimado = Column(String)  # Costo estimado del equipo
+    numero_etapa = Column(Integer, nullable=False, default=0)  
+
+    # Relación con proyectos
+    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id"))
+    simulacion: Mapped["SimulacionProduccion"] = relationship(back_populates="etapas")
+
+
+class EquipoProduccion(BaseModel):
+    __tablename__ = 'equipos_produccion'
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String)
+    esta_en_planta = Column(Boolean, default=False)  # Indica si el equipo está en la planta
+
+    ubicacion = Column(String)  # Ubicación del equipo en la planta
+    especificaciones = Column(String)  # Especificaciones del equipo
+    dimensiones = Column(String) 
+    proveedor = Column(String)
+    web_proveedor = Column(String)
+    costo = Column(Float, default=0.0)  
+    imagen = Column(String)  # Imagen del equipo
+    requisitos_uso = Column(String)  # Requisitos de uso del equipo
+    requisitos_instalacion = Column(String)  # Requisitos de instalación del equipo
+    observaciones = Column(String)  # Observaciones sobre el equipo
+
+    # Relación con proyectos
+    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id"))
+    simulacion: Mapped["SimulacionProduccion"] = relationship(back_populates="equipos_produccion")
+
 
 
 class SimulacionProduccion(BaseModel):
     __tablename__ = 'simulacion_produccion'
     id = Column(Integer, primary_key=True)
-    tabla = Column(JSON)  #Luego hay que convertir a formato tabla con simulacion_produccion_IA
-    diagrama_flujo = Column(String)  
-    imagen = Column(String)
+    tabla = Column(JSON)  #En principio no se usa
+    diagrama_flujo = Column(String)
+    imagen = Column(String) #Pueden llegar a subir una imagen de la línea de producción
+
+    # Relación con etapas de producción
+    etapas: Mapped[List["EtapaProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan")
+    equipos_produccion: Mapped[List["EquipoProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan")
 
     # Relación con proyectos
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     project: Mapped["Project"] = relationship(back_populates="simulacion_produccion")
+
+    def __repr__(self):
+        return f"SimulacionProduccion(id={self.id}, diagrama_flujo={self.diagrama_flujo}, imagen={self.imagen}, etapas_produccion={[etapa.nombre for etapa in self.etapas]})"
     
+
+class ValoresNutricionales(BaseModel):
+    __tablename__ = 'valores_nutricionales'
+    id = Column(Integer, primary_key=True)
+    energia_kcal = Column(Float, nullable=False, default=0.0)  # Energía en kilocalorías
+    proteinas = Column(Float, nullable=False, default=0.0)  # Proteínas en gramos
+    grasas_totales = Column(Float, nullable=False, default=0.0)  # Grasas totales en gramos
+    grasas_saturadas = Column(Float, nullable=False, default=0.0)  # Grasas saturadas en gramos
+    grasas_trans = Column(Float, nullable=False, default=0.0)  # Grasas trans en gramos
+
+    carbohidratos = Column(Float, nullable=False, default=0.0)  # Carbohidratos en gramos
+    fibra = Column(Float, nullable=False, default=0.0)  # Fibra en gramos
+    azucares = Column(Float, nullable=False, default=0.0)  # Azúcares en gramos
+
+    sodio = Column(Float, nullable=False, default=0.0)  # Sodio en gramos
+    sal = Column(Float, nullable=False, default=0.0)  # Sal en gramos
+
+    prototype_id: Mapped[int] = mapped_column(ForeignKey("prototypes.id"))
+    prototype: Mapped["Prototype"] = relationship(back_populates="valores_nutricionales")
+
+    def calcular_valores_nutricionales(self):
+        energia_kcal_parcial = 0.0
+        proteinas_parcial = 0.0
+        grasas_totales_parcial = 0.0
+        grasas_saturadas_parcial = 0.0
+        grasas_trans = 0.0
+        sal = 0.0
+        sodio = 0.0
+        fibra = 0.0
+        azucares = 0.0
+        carbohidratos = 0.0
+
+        for food_prototype in self.prototype.food_prototypes:
+            food = food_prototype.food
+            cantidad = food_prototype.cantidad
+
+            print(f"Calculando valores nutricionales para {food.food_description} con cantidad {cantidad}g")
+            
+            # Calcular valores parciales para cada alimento
+            energia_kcal_parcial += (food.energy_kcal * cantidad) / 100
+            proteinas_parcial += (food.protein * cantidad) / 100
+            grasas_totales_parcial += (food.total_fat * cantidad) / 100
+            grasas_saturadas_parcial += (food.saturated_fat * cantidad) / 100
+            grasas_trans += (food.trans_fat * cantidad) / 100
+            sodio += (food.sodium * cantidad) / 100
+            fibra += (food.fiber * cantidad) / 100
+            azucares += (food.sugars * cantidad) / 100
+            carbohidratos += (food.carbohydrates * cantidad) / 100
+
+        self.energia_kcal = round(energia_kcal_parcial, 3)
+        self.proteinas = round(proteinas_parcial, 3)
+        self.grasas_totales = round(grasas_totales_parcial, 3)
+        self.grasas_saturadas = round(grasas_saturadas_parcial, 3)
+        self.grasas_trans = round(grasas_trans, 3)
+        self.sal = round(sal, 3)
+        self.sodio = round(sodio, 3)
+        self.fibra = round(fibra, 3)
+        self.azucares = round(azucares, 3)
+        self.carbohidratos = round(carbohidratos, 3)
+        Session.commit()
+
+        print(f"Valores nutricionales actualizados {self}:")
+
+
+
+    def __init(self, protoype):
+        self.prototype = protoype
+        self.prototype_id = protoype.id
+        self.calcular_valores_nutricionales()
+
+    def __repr__(self):
+        return (f"ValoresNutricionales(energia_kcal={self.energia_kcal}, proteinas={self.proteinas}, "
+                f"grasas_totales={self.grasas_totales}, grasas_saturadas={self.grasas_saturadas}, carbohidratos={self.carbohidratos}, "
+                f"fibra={self.fibra}, azucares={self.azucares}, sodio={self.sodio}, sal={self.sal})")
+        
+
+
+
+
 class Prototype(BaseModel):
     __tablename__ = 'prototypes'
     id = Column(Integer, primary_key=True)
@@ -360,6 +604,9 @@ class Prototype(BaseModel):
 
 
     is_favourite = Column(Boolean, default=False)
+
+    # Relación 1:1 con valores nutricionales
+    valores_nutricionales = relationship("ValoresNutricionales", back_populates="prototype",  cascade="all, delete-orphan", uselist=False)
 
 
 
@@ -506,12 +753,14 @@ class Food(BaseModel):
     saturated_fat = Column(Float, nullable=False, default=0.0)  # Ácidos grasos saturados en gramos
     monounsaturated_fat = Column(Float, nullable=False, default=0.0)  # Ácidos grasos monoinsaturados en gramos
     polyunsaturated_fat = Column(Float, nullable=False, default=0.0)  # Ácidos grasos poliinsaturados en gramos
+    trans_fat = Column(Float, nullable=False, default=0.0)  # Grasas trans
     cholesterol = Column(Float, nullable=False, default=0.0)  # Colesterol en miligramos
     sodium = Column(Float, nullable=False, default=0.0)  # Sodio en miligramos
     water = Column(Float, nullable=False, default=0.0)  # Agua en gramos
     potassium = Column(Float, nullable=False, default=0.0)  # Potasio en miligramos
     calcium = Column(Float, nullable=False, default=0.0)  # Calcio en miligramos
     iron = Column(Float, nullable=False, default=0.0)  # Calcio en miligramos
+    #Sodio es sal?
 
 
     #Constructor de la clase solo con food_description

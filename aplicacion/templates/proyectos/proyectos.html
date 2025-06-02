@@ -1,44 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .project-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .project-title {
+            color: #343a40;
+            margin-bottom: 0;
+        }
+        .project-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .btn-view {
+            background-color: #4e73df;
+            color: white;
+        }
+        .btn-view:hover {
+            background-color: #3a5ec4;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #e74a3b;
+            color: white;
+        }
+        .btn-delete:hover {
+            background-color: #c03526;
+            color: white;
+        }
+        .btn-add {
+            background-color: #1cc88a;
+            color: white;
+            font-weight: 500;
+            padding: 10px 20px;
+            margin-top: 20px;
+        }
+        .btn-add:hover {
+            background-color: #17a673;
+            color: white;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-icon {
+            color: #e74a3b;
+            font-size: 1.5rem;
+        }
+        .welcome-message {
+            color: #5a5c69;
+            font-weight: 600;
+        }
+    </style>
 </head>
-
 <body>
-</head>
-<body>
-    
     <div class="container">
-        
-        <div class="row col-1">
-            <a href="/logout" class="border-0 bg-transparent">
-                <img src="{{ url_for('static', filename='img/logout.jpg') }}" alt="Macronutrientes" style="width: 80px; height: 80px;">
+        <div class="header">
+            <h1 class="welcome-message">Bienvenido, {{user.name}}</h1>
+            <a href="/logout" class="logout-btn" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt logout-icon"></i>
             </a>
         </div>
-        &nbsp;
-        <h1 class="row">Bienvenido a tus proyectos {{user.name}}</h1>
         
-  
-        &nbsp;
-        {% for project in user.projects %}
-        <div class="row" style="margin-bottom: 15px;">  <!-- Agrega margen entre filas -->
-            {% with titulo=project.name, url="/funciones/?id=" ~ project.id %}
-                {% include 'proyectos/proyecto.html' %}
-            {% endwith %}
-        </div>
-        &nbsp;
-        {% endfor %}
+        <h3 class="mb-4">Tus Proyectos</h3>
         
-        <div class="row proyecto" style="margin-bottom: 15px;">  <!-- Agrega margen entre filas -->
-            <a href="/proyectos/crearProyecto" class="btn btn-primary">Nuevo Proyecto</a>
+        {% if user.projects %}
+            {% for project in user.projects %}
+            <div class="project-card">
+                <h4 class="project-title">{{ project.name }}</h4>
+                <div class="project-actions">
+                    <form action="/funciones" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-view">
+                            <i class="fas fa-folder-open"></i> Abrir
+                        </button>
+                    </form>
+                    <form action="/proyectos/eliminar" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-delete"  name="eliminar" value="{{project.id}}" onclick="return confirm('¿Estás seguro de que quieres eliminar este proyecto?');">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                No tienes proyectos creados todavía. ¡Crea tu primer proyecto!
+            </div>
+        {% endif %}
+        
+        <div class="text-center">
+            <a href="/proyectos/crearProyecto" class="btn btn-add">
+                <i class="fas fa-plus"></i> Nuevo Proyecto
+            </a>
         </div>
-
-
     </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -22,6 +22,8 @@ def proyectos():
     else: 
         print("No hay session")
     
+    print("Usuario final: ", usuario_final.projects)
+    
     return render_template("proyectos/proyectos.html", user=usuario_final)
 
 
@@ -45,3 +47,29 @@ def crearProyecto():
         return redirect('/proyectos')
     else: 
         return render_template("proyectos/crearProyecto.html", error="Rellena todos los campos obligatorios")
+    
+
+
+
+@proyectos_bp.route('/eliminar', methods=["POST", "GET"])
+@login_required
+def eliminar():
+    
+    #Recuperamos de la session el usuario
+    if 'username' in session:
+        usuario_final = Session.query(User).filter(User.name == session['username']).first()
+    else: 
+        print("No hay session")
+    
+    if request.form:
+        project_id = request.form.get("eliminar")
+        print("ID del proyecto a eliminar:", project_id)
+        if project_id:
+            project = Session.query(Project).filter(Project.id == project_id).first()
+            if project:
+                Session.delete(project)
+                Session.commit()
+                print("Proyecto eliminado correctamente")
+                return redirect('/proyectos')
+    
+    return render_template("proyectos/proyectos.html", user=usuario_final)

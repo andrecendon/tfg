@@ -3,290 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha Inicial de Proyecto</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <title>Simulación de Línea de Producción</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .api-response {
-        margin-top: 30px;
-        border-top: 2px solid #28a745;
-        padding-top: 20px;
-    }
-
-    .response-section {
-        margin-bottom: 30px;
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .mermaid {
-        background: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin: 15px 0;
-        border: 1px solid #ddd;
-    }
-
-    .code-block {
-        background: #f5f5f5;
-        padding: 15px;
-        border-radius: 5px;
-        overflow-x: auto;
-        font-family: 'Courier New', monospace;
-    }
-
-    .styled-table-container {
-        overflow-x: auto;
-    }
-
-    .styled-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-    }
-
-    .styled-table th {
-        background-color: #28a745;
-        color: white;
-        padding: 12px;
-        text-align: left;
-    }
-
-    .styled-table td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .styled-table tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
         }
         .container {
-            width: 90%;
-            max-width: 1000px; /* Ajusta el ancho */
-            margin: 0 auto;
+            max-width: 1200px;
         }
-        .form-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            resize: none;
-            padding: 5px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
+        .card {
             border: none;
-            background: #28a745;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #3498db;
             color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
         }
-        .btn:hover {
-            background: #218838;
-        }
-        .row {
-            margin-bottom: 15px;
-        }
-        .bg-transparent {
-            background-color: transparent;
-        }
-        .border-0 {
+        .btn-primary {
+            background-color: #3498db;
             border: none;
         }
-        .styled-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 15px 0;
-        font-size: 0.9em;
-        font-family: Arial, sans-serif;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        min-width: 600px; /* Ancho mínimo para evitar compresión */
-    }
-    
-    .styled-table thead tr {
-        background-color: #28a745;
-        color: #ffffff;
-        text-align: left;
-        position: sticky;
-        top: 0;
-    }
-    
-    .styled-table th {
-        padding: 12px 15px;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85em;
-        letter-spacing: 0.5px;
-    }
-    
-    .styled-table td {
-        padding: 10px 15px;
-        border-bottom: 1px solid #e0e0e0;
-        vertical-align: top;
-    }
-    
-    .styled-table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    .styled-table tbody tr:nth-of-type(even) {
-        background-color: #f8f9fa;
-    }
-    
-    .styled-table tbody tr:last-of-type {
-        border-bottom: 2px solid #28a745;
-    }
-    
-    .styled-table tbody tr:hover {
-        background-color: #e9f7ef;
-        cursor: default;
-    }
-    
-    /* Contenedor responsive */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        margin-bottom: 20px;
-    }
-    
-    /* Estilos para enlaces */
-    .styled-table a {
-        color: #28a745;
-        text-decoration: none;
-        word-break: break-all; 
-    }
-    
-    .styled-table a:hover {
-        text-decoration: underline;
-        color: #218838;
-    }
-    
-    /* Estilos para costos */
-    .styled-table td:nth-child(5) {
-        font-weight: 600;
-        color: #2c3e50;
-        text-align: right;
-        white-space: nowrap; /* Evita salto de línea en números */
-    }
-    
-    
+        .btn-success {
+            background-color: #2ecc71;
+            border: none;
+        }
+        .stage-item {
+            transition: all 0.3s ease;
+        }
+        .stage-item:hover {
+            background-color: #f1f8fe;
+        }
+        .orden-input {
+            width: 60px;
+            text-align: center;
+        }
+        .acciones-cell {
+            white-space: nowrap;
+        }
+        /* Estilos para la tabla IA */
+        .table-ia {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .table-ia thead tr {
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+        }
+        .table-ia th,
+        .table-ia td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
+        }
+        .table-ia tbody tr {
+            transition: all 0.3s;
+        }
+        .table-ia tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .table-ia tbody tr:last-of-type {
+            border-bottom: 2px solid #3498db;
+        }
+        .table-ia tbody tr:hover {
+            background-color: #e9f7ef;
+        }
+        .table-ia a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .table-ia a:hover {
+            text-decoration: underline;
+        }
+        .costo-cell {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="row">
-            <a href="/funciones" class="border-0 bg-transparent">
-                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+        <div class="mb-3">
+            <a href="/funciones" class="btn btn-light">
+                <i class="fas fa-arrow-left me-2"></i> Volver
             </a>
         </div>
 
-        <h1>Simulación de línea de producción</h1>
+        <h1 class="mb-4"><i class="fas fa-industry me-2"></i>Simulación de línea de producción</h1>
         
-        <div class="form-container">
-            <form action="/funciones/Fase3/simulacionProduccion/chatbot" method="POST">
-                <div class="input-group">
-                    <label for="prompt_flujo">Describa el diagrama de flujo: </label>
-                    <textarea id="prompt_flujo" name="prompt_flujo">{{prompt_flujo}}</textarea>
-                </div>
-                <button type="submit" name="flujo" class="btn">Generar flujo</button>
-                &nbsp;
-                <div class="input-group">
-                    <label for="prompt_tabla">Tabla: </label>
-                    <textarea id="prompt_tabla" name="prompt_tabla">{{prompt_tabla}}</textarea>
-                </div>
-                <button type="submit" name="tabla" class="btn">Generar tabla</button>
-                &nbsp;
-                <div class="input-group">
-                    <label for="prompt_imagen">Imagen: </label>
-                    <textarea id="prompt_imagen" name="prompt_imagen">{{prompt_imagen}}</textarea>
-                </div>
-                
-                <button type="submit" name="imagen" class="btn">Generar imagen</button>
-                &nbsp;
-            
-
-            
+        <!-- Formulario para añadir etapas -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Añadir Etapa del Proceso</h3>
+            </div>
+            <div class="card-body">
+                <form action="/funciones/Fase3/simulacionProduccion/añadirEtapa" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label for="numero_etapa" class="form-label">Número</label>
+                            <input type="number" class="form-control" id="numero_etapa" name="numero_etapa" min="1" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nombre_etapa" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre_etapa" name="nombre_etapa" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="descripcion_etapa" class="form-label">Descripción</label>
+                            <input type="text" class="form-control" id="descripcion_etapa" name="descripcion_etapa" required>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Guardar Etapa
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-            {% if project.simulacion_produccion.diagrama_flujo %}
-            <input type="hidden" name="response_flujo" value="{{ response_flujo }}">
-            <div class="response-section">
-                <h3>Diagrama de Flujo</h3>
-                <div class="mermaid">
-                    {{ project.simulacion_produccion.diagrama_flujo  }}
-                </div>
-                <pre class="code-block">{{  project.simulacion_produccion.diagrama_flujo  }}</pre>
+        <!-- Lista de etapas existentes -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-list-ol me-2"></i>Etapas del Proceso</h3>
+                <span class="badge bg-primary rounded-pill">{{ project.simulacion_produccion.etapas|length }} etapas</span>
             </div>
-            {% endif %}
+            <div class="card-body">
+                {% if project.simulacion_produccion.etapas %}
+                    <form action="/funciones/Fase3/simulacionProduccion/actualizar_etapas" method="POST">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 80px;">Orden</th>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th style="width: 120px;" class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for etapa in project.simulacion_produccion.etapas|sort(attribute='numero') %}
+                                    <tr class="stage-item">
+                                        <td>
+                                            <input type="hidden" name="etapas[{{loop.index0}}][id]" value="{{ etapa.id }}">
+                                            <input type="number" class="form-control orden-input" 
+                                                   name="etapas[{{loop.index0}}][numero]" 
+                                                   value="{{ etapa.numero_etapa }}" min="1">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" 
+                                                   name="etapas[{{loop.index0}}][nombre]" 
+                                                   value="{{ etapa.nombre }}" required>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" 
+                                                   name="etapas[{{loop.index0}}][descripcion]" 
+                                                   value="{{ etapa.descripcion }}" required>
+                                        </td>
+                                        <td class="text-end acciones-cell">
+                                            <button type="button" class="btn btn-sm btn-outline-danger eliminar-etapa"
+                                                    data-etapa-id="{{ etapa.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sync-alt me-2"></i>Actualizar Orden
+                            </button>
+                        </div>
+                    </form>
+                <form action="/funciones/Fase3/simulacionProduccion/generarTablaIA" method="POST" class="mt-3">
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-robot me-2"></i>Generar tabla con IA
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>No hay etapas registradas aún.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+   
 
-            {% if  project.simulacion_produccion.tabla  %}
-            <input type="hidden" name="response_tabla" value="{{ response_tabla }}">
-            <div class="input-group">
-                <label>Respuesta de la tabla:</label>
-                <div class="table-responsive">
-                    <table class="styled-table">
-                        <thead>
-                            <tr>
-                                <th>Etapa del Proceso</th>
-                                <th>Equipos Requeridos</th>
-                                <th>Proveedor en España</th>
-                                <th>Enlace de la Empresa</th>
-                                <th>Costo Estimado (€)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for f in project.simulacion_produccion.tabla%}
-                            <tr>
-                                <td>{{ f.etapa }}</td>
-                                <td>{{ f.equipo }}</td>
-                                <td>{{ f.proveedor }}</td>
-                                <td><a href="{{ f.enlace }}" target="_blank">{{ f.enlace }}</a></td>
-                                <td>{{ f.costo }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro que deseas eliminar esta etapa del proceso?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="formEliminarEtapa" method="POST" action="/funciones/Fase3/simulacionProduccion/eliminarEtapa">
+                        <input type="hidden" name="etapa_id" id="etapaIdAEliminar">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
                 </div>
             </div>
-            {% endif %}
-            {% if response_imagen %}
-                <div class="input-group">
-                    <label for="response_imagen">Respuesta de la imagen: </label>
-                    <textarea id="response_imagen" name="response_imagen" readonly>{{response_imagen}}</textarea>
-                </div>
-            {% endif %}
-        </form>
+        </div>
     </div>
+
+    {% if project.simulacion_produccion.etapas %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Información generada por IA</h3>
+            <span class="badge bg-success rounded-pill">IA</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table-ia">
+                    <thead>
+                        <tr>
+                            <th># Etapa</th>
+                            <th>Nombre</th>
+                            <th>Equipos requeridos</th>
+                            <th>Proveedor</th>
+                            <th>Web</th>
+                            <th>Costo estimado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for etapa in project.simulacion_produccion.etapas %}
+                        <tr>
+                            <td>{{ etapa.numero_etapa }}</td>
+                            <td>{{ etapa.nombre }}</td>
+                            <td>{{ etapa.equipos_requeridos }}</td>
+                            <td>{{ etapa.proveedor }}</td>
+                            <td>
+                                {% if etapa.web_proveedor %}
+                                <a href="{{ etapa.web_proveedor }}" target="_blank">
+                                   {{etapa.web_proveedor }}
+                                </a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="costo-cell">
+                                {% if etapa.costo_estimado %}
+                                {{ etapa.costo_estimado }} €
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar el modal de eliminación
+            const confirmarEliminarModal = new bootstrap.Modal(document.getElementById('confirmarEliminarModal'));
+            
+            document.querySelectorAll('.eliminar-etapa').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const etapaId = this.getAttribute('data-etapa-id');
+                    document.getElementById('etapaIdAEliminar').value = etapaId;
+                    confirmarEliminarModal.show();
+                });
+            });
+            
+            // Validar números de etapa únicos antes de enviar
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const numeros = [];
+                let hayDuplicados = false;
+                
+                document.querySelectorAll('.orden-input').forEach(input => {
+                    const num = parseInt(input.value);
+                    if (numeros.includes(num)) {
+                        hayDuplicados = true;
+                        input.classList.add('is-invalid');
+                    } else {
+                        numeros.push(num);
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (hayDuplicados) {
+                    e.preventDefault();
+                    alert('Los números de etapa deben ser únicos. Por favor corrige los valores duplicados.');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

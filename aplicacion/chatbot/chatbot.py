@@ -10,6 +10,7 @@ from modelo.models import Prototype
 from PIL import Image
 from io import BytesIO
 import base64
+from google.genai import types
 
 
 from google import genai
@@ -42,11 +43,15 @@ class Suplemento(BaseModel):
 
 class Empaque_IA(BaseModel):
      Nombre: str
-     Características: str
+     Caracteristicas: str
      Precio:  float
      Proveedor: str
      Web: str 
      Imagen: str
+
+class Alimento_IA(BaseModel):
+     Id: int
+     Nombre: str
 
 class MatrizSustentable(BaseModel):
      Ingrediente: str
@@ -57,12 +62,13 @@ class MatrizSustentable(BaseModel):
      ImpactoAmbiental: str
 
 class Normativa(BaseModel):
-     nombre: str
      nombre_requisito: str
+     nombre_norma: str
      requisito_especifico: str
      link: str
 
 class simulacionProduccion_IA(BaseModel):
+     numero_etapa: int
      etapa: str
      equipo: str
      proveedor: str
@@ -145,13 +151,10 @@ def chat():
 def ModeloImagenIA(prompt, model=None, config=None, api_key=None, img_directory=None):
     
     if model is None:
-        model = "gemini-2.0-flash-exp-image-generation"
+        model = "gemini-2.0-flash"
     if api_key is None:
         api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
-    if config is None: 
-        config = types.GenerateContentConfig(
-            response_modalities=['Text', 'Image']
-        )
+    
 
         try:
             client = genai.Client(api_key=api_key)
@@ -160,7 +163,7 @@ def ModeloImagenIA(prompt, model=None, config=None, api_key=None, img_directory=
 
             response = client.models.generate_content(
                 model=model,
-                contents= prompt,
+                contents= "Genera una imagen real para el siguiente prompt: "+ prompt,
                 config=config,
             )
 

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lluvia de Ideas - Alimentos Innovadores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header-section {
+            background-color: #4e73df;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .idea-form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        .food-list {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .food-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .food-item:last-child {
+            border-bottom: none;
+        }
+        .rating {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+        .rating-label {
+            margin-right: 10px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .form-range {
+            width: 150px;
+            margin-right: 15px;
+        }
+        .rating-value {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .impact {
+            color: #1cc88a;
+        }
+        .feasibility {
+            color: #36b9cc;
+        }
+        .btn-add {
+            background-color: #1cc88a;
+            border: none;
+            font-weight: 600;
+        }
+        .btn-submit {
+            background-color: #4e73df;
+            border: none;
+            font-weight: 600;
+            margin-top: 20px;
+            padding: 10px 25px;
+        }
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4e73df;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="header-section text-center">
+            <h1><i class="bi bi-lightbulb"></i> Lluvia de Ideas</h1>
+            <p class="lead">Propuesta de alimentos innovadores basados en tu proyecto inicial</p>
+        </div>
+
+        <div class="instructions">
+            <h4><i class="bi bi-info-circle"></i> Instrucciones:</h4>
+            <p>1. Ingresa ideas de alimentos innovadores considerando tu propuesta inicial y estudio de mercado.</p>
+            <p>2. Evalúa cada idea en <span class="impact">Impacto</span> (potencial de mercado) y <span class="feasibility">Factibilidad</span> (viabilidad de producción).</p>
+            <p>3. Usa la escala del 1 (bajo) al 5 (alto) para cada criterio.</p>
+        </div>
+
+        <div class="idea-form">
+            <form id="addFoodForm">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <label for="foodName" class="form-label">Nueva idea de alimento:</label>
+                        <input type="text" class="form-control" id="foodName" placeholder="Ej: Snack de proteína vegetal con insectos" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label rating-label impact">Impacto:</label>
+                        <input type="range" class="form-range impact" min="1" max="5" step="1" id="impactRating" value="3">
+                        <div class="rating-value impact" id="impactValue">3</div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label rating-label feasibility">Factibilidad:</label>
+                        <input type="range" class="form-range feasibility" min="1" max="5" step="1" id="feasibilityRating" value="3">
+                        <div class="rating-value feasibility" id="feasibilityValue">3</div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-add w-100">
+                            <i class="bi bi-plus-lg"></i> Añadir
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="food-list">
+            <h3 class="mb-4"><i class="bi bi-list-check"></i> Ideas propuestas</h3>
+            
+            <form id="foodIdeasForm" action="/guardar-ideas" method="POST">
+                <div id="foodItemsContainer">
+                    <!-- Las ideas de alimentos se añadirán aquí dinámicamente -->
+                    <div class="alert alert-info" id="emptyMessage">
+                        No hay ideas añadidas todavía. ¡Comienza agregando algunas!
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
+                        <i class="bi bi-save"></i> Guardar todas las ideas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Plantilla para nuevos items (hidden) -->
+    <template id="foodItemTemplate">
+        <div class="food-item">
+            <input type="hidden" name="foods[]" class="food-data">
+            <div class="food-name" style="flex-grow: 1;"></div>
+            <div class="rating">
+                <span class="rating-label impact">Impacto:</span>
+                <span class="rating-value impact"></span>
+            </div>
+            <div class="rating" style="margin-left: 20px;">
+                <span class="rating-label feasibility">Factibilidad:</span>
+                <span class="rating-value feasibility"></span>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger ms-3 remove-btn">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </template>
+
+    <script>
+        // Actualizar valores visibles de los sliders
+        document.getElementById('impactRating').addEventListener('input', function() {
+            document.getElementById('impactValue').textContent = this.value;
+        });
+        
+        document.getElementById('feasibilityRating').addEventListener('input', function() {
+            document.getElementById('feasibilityValue').textContent = this.value;
+        });
+
+        // Añadir nueva idea
+        document.getElementById('addFoodForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const foodName = document.getElementById('foodName').value;
+            const impact = document.getElementById('impactRating').value;
+            const feasibility = document.getElementById('feasibilityRating').value;
+            
+            if (!foodName) return;
+            
+            // Ocultar mensaje de lista vacía si es la primera idea
+            const emptyMessage = document.getElementById('emptyMessage');
+            if (emptyMessage) emptyMessage.style.display = 'none';
+            
+            // Crear nuevo elemento desde la plantilla
+            const template = document.getElementById('foodItemTemplate');
+            const newItem = template.content.cloneNode(true);
+            
+            // Llenar los datos
+            newItem.querySelector('.food-name').textContent = foodName;
+            newItem.querySelectorAll('.rating-value.impact')[0].textContent = impact;
+            newItem.querySelectorAll('.rating-value.feasibility')[0].textContent = feasibility;
+            
+            // Almacenar datos como JSON en el input hidden
+            const foodData = JSON.stringify({
+                name: foodName,
+                impact: parseInt(impact),
+                feasibility: parseInt(feasibility)
+            });
+            newItem.querySelector('.food-data').value = foodData;
+            
+            // Añadir funcionalidad al botón de eliminar
+            newItem.querySelector('.remove-btn').addEventListener('click', function() {
+                this.closest('.food-item').remove();
+                if (document.querySelectorAll('.food-item').length === 0) {
+                    emptyMessage.style.display = 'block';
+                    document.getElementById('submitBtn').disabled = true;
+                }
+            });
+            
+            // Añadir al contenedor
+            document.getElementById('foodItemsContainer').appendChild(newItem);
+            
+            // Habilitar botón de guardar
+            document.getElementById('submitBtn').disabled = false;
+            
+            // Resetear formulario
+            this.reset();
+            document.getElementById('impactValue').textContent = '3';
+            document.getElementById('feasibilityValue').textContent = '3';
+        });
+    </script>
+</body>
+</html>

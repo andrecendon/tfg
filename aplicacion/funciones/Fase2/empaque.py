@@ -7,6 +7,7 @@ from aplicacion.chatbot.chatbot import ModeloImagenIA, ModeloIA, Empaque_IA
 from flask_login import login_required
 import os
 from PIL import Image
+from werkzeug.utils import secure_filename
 from aplicacion.chatbot.chatbot import ModeloIA
 # Crear el Blueprint
 
@@ -47,6 +48,144 @@ def inicio():
 
 
 
+
+@empaque_bp.route('/favorito', methods=["POST", "GET"])
+@login_required
+def favorito():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        if 'empaque_id' in request.form:
+            empaque_id = request.form.get('empaque_id')
+            empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Project.id==project.id).first()
+            
+            if empaque.is_favourite is False:
+                empaque.is_favourite = True
+                for emp in project.empaques:
+                    if emp.id != empaque.id:
+                        emp.is_favourite = False
+            else: 
+                empaque.is_favourite = False
+            Session.commit()
+            print(f"[DEBUG] Estado de favorito actualizado para el empaque: {empaque.nombre}, is_favourite: {empaque.is_favourite}")
+    return redirect(url_for('empaque.inicio')) 
+
+@empaque_bp.route('/eliminar', methods=["POST", "GET"])
+@login_required
+def eliminar():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        if 'empaque_id' in request.form:
+            empaque_id = request.form.get('empaque_id')
+            empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Project.id==project.id).first()
+            Session.delete(empaque)
+            Session.commit()
+            print(f"[DEBUG] Empaque eliminado: {empaque.nombre}")
+    return redirect(url_for('empaque.inicio')) 
+
+
+@empaque_bp.route('/guardar', methods=["POST", "GET"])
+@login_required
+def guardar():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+
+    if 'empaque_id' in request.form: 
+        empaque_id = request.form.get('empaque_id')
+        empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Empaque.project_id == project.id).first()
+        
+        if empaque:
+            empaque.nombre = request.form.get('nombre', '')
+            empaque.caracteristicas = request.form.get('caracteristicas', '')
+            empaque.proveedor = request.form.get('proveedor', '')
+            empaque.web = request.form.get('web', '')
+            empaque.precio = float(request.form.get('precio', 0)) if request.form.get('precio') else 0.0
+            
+            Session.commit()
+            print(f"[DEBUG] Empaque actualizado: {empaque.nombre}")
+        else:
+            print("[ERROR] No se encontró el empaque con el ID proporcionado.")
+    return redirect(url_for('empaque.inicio'))
+
+@empaque_bp.route('/crearPrototipo', methods=["POST", "GET"])
+@login_required
+def crear():
+    if 'project_id' in session:
+            project_id = session.get('project_id')
+            project = Session.query(Project).filter(Project.id == project_id).first()
+    
+    #Recuperamos la información y creamos nuevo prototipo de empaque
+    if 'proveedor' and 'precio' and 'nombre' and 'caracteristicas' and 'web' in request.form:
+        nuevo_empaque = Empaque(
+            nombre=request.form.get('nombre'),
+            caracteristicas=request.form.get('caracteristicas', ''), 
+            precio=float(request.form.get('precio', 0)) if request.form.get('precio') else 0.0,
+            proveedor=request.form.get('proveedor', ''),
+            web=request.form.get('web', ''),
+            project_id=project.id
+        )
+
+        Session.add(nuevo_empaque)
+        Session.commit()
+    
+    print("Nuevo empaque creado:", nuevo_empaque)
+
+    return redirect("/funciones/Fase2/empaque")
+
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@empaque_bp.route('/subirImagen', methods=["POST", "GET"])
+@login_required
+def imagen():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+
+    if 'nueva_imagen' not in request.files:
+        return "No se envió ningún archivo", 400
+    
+    file = request.files['nueva_imagen']
+    categoria = request.form.get('categoria')
+    print(f"[DEBUG] Archivo recibido: {file}")
+    if file.filename == '':
+        return "Nombre de archivo vacío", 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        
+        ruta = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'empaques', project.name)
+        
+        os.makedirs(ruta, exist_ok=True)
+        file.save(os.path.join(ruta, filename))
+        print(f"[DEBUG] Archivo guardado en: {os.path.join(ruta, filename)}")
+        emp_id = request.form.get('empaque_id')
+        for emp in project.empaques:
+            if emp.id == int(emp_id):
+                #Eliminamos la imagen anterior si existe
+                if emp.imagen1:
+                    old_image_path = os.path.join(ruta, emp.imagen1)
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+                        print(f"[DEBUG] Imagen anterior eliminada: {old_image_path}")
+
+                emp.imagen1 = filename
+                Session.commit()
+                print(f"[DEBUG] Imagen guardada para el empaque {emp.nombre}: {filename}")
+                break
+        return redirect(url_for('empaque.inicio'))
+    else:
+        return "Extensión de archivo no permitida", 400
+
+  
+
+
+
 @empaque_bp.route('/generar', methods=["POST", "GET"])
 @login_required
 def generarEmpaque():
@@ -70,61 +209,27 @@ def generarEmpaque():
         empaques, tiempo = ModeloIA(prompt, config=config)
         empaques: list[Empaque_IA] = empaques.parsed
 
-        #Hacemos que para todos los Empaque_IA se le guarde la url de su imagen: img="imagenesIA/"+f"{project.name}/"+ f"{emp.Nombre}"+ ".png"
 
         for emp in empaques: 
-             emp.Imagen="imagenesIA/"+f"{project.name}/"+ f"{emp.Nombre}"+ ".png"
-             print("NOMBRE EMPAUQETADO", emp.Imagen)
+             print(f"[DEBUG] Empaque generado: {emp.Nombre}, Precio: {emp.Precio}, Proveedor: {emp.Proveedor}, Web: {emp.Web}, Características: {emp.Caracteristicas}")
         
-       
-
-
         tiempo_total += tiempo
 
-    
-        #Imagen - hacemos una llamada por cada uno de los empaques
+       
         
-        if request.form.get("name") is not None: 
-            nombre_imagen= request.form.get("name")
-        else:
-            nombre_imagen = "empaque.png"
-        ruta_base = os.path.abspath(os.path.join(os.getcwd(), '..'))  # sube una carpeta: "carpeta abuela"
-        ruta_destino = os.path.join(ruta_base, "app", "static", "imagenesIA", project.name)  # carpeta de la imagen
-        
+    return render_template("funciones/Fase2/prototipoEmpaque.html", empaques_IA=empaques, proyecto=project, prompt= prompt,  project=project, tiempo=tiempo_total)
 
-        # Crear carpetas si no existen
-        os.makedirs(ruta_destino, exist_ok=True)
-        alimentos = ""
-        for f in project.foods:
-            alimentos += f"{f.food_description}, "
-        lista_imagenes = []
-        for emp in empaques: 
-            ruta_completa = os.path.join(ruta_destino, f"{emp.Nombre}.png")
-            directory = "imagenesIA/"+f"{project.name}/"+ f"{emp.Nombre}"+ ".png"
-            lista_imagenes.append(directory)
-            prompt_emp = "Genera una imagen realista de un prototipo de envoltorio, de este tipo:  "+ emp.Nombre + ", con estas características" + emp.Características + "del alimento que tiene estos ingredientes" + alimentos 
-            imagen, tiempo = ModeloImagenIA(prompt = prompt_emp, img_directory=ruta_completa)
-
-            tiempo_total += tiempo
-        
-        
-
-    print(lista_imagenes)
-        
-    return render_template("funciones/Fase2/prototipoEmpaque.html", empaques_IA=empaques, proyecto=project, prompt= prompt, imagenes=lista_imagenes, project=project, tiempo=tiempo_total)
-
-@empaque_bp.route('/añadir', methods=["POST", "GET"])
+@empaque_bp.route('/guardarEmpaqueIA', methods=["POST", "GET"])
 @login_required
 def añadir():
     #Recibe un Empaque_IA y crea un Empaque normal en el proyecto.
     
-    try:
+   
         if 'project_id' in session:
             project_id = session.get('project_id')
             project = Session.query(Project).filter(Project.id == project_id).first()
         
-        if not project:
-            return redirect("/funciones/Fase2/empaque")
+        print(request.form)
        
         if request.form.get('nombre') is not None:
 
@@ -135,8 +240,6 @@ def añadir():
             precio=float(request.form.get('precio', 0)) if request.form.get('precio') else 0.0,
             proveedor=request.form.get('proveedor', ''),
             web=request.form.get('web', ''),
-            imagen=request.form.get('imagen', ''), 
-            notas=request.form.get('notas', ''),
             project_id=project.id
             )
 
@@ -149,10 +252,7 @@ def añadir():
         
         return redirect("/funciones/Fase2/empaque")
 
-    except Exception as e:
-        print("Operación de creación de empaque abortada")
-        Session.rollback()
-        return redirect("/funciones/Fase2/empaque")
+    
 
 
 
@@ -171,38 +271,3 @@ def editar():
 
 
 
-@empaque_bp.route('/eliminar', methods=["POST", "GET"])
-@login_required
-def eliminar():
-    #Recibe un Empaque_IA y crea un Empaque normal en el proyecto.
-    
-    try:
-        if 'project_id' in session:
-            project_id = session.get('project_id')
-            project = Session.query(Project).filter(Project.id == project_id).first()
-        
-        if not project:
-            return redirect("/funciones/Fase2/empaque")
-        actualizar = request.form.get("actualizar")
-        eliminar = request.form.get("eliminar")
-        notas = request.form.get("notas")
-        id = request.form.get("id")
-        if id and eliminar:
-            empaque = Session.query(Empaque).filter(Empaque.id==id).first()
-            Session.delete(empaque)
-            Session.commit()
-        if actualizar and notas and id:
-            emp = Session.query(Empaque).filter(Empaque.id==int(id)).first()
-            if emp:
-                emp.notas =notas 
-                Session.commit()
-            print("notas actualizada")
-            
-
-        
-        return redirect("/funciones/Fase2/empaque")
-
-    except Exception as e:
-        print("Operación de eliminar empaque abortada")
-        Session.rollback()
-        return redirect("/funciones/Fase2/empaque")

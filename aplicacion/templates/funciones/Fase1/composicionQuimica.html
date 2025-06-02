@@ -6,97 +6,225 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
     <title>Tabla Nutricional</title>
-    
-        
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 1200px; /* Increased max-width for better table display */
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            border: none;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .back-button {
+            margin-bottom: 20px;
+        }
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .status-message.complete {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-message.incomplete {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .alimento-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #2ecc71;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+        /* Table specific styles */
+        .table-responsive {
+            overflow-x: auto; /* Enable horizontal scrolling for the table */
+            margin-bottom: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .table th, .table td {
+            padding: 12px 15px;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+            white-space: nowrap; /* Prevent text wrapping in table cells */
+        }
+        .table thead th {
+            background-color: #3498db;
+            color: white;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            text-align: left;
+        }
+        .table tbody tr:nth-of-type(even) {
+            background-color: #f2f2f2;
+        }
+        .table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        .table .total-row {
+            background-color: #e0f2f7;
+            font-weight: bold;
+        }
+        .table .total-row td {
+            border-top: 2px solid #3498db;
+        }
+        .add-food-link {
+            display: block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #2ecc71;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .add-food-link:hover {
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+        }
+        .remove-food-link {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .remove-food-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-    &nbsp;
-    <div class="row col-1">
-        <a href="/funciones" class="border-0 bg-transparent">
-            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
-        </a>
-    </div>
-    &nbsp;
-    <div class="row">
-        <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
-        <div class="col"> <button> <a href="/funciones/Fase1/composicionQuimica/quitarAlimento"> Guardar Proyecto </a></button>
+        <div class="row mt-4">
+            <div class="col-1">
+                <a href="/funciones" class="border-0 bg-transparent back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Atrás" style="width: 30px; height: 30px;">
+                </a>
+            </div>
+            <div class="col-7">
+                <h2>Proyecto: {{proyecto.name}}</h2>
+            </div>
+            
         </div>
-    </div>
-    
-    &nbsp;
-    <h3>Tabla Nutricional</h3>
-    <table>
-        <thead>
-            <tr>
-                <th class="header">Número</th>
-                <th class="header">Nombre</th>
-                <th class="header">Gramos</th>
-                <th class="header">Energy (kcal)</th>
-                <th class="header">Protein (g)</th>
-                <th class="header">Carbohydrates (g)</th>
-                <th class="header">Sugars (g)</th>
-                <th class="header">Fiber (g)</th>
-                <th class="header">Total Fat (g)</th>
-                <th class="header">Saturated Fat (g)</th>
-                <th class="header">Monounsaturated Fat (g)</th>
-                <th class="header">Polyunsaturated Fat (g)</th>
-                <th class="header">Cholesterol (mg)</th>
-                <th class="header">Sodium (mg)</th>
-                <th class="header">Water (g)</th>
-                <th class="header">Potassium (mg)</th>
-                <th class="header">Calcium (mg)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for food in foods %}
-            <tr>
-                <td><a href="/funciones/Fase1/composicionQuimica/quitarAlimento?food_id={{ food.id }}"> Quitar alimento </a></td>
-                <td>{{ food.food_description }}</td>
-                <td>{{ food.grams }}</td>
-                <td>{{ food.energy_kcal }}</td>
-                <td>{{ food.protein }}</td>
-                <td>{{ food.carbohydrates }}</td>
-                <td>{{ food.sugars }}</td>
-                <td>{{ food.fiber }}</td>
-                <td>{{ food.total_fat }}</td>
-                <td>{{ food.saturated_fat }}</td>
-                <td>{{ food.monounsaturated_fat }}</td>
-                <td>{{ food.polyunsaturated_fat }}</td>
-                <td>{{ food.cholesterol }}</td>
-                <td>{{ food.sodium }}</td>
-                <td>{{ food.water }}</td>
-                <td>{{ food.potassium }}</td>
-                <td>{{ food.calcium }}</td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <td><strong>Total</strong></td>
-                <td></td> <!-- Deja en blanco la columna de nombre -->
-                <td></td> <!-- Deja en blanco la columna de gramos -->
-                <td><strong>{{ totales['energy'] }}</strong></td>
-                <td><strong>{{ totales['protein'] }}</strong></td>
-                <td><strong>{{ totales['carbs'] }}</strong></td>
-                <td><strong>{{ totales['sugars'] }}</strong></td>
-                <td><strong>{{ totales['fiber'] }}</strong></td>
-                <td><strong>{{ totales['fat'] }}</strong></td>
-                <td></td> <!-- Puedes agregar más cálculos si lo necesitas -->
-                <td></td>
-                <td></td>
-                <td><strong>{{ totales['cholesterol'] }}</strong></td>
-                <td><strong>{{ totales['sodium'] }}</strong></td>
-                <td><strong>{{ totales['water'] }}</strong></td>
-                <td><strong>{{ totales['potassium'] }}</strong></td>
-                <td><strong>{{ totales['calcium'] }}</strong></td>
-            </tr>
-            <tr> 
-                <td> <a href="/funciones/Fase1/composicionQuimica/añadirAlimento" style="color: inherit; text-decoration: none;">Añadir Alimento +</a></td>
-            </tr>
-        </tbody>
         
-        
-    </table>
+        <h3 class="mt-4 mb-3">Tabla Nutricional</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="header">Acción</th>
+                        <th class="header">Nombre</th>
+                        <th class="header">Gramos</th>
+                        <th class="header">Energy (kcal)</th>
+                        <th class="header">Protein (g)</th>
+                        <th class="header">Carbohydrates (g)</th>
+                        <th class="header">Sugars (g)</th>
+                        <th class="header">Fiber (g)</th>
+                        <th class="header">Total Fat (g)</th>
+                        <th class="header">Saturated Fat (g)</th>
+                        <th class="header">Monounsaturated Fat (g)</th>
+                        <th class="header">Polyunsaturated Fat (g)</th>
+                        <th class="header">Cholesterol (mg)</th>
+                        <th class="header">Sodium (mg)</th>
+                        <th class="header">Water (g)</th>
+                        <th class="header">Potassium (mg)</th>
+                        <th class="header">Calcium (mg)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for food in foods %}
+                    <tr>
+                        <td><a href="/funciones/Fase1/composicionQuimica/quitarAlimento?food_id={{ food.id }}" class="remove-food-link"> Quitar alimento </a></td>
+                        <td>{{ food.food_description }}</td>
+                        <td>{{ food.grams }}</td>
+                        <td>{{ food.energy_kcal }}</td>
+                        <td>{{ food.protein }}</td>
+                        <td>{{ food.carbohydrates }}</td>
+                        <td>{{ food.sugars }}</td>
+                        <td>{{ food.fiber }}</td>
+                        <td>{{ food.total_fat }}</td>
+                        <td>{{ food.saturated_fat }}</td>
+                        <td>{{ food.monounsaturated_fat }}</td>
+                        <td>{{ food.polyunsaturated_fat }}</td>
+                        <td>{{ food.cholesterol }}</td>
+                        <td>{{ food.sodium }}</td>
+                        <td>{{ food.water }}</td>
+                        <td>{{ food.potassium }}</td>
+                        <td>{{ food.calcium }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td><strong>Total</strong></td>
+                        <td></td> <td></td> <td><strong>{{ totales['energy'] }}</strong></td>
+                        <td><strong>{{ totales['protein'] }}</strong></td>
+                        <td><strong>{{ totales['carbs'] }}</strong></td>
+                        <td><strong>{{ totales['sugars'] }}</strong></td>
+                        <td><strong>{{ totales['fiber'] }}</strong></td>
+                        <td><strong>{{ totales['fat'] }}</strong></td>
+                        <td></td> <td></td>
+                        <td></td>
+                        <td><strong>{{ totales['cholesterol'] }}</strong></td>
+                        <td><strong>{{ totales['sodium'] }}</strong></td>
+                        <td><strong>{{ totales['water'] }}</strong></td>
+                        <td><strong>{{ totales['potassium'] }}</strong></td>
+                        <td><strong>{{ totales['calcium'] }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <a href="/funciones/Fase1/composicionQuimica/añadirAlimento" class="add-food-link">Añadir Alimento +</a>
     </div>
 </body>
 </html>

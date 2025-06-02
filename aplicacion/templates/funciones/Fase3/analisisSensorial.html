@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Sensoriales - {{ project.nombre }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -48,6 +50,18 @@
             background-color: #27ae60;
             color: white;
         }
+        .btn-massive {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            margin-left: 15px;
+        }
+        .btn-massive:hover {
+            background-color: #8e44ad;
+            color: white;
+        }
         .test-item {
             border-left: 4px solid #3498db;
             padding-left: 15px;
@@ -73,6 +87,29 @@
             font-weight: 700;
             margin-bottom: 30px;
         }
+        .results-table {
+            margin-top: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .results-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        .results-table td, .results-table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .position-input {
+            width: 60px;
+            text-align: center;
+            margin: 0 auto;
+        }
+        .comments-cell {
+            min-width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -85,68 +122,264 @@
         &nbsp;
         <h1 class="project-title">
             <i class="fas fa-utensils me-2"></i>Test Sensoriales
-           
         </h1>
 
-        <!-- Sección de tests realizados -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Realizados</h3>
+        <form id="form-iniciar" action="/funciones/Fase3/analisisSensorial/iniciar" method="POST">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Formulario de Evaluación Sensorial</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="nombre_evaluador" class="form-label">Número de muestras:</label>
+                        <input type="number" id="numero_muestras" name="numero_muestras" class="form-control" value="{{ numero_muestras or '' }}" placeholder="No especificado"  >
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="atributo" class="form-label">Atributo a Evaluar:</label>
+                        <input type="text" id="atributo" name="atributo" class="form-control" value="{{ atributo or '' }}" placeholder="No especificado"  >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón para guardar -->
+            <button type="submit" class="btn btn-primary mb-4">
+                <i class="fas fa-save me-2"></i>Iniciar Evaluación
+            </button>
+        </form>
+        {% if tests %}
+            
+       
+        <form id="form-resultados" action="/funciones/Fase3/analisisSensorial/eliminar" method="POST">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-table me-2"></i>Resultados de Evaluación</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive results-table">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Evaluador</th>
+                                    {% for i in range(numero_muestras|int) %}
+                                        <th>Muestra {{ i + 1 }}</th>
+                                        <th>Posición {{ i + 1 }}</th>
+                                    {% endfor %}
+                                    <th>Comentarios</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in tests %}
+                                {% set test_index = loop.index0 %}
+                                <tr>
+                                    <input type="hidden" name="tests[{{ loop.index0 }}][id]" value="{{ test.id }}">
+                                    <td>
+                                        <input type="text" class="form-control" name="tests[{{ loop.index0 }}][nombre_evaluador]" value="{{ test.nombre_evaluador or '' }}" placeholder="Evaluador"  >
+                                    </td>
+                                    {% for codigo, posicion in test.resultados.items() %}
+                                        <td>
+                                            <input type="text" class="form-control" name="tests[{{test_index}}][muestra{{ loop.index}}_codigo]" value="{{ codigo }}" placeholder="Código">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control" name="tests[{{test_index}}][posicion{{ loop.index}}]" value="{{ posicion }}" min="1" max="{{ numero_muestras }}">
+                                        </td>
+                                    {% endfor %}
+
+
+                                    <td>
+                                        <textarea class="form-control" name="tests[{{ loop.index0 }}][comentarios]" rows="1" placeholder="Texto libre">{{ test.comentarios or '' }}</textarea>
+                                    </td>
+                                    <td>
+                                       
+                                            <button type="submit" name="eliminar" value="{{test.id}}" class="btn btn-danger btn-sm">Eliminar</button>
+                                        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+        
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between mt-3">
+                            
+                            <button type="submit" name="añadir" value="añadir" class="btn btn-success">Añadir test</button>
+                            <button type="submit" name="guardar" value="guardar" class="btn btn-primary">Guardar resultados</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+       
+        {% endif %}
+
+        {% if tests %}
+           <!-- Card para mostrar el gráfico -->
+        <div class="card shadow-lg rounded-3 mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Posición Promedio por Muestra</h5>
             </div>
             <div class="card-body">
-                {% if project.tests_sensoriales %}
-                    {% for test in tests %}
-                        <div class="test-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <p class="text-muted mb-1">
-                                        <i class="fas fa-user me-1"></i> Evaluador: {{ test.nombre_evaluador or 'No especificado' }}
-                                    </p>
-                                    <p class="text-muted mb-1">
-                                        <i class="fas fa-tag me-1"></i> Atributo: {{ test.atributo or 'No especificado' }}
-                                    </p>
-                                    <p class="text-muted mb-0">
-                                        <i class="fas fa-calendar-alt me-1"></i> Fecha: {{ test.fecha.strftime('%d/%m/%Y') if test.fecha else 'No especificada' }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <form method="POST" action="/funciones/Fase3/analisisSensorial/editar" class="d-inline-block">
-                                        <input type="hidden" name="test_id" value="{{ test.id }}">
-                                        <button class="btn btn-edit me-2" name="editar" type="submit">
-                                            <i class="fas fa-edit me-1"></i> Editar
-                                        </button>
-                                    </form>
-                                    
-                                    <form method="POST" action="/funciones/Fase3/analisisSensorial/eliminar" class="d-inline-block">
-                                        <input type="hidden" name="test_id" value="{{ test.id }}">
-                                        <button class="btn btn-danger" name="eliminar" type="submit">
-                                            <i class="fas fa-trash me-1"></i> Eliminar
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h4>No hay tests realizados aún</h4>
-                        <p class="text-muted">Comienza creando tu primer test sensorial</p>
-                    </div>
-                {% endif %}
+                <canvas id="promediosChart" height="100"></canvas>
             </div>
         </div>
+        {%endif%}
 
-        <!-- Botón para nuevo formulario -->
-        <div class="text-center mt-5">
-            <button class="btn btn-new" onclick="location.href='/funciones/Fase3/analisisSensorial/formulario'">
-                <i class="fas fa-plus-circle me-2"></i>Nuevo Formulario
-            </button>
-        </div>
+        
 
-        <img src="{{ url_for('static', filename='graficos/analisisSensorial.png') }}" alt="Análisis Sensorial" class="img-fluid mt-4" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {% if tests and numero_muestras and promedios %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if tests and numero_muestras and promedios %}
+        const colores = [
+            'rgba(52, 152, 219, 0.7)',
+            'rgba(155, 89, 182, 0.7)',
+            'rgba(46, 204, 113, 0.7)',
+            'rgba(241, 196, 15, 0.7)',
+            'rgba(231, 76, 60, 0.7)',
+            'rgba(26, 188, 156, 0.7)'
+        ];
+
+        const promedios = {{ promedios | tojson | safe }};
+        const labels = Object.keys(promedios).sort();
+        const data = labels.map(label => promedios[label]);
+
+        const ctx = document.getElementById('promediosChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Posición Promedio',
+                    data: data,
+                    backgroundColor: colores.slice(0, labels.length),
+                    borderColor: colores.slice(0, labels.length).map(c => c.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: {{ numero_muestras }},
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Posición Promedio'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Muestras'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Promedio: ${context.raw.toFixed(2)}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+    </script>
+    {% endif %}
+    
+        
+    <script>
+        // Guardar la posición al salir
+        window.addEventListener("beforeunload", function () {
+            localStorage.setItem("scrollY", window.scrollY);
+        });
+        
+        // Restaurar la posición al cargar
+        window.addEventListener("load", function () {
+            const y = localStorage.getItem("scrollY");
+            if (y !== null) {
+                window.scrollTo(0, parseInt(y));
+                localStorage.removeItem("scrollY");
+            }
+        });
+        </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    
+        function serializeForm(form) {
+            const formData = new FormData(form);
+            return new URLSearchParams(formData).toString();
+        }
+    
+        // Manejo del primer formulario (iniciar evaluación)
+        const formIniciar = document.getElementById("form-iniciar");
+        formIniciar.addEventListener("submit", function (e) {
+            e.preventDefault();
+            fetch(formIniciar.action, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: serializeForm(formIniciar)
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(err => alert("Error al iniciar evaluación"));
+        });
+    
+        // Manejo del segundo formulario (guardar/eliminar/añadir tests)
+        const formResultados = document.getElementById("form-resultados");
+        formResultados.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const activeElement = document.activeElement;
+    
+            const formData = new FormData(formResultados);
+            if (activeElement && activeElement.name) {
+                formData.append(activeElement.name, activeElement.value);
+            }
+    
+            fetch(formResultados.action, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(err => alert("Error al guardar los resultados"));
+        });
+    
+    });
+    </script>
+    
+        
+
 </body>
+
 </html>

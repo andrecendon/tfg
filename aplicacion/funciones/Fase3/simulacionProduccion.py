@@ -1,11 +1,12 @@
 
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
-from modelo.models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession, SimulacionProduccion
+from modelo.models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession, SimulacionProduccion, EtapaProduccion
 from collections import defaultdict
 from flask_login import login_required
 from aplicacion.chatbot.chatbot import ModeloIA, simulacionProduccion_IA
 import json
+from pydantic import TypeAdapter
 
 # Crear el Blueprint
 simulacionProduccion_bp = Blueprint("simulacionProduccion", __name__, template_folder="templates")
@@ -21,19 +22,70 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if project.simulacion_produccion is None:
+            project.simulacion_produccion = SimulacionProduccion(project=project)
+            Session.add(project.simulacion_produccion)
+            Session.commit()
     
     ingredientes = ""
     for f in project.foods:
         ingredientes += f"{f.food_description}/ "
 
     prompt_flujo = "Realizar un diagrama de flujo para la producción de un alimento tipo [  ], el cual tiene como ingredientes: " + ingredientes 
-    prompt_tabla = "A partir del diagrama de flujo realiza una tabla que contenga : Cada etapa del proceso ; posibles equipos requeridos , proveedor en el país [ ] link de la empresa, costo estimado."
+    prompt_tabla = "A partir de este diagrama de flujo realiza una tabla que contenga : Cada etapa del proceso ; posibles equipos requeridos , proveedor en el país [ ] link de la empresa, costo estimado."
     prompt_imagen = "A partir del diagrama de flujo y de la tabla realizar una imagen de la línea de producción de [ ] teniendo en cuenta [ ]. "
 
-    return render_template("funciones/Fase3/simulacionProduccion.html", project=project, prompt_flujo=prompt_flujo, prompt_tabla=prompt_tabla, prompt_imagen=prompt_imagen)
+    print("Etapas", project.simulacion_produccion)
+    if project.simulacion_produccion.etapas:
+        for etapa in project.simulacion_produccion.etapas:
+            print("Etapa: ", etapa.numero_etapa, etapa.nombre, etapa.descripcion)
+    return render_template("funciones/Fase3/simulacionProduccion.html", project=project, prompt_tabla=prompt_tabla, prompt_imagen=prompt_imagen)
 
 
-@simulacionProduccion_bp.route('/chatbot', methods=["POST", "GET"])
+@simulacionProduccion_bp.route('añadirEtapa/', methods=["POST", "GET"])
+@login_required
+def etapa():
+    
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+
+    numero_etapa = request.form.get("numero_etapa")
+    nombre_etapa = request.form.get("nombre_etapa")
+    descripcion_etapa = request.form.get("descripcion_etapa")
+    print("Datos recibidos: ", numero_etapa, nombre_etapa, descripcion_etapa)
+    if nombre_etapa and descripcion_etapa and numero_etapa:
+        
+            if project.simulacion_produccion is None:
+                project.simulacion_produccion = SimulacionProduccion(project=project)
+                Session.add(project.simulacion_produccion)
+                Session.commit()
+        
+            etapa = EtapaProduccion(numero_etapa=numero_etapa, nombre=nombre_etapa, descripcion=descripcion_etapa, simulacion = project.simulacion_produccion)
+            Session.add(etapa)
+            Session.commit()
+            
+
+    return redirect(url_for('simulacionProduccion.inicio'))
+
+
+@simulacionProduccion_bp.route('eliminarEtapa/', methods=["POST", "GET"])
+@login_required
+def eliminar():
+    
+    if 'etapa_id' in request.form:
+        etapa_id = request.form.get('etapa_id')
+        etapa = Session.query(EtapaProduccion).filter(EtapaProduccion.id == etapa_id).first()
+        if etapa:
+            Session.delete(etapa)
+            Session.commit()
+            print("Etapa eliminada: ", etapa_id)
+        else:
+            print("No se encontró la etapa con ID: ", etapa_id)
+
+    return redirect(url_for('simulacionProduccion.inicio'))
+
+@simulacionProduccion_bp.route('/generarTablaIA', methods=["POST", "GET"])
 @login_required
 def chat():
     
@@ -41,54 +93,40 @@ def chat():
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
         if project.simulacion_produccion is None:
-            project.simulacion_produccion = SimulacionProduccion()
+            project.simulacion_produccion = SimulacionProduccion(project=project)
+            Session.add(project.simulacion_produccion)
             Session.commit()
         
     
     
-    #Recibimos los diferentes prompts para el chatbot
-    prompt_flujo = request.form.get("prompt_flujo")
-    prompt_tabla = request.form.get("prompt_tabla")
-    prompt_imagen = request.form.get("prompt_imagen")
+    #Generamos prompt para la tabla: 
+    prompt_tabla = "Genera una tabla que contenga las siguientes columnas: Etapa del proceso, Posibles equipos requeridos, Proveedor en España, Link de la empresa (que funcione), Costo estimado. A partir de las siguientes etapas: \n\n"
+    for etapa in project.simulacion_produccion.etapas:
+        prompt_tabla += f"Etapa {etapa.numero_etapa}: {etapa.nombre} - {etapa.descripcion}\n"
 
-    #Pipeline para el chatbot
-    try: 
-        response_tabla = None
-        reponse_flujo = None
-        response_imagen = None
-        if 'flujo' in request.form:
-            # 1. Generar el diagrama de flujo
-            prompt = f"{prompt_flujo}\n\nPor favor genera un diagrama de flujo en formato Mermaid JS con este formato:\n Graph: \n    A[Inicio] --> B[Paso 1]\n    B --> C[Paso 2]```" + prompt_flujo
-            reponse_flujo, tiempo= ModeloIA(prompt)
-            print("Respuesta flujo: ", reponse_flujo)
-            project.simulacion_produccion.diagrama_flujo = reponse_flujo
+    config = {
+            'response_mime_type': 'application/json',
+            'response_schema': list[simulacionProduccion_IA],
+    }
+
+    response_tabla, tiempo = ModeloIA(prompt_tabla, config=config)
+
+    json_obj = json.loads(response_tabla.text)
+
+    adapter = TypeAdapter(list[simulacionProduccion_IA])
+    lista_objetos = adapter.validate_python(json_obj)
+
+    for item in lista_objetos:
+        print(f"Etapa: {item.etapa}, Equipos: {item.equipo}, Proveedor: {item.proveedor}, Link: {item.enlace}, Costo: {item.costo}")
+        #Recuperamos la etaa que tiene el mismo numero de etapa que el objeto
+        etapa = Session.query(EtapaProduccion).filter(EtapaProduccion.numero_etapa == item.numero_etapa, EtapaProduccion.simulacion == project.simulacion_produccion).first()
+        if etapa:
+            etapa.equipos_requeridos = item.equipo
+            etapa.proveedor = item.proveedor
+            etapa.web_proveedor = item.enlace
+            etapa.costo_estimado = item.costo
             Session.commit()
-            
-        
-        if 'tabla' in request.form:
-            config={
-                        'response_mime_type': 'application/json',
-                        'response_schema': list[simulacionProduccion_IA],}
-                
+         
 
-            response_tabla, tiempo = ModeloIA(prompt_tabla, config=config)
-           
-            try:
-                json_obj = json.loads(response_tabla.text)
-                project.simulacion_produccion.tabla = json_obj
-                Session.commit()
-            except json.JSONDecodeError as e:
-                print(f"Error al decodificar JSON: {e}")
-
-            
-            
-           
-
-        # 3. Generar la imagen
-        #imagen = ModeloIA(prompt_imagen, project.foods, project_id, "imagen")
-
-        
-        return render_template("funciones/Fase3/simulacionProduccion.html", project=project, prompt_flujo=prompt_flujo, prompt_tabla=prompt_tabla, prompt_imagen=prompt_imagen, response_flujo=reponse_flujo)
-    except Exception as e:
-        print("Error en el chatbot: ", e)
-        return redirect("/funciones/Fase3/simulacionProduccion")
+    
+    return redirect("/funciones/Fase3/simulacionProduccion")

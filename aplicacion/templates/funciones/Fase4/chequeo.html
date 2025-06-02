@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Producción Sustentable</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .semaphore {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        .semaphore-red {
+            background-color: #dc3545;
+        }
+        .semaphore-green {
+            background-color: #28a745;
+        }
+        .question-row:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        .status-radio {
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+        .status-cell {
+            text-align: center;
+            vertical-align: middle;
+        }
+        h2 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .commitments-textarea {
+            min-height: 100px;
+        }
+        .category-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .progress {
+            height: 25px;
+        }
+        .environmental-section {
+            border-left: 4px solid #28a745;
+        }
+        .economic-section {
+            border-left: 4px solid #007bff;
+        }
+        .social-section {
+            border-left: 4px solid #fd7e14;
+        }
+        #submitBtn {
+            background-color: #2c3e50;
+            border: none;
+        }
+        #submitBtn:hover {
+            background-color: #1a252f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <form id="evaluationForm" method="POST" action="/funciones/Fase4/chequeo/guardar">
+            <div class="row">
+                <div class="col-1">
+                    <button type="submit" name="action" value="back" class="border-0 bg-transparent">
+                        <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+                    </button>
+                </div>
+            </div>
+            <h2 class="mb-4 text-center">Evaluación de Producción Sustentable</h2>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Lista de Verificación</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Criterio de Evaluación</th>
+                                            <th class="status-cell">Sí</th>
+                                            <th class="status-cell">No</th>
+                                            <th class="status-cell">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="questions-table">
+                                        {% for pregunta in project.parametros_sustentables.chequeo %}
+                                        <tr class="question-row environmental-section">
+                                            <td>{{ loop.index }}. {{ pregunta.texto }} {{pregunta.check}}</td>
+                                            <td class="status-cell">
+                                                <input type="radio" class="status-radio" name="pregunta_{{ loop.index }}" value="si" 
+                                                       {% if pregunta.check== true %}checked{% endif %} onchange="updateStatus(this)">
+                                            </td>
+                                            <td class="status-cell">
+                                                <input type="radio" class="status-radio" name="pregunta_{{ loop.index }}" value="no" 
+                                                       {% if not pregunta.check %}checked{% endif %} onchange="updateStatus(this)">
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="semaphore {% if pregunta.check %}semaphore-green{% else %}semaphore-red{% endif %}" 
+                                                      id="semaphore-pregunta_{{ loop.index }}"></span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Resultados Generales</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="generalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Resultados por Categoría</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Plan de Mejora</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="observaciones" class="form-label">Observaciones</label>
+                                <textarea class="form-control commitments-textarea" id="observaciones" name="observaciones" 
+                                          placeholder="Registre observaciones importantes...">{{ project.parametros_sustentables.observaciones or '' }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="acciones" class="form-label">Acciones de mejora</label>
+                                <textarea class="form-control commitments-textarea" id="acciones" name="acciones" 
+                                          placeholder="Describa las acciones de mejora identificadas...">{{ project.parametros_sustentables.acciones or '' }}</textarea>
+                            </div>
+                            <button type="submit" name="action" value="save" class="btn btn-primary">Guardar Evaluación</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Variables para los gráficos
+        let generalChart;
+        let categoryChart;
+        
+        // Inicializar los gráficos
+        function initCharts() {
+            const generalCtx = document.getElementById('generalChart').getContext('2d');
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            
+            // Contar respuestas iniciales
+            const yesCount = document.querySelectorAll('input[type="radio"][value="si"]:checked').length;
+            const noCount = document.querySelectorAll('input[type="radio"][value="no"]:checked').length;
+            const totalQuestions = {{ project.parametros_sustentables.chequeo|length }};
+            
+            generalChart = new Chart(generalCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sí', 'No'],
+                    datasets: [{
+                        data: [yesCount, noCount],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = Math.round((value / totalQuestions) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            categoryChart = new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ambiental'],
+                    datasets: [
+                        {
+                            label: 'Sí',
+                            data: [yesCount],
+                            backgroundColor: '#28a745'
+                        },
+                        {
+                            label: 'No',
+                            data: [noCount],
+                            backgroundColor: '#dc3545'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            max: totalQuestions
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Actualizar los gráficos
+        function updateCharts() {
+            const yesCount = document.querySelectorAll('input[type="radio"][value="si"]:checked').length;
+            const noCount = document.querySelectorAll('input[type="radio"][value="no"]:checked').length;
+            const totalQuestions = {{ project.parametros_sustentables.chequeo|length }};
+            
+            // Actualizar gráfico general
+            if (generalChart) {
+                generalChart.data.datasets[0].data = [yesCount, noCount];
+                generalChart.update();
+            }
+            
+            // Actualizar gráfico por categorías
+            if (categoryChart) {
+                categoryChart.data.datasets[0].data = [yesCount];
+                categoryChart.data.datasets[1].data = [noCount];
+                categoryChart.update();
+            }
+        }
+        
+        function updateStatus(radio) {
+            const questionId = radio.name;
+            const semaphore = document.getElementById(`semaphore-${questionId}`);
+            
+            // Actualizar el semáforo visualmente
+            semaphore.classList.remove('semaphore-green', 'semaphore-red');
+            
+            if(radio.value == 'si') {
+                semaphore.classList.add('semaphore-green');
+            } else {
+                semaphore.classList.add('semaphore-red');
+            }
+            
+            // Actualizar los gráficos
+            updateCharts();
+        }
+        
+        // Manejar el envío del formulario
+        document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+            // Validar que todas las preguntas estén respondidas
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const totalQuestions = {{ project.parametros_sustentables.chequeo|length }};
+            
+            if (answered < totalQuestions) {
+                e.preventDefault();
+                alert(`Por favor responda todas las ${totalQuestions} preguntas antes de enviar`);
+            }
+        });
+        
+        // Inicializar los gráficos cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

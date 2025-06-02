@@ -101,13 +101,17 @@
 <body>
    &nbsp;
     <div class="container">
-        <div class="header-container">
+        <div class="header-container d-flex justify-content-between align-items-start">
             <div class="col-1">
                 <a href="/proyectos" class="border-0 bg-transparent">
                     <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
                 </a>
             </div>
-            <a href="/funciones/resumen" class="btn btn-resumen">Resumen del Proyecto</a>
+            
+            <div class="d-flex flex-column align-items-end">
+                <a href="/funciones/resumen" class="btn btn-resumen mb-2">Resumen del Proyecto</a>
+                <a href="/chatbot/agente" class="btn btn-resumen">Asistente del proyecto</a>
+            </div>
         </div>
         
         <h3>Funcionalidades del proyecto " {{project.name}} "<h3></h3>
@@ -151,7 +155,7 @@
             </div>
         
             <div class="col   my-2">
-                {% with imagen=url_for('static', filename='img/ideacion.jpg'), titulo="Ideación", url="/funciones/ideacion"%}
+                {% with imagen=url_for('static', filename='img/ideacion.jpg'), titulo="Ideación", url="/funciones/formularios/ideacion"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
@@ -196,7 +200,7 @@
                 </div>
     
                 <div class="col my-2">
-                    {% with imagen=url_for('static', filename='img/normativa.jpg'), titulo="Viabilidad normativa", url="/funciones/Fase2/normativa" %}
+                    {% with imagen=url_for('static', filename='img/normativa.jpg'), titulo="Viabilidad normativa", url="/funciones/Fase2/analisisNormativo" %}
                     {% include 'funciones/noticia.html' %}
                     {% endwith %}
                 </div>
@@ -254,7 +258,7 @@
                 <div class="row">
         
                     <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/composicion_nutricional.webp'), titulo="Validación composición nutricional", url="/funciones/Fase3/composicionNutricional" %}
+                        {% with imagen=url_for('static', filename='img/composicion_nutricional.webp'), titulo="Validación composición nutricional", url="/funciones/Fase3/validacionNutricional" %}
                         {% include 'funciones/noticia.html' %}
                         {% endwith %}
                     </div>
@@ -266,7 +270,7 @@
                     </div>
         
                     <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/costo_produccion.jpg'), titulo="Validación costos producción", url="/funciones/Fase3/costosProduccion" %}
+                        {% with imagen=url_for('static', filename='img/costo_produccion.jpg'), titulo="Validación costos producción", url="/funciones/Fase3/calculoGastos/validacionCostos" %}
                         {% include 'funciones/noticia.html' %}
                         {% endwith %}
                     </div>
@@ -281,7 +285,65 @@
                 &nbsp;
                 <div class="avance-fase-container">
             
-                    <a href="/funciones/evaluacionAvance">Evaluación Avance de la Fase 3</a>
+                    <a href="/funciones/evaluacionAvance/Fase3">Evaluación Avance de la Fase 3</a>
+                
+                </div>
+
+
+
+                &nbsp;
+            <h2 class="row proyecto">Fase 4<h2>
+                <div class="row">
+        
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/parametrosSustentables.jpg'), titulo="Medición parámetros de sustentabilidad inicial lista de chequeo", url="/funciones/Fase4/chequeo" %}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/estudioVidaUtil.jpg'), titulo="Estudio de vida útil", url="/funciones/Fase4/vidaUtil"%}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+        
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/analisisSensorial2.webp'), titulo="Análisis sensorial 2", url="/funciones/Fase4/analisisSensorial2"%}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+        
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/empaqueFinal.jpg'), titulo="Validación de empaques", url="/funciones/Fase4/validacionEmpaque" %}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+        
+                   
+                
+                </div> 
+
+                <div class="row">
+        
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/sustentable.jpg'), titulo="Medición parámetros de sustentabilidad", url="/funciones/Fase4/parametrosSustentables" %}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+        
+                    
+        
+                    <div class="col my-2">
+                        {% with imagen=url_for('static', filename='img/analisisSensorial3.jpg'), titulo="Análisis sensorial 3", url="/funciones/Fase4/analisisSensorial2/aceptacion"%}
+                        {% include 'funciones/noticia.html' %}
+                        {% endwith %}
+                    </div>
+                
+                </div> 
+                &nbsp;
+                <div class="avance-fase-container">
+            
+                    <a href="/funciones/evaluacionAvance/Fase4">Evaluación Avance de la Fase 4</a>
                 
                 </div>
         

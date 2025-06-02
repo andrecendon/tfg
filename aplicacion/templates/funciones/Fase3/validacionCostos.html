@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Costos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        .costos-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .costos-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .costos-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        .costos-table tr:last-child td {
+            border-bottom: none;
+        }
+        .costos-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .costos-table tr:hover {
+            background-color: #f1f8fe;
+        }
+        .category-row {
+            background-color: #e3f2fd !important;
+            font-weight: 600;
+        }
+        .subtotal-row {
+            background-color: #bbdefb !important;
+            font-weight: 600;
+        }
+        .total-row {
+            background-color: #90caf9 !important;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        .unidad-cell {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" action="/funciones/Fase3/calculoGastos/validacionCostos/actualizar">
+
+       
+
+    <div class="container">
+        <div class="col-1">
+            <button type="submit" name="action" value="back" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+            </button>
+        </div>
+        &nbsp;
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-calculator me-2"></i>Detalle de Costos del Proyecto</h3>
+            </div>
+            
+           
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="costos-table">
+                        <thead>
+                            <tr> 
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th style="width: 50px;">Unidad</th>
+                                <th>Cantidad</th>
+                                <th>Costo Unitario (USD)</th>
+                                <th>Costo Total (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Ingredientes -->
+                    <tr class="category-row">
+                        <td colspan="6">Ingredientes</td>
+                    </tr>
+                    {% set subtotals = {'general': 0, 'ingredientes':0, 'empaques': 0, 'mano_obra': 0, 'indirectos': 0, 'otros': 0, 'total': 0} %}
+                    
+                    {% if project.costos.ingredientes %}
+                        {% for clave, valor in project.costos.ingredientes.items() %}
+                        <tr>
+                            <td>{{ clave }}</td>
+                            <td>
+                            <input type="text" class="editable-field" name="ingredientes[{{ clave }}][descripcion]" 
+                                    value="{{ valor.descripcion }}" required>
+                            </td>
+                            <td class="unidad-cell">g</td>
+                            <td>{{ valor.cantidad }}</td>
+                            <td>{{ valor.costo }}</td>
+                            <td>{{ "%.2f"|format(valor.costo * valor.cantidad) }}</td>
+                            {% set _ = subtotals.update({'ingredientes': subtotals['ingredientes'] + (valor.costo * valor.cantidad)}) %}
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                        
+                        <tr class="subtotal-row">
+                            <td colspan="4"></td>
+                            <td>Subtotal Ingredientes</td>
+                            <td>{{ "%.2f"|format(subtotals['ingredientes']) }}</td>
+                            </tr>
+                            
+                            <!-- Materiales de Empaque -->
+                            <tr class="category-row">
+                                <td colspan="6">Materiales de Empaque</td>
+                            </tr>
+                            
+                            {% if project.costos.empaque %}
+                                {% for clave, valor in project.costos.empaque.items() %}
+                                <tr>
+                                    <td>{{ clave }}</td>
+                                    <td>
+                                    <input type="text" class="editable-field" name="empaque[{{ clave }}][descripcion]" 
+                                            value="{{ valor.descripcion }}" required>
+                                    </td>
+                                    <td class="unidad-cell">unidad</td>
+                                    <td>
+                                    <input type="number" class="editable-field" name="empaque[{{ clave }}][cantidad]" 
+                                            value="{{ valor.cantidad }}" step="0.01" min="0" required>
+                                    </td>
+                                    <td>
+                                    <input type="number" class="editable-field" name="empaque[{{ clave }}][costo]" 
+                                            value="{{ valor.costo }}" step="0.01" min="0" required>
+                                    </td>
+                                    <td class="total-cell">{{ "%.2f"|format(valor.costo * valor.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'empaques': subtotals['empaques'] + (valor.costo * valor.cantidad)}) %}
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <tr class="subtotal-row">
+                                <td colspan="4"></td>
+                                <td>Subtotal Empaque</td>
+                                <td>{{ "%.2f"|format(subtotals['empaques']) }}</td>
+                            </tr>
+                            
+                            <!-- Mano de Obra -->
+                            <tr class="category-row">
+                                <td colspan="6">Mano de Obra</td>
+                            </tr>
+                            <tr>
+                                <td>Operario</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="operario[descripcion]" 
+                                            value="{{ project.costos.mano_obra.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="operario[cantidad]" 
+                                            value="{{ project.costos.mano_obra.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="operario[costo]" 
+                                            value="{{ project.costos.mano_obra.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.mano_obra.costo * project.costos.mano_obra.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'mano_obra': subtotals['mano_obra'] + (project.costos.mano_obra.costo * project.costos.mano_obra.cantidad)}) %}
+                                </tr>
+                                
+                            
+                            
+                            <tr class="subtotal-row">
+                                <td colspan="4"></td>
+                                <td>Subtotal Mano de Obra</td>
+                                <td>{{ "%.2f"|format(subtotals['empaques']) }}</td>
+                            </tr>
+
+                            <!-- Costos indirectos -->
+                            <tr class="category-row">
+                                <td colspan="6">Costos Indirectos</td>
+                            </tr>
+                            <tr>
+                                <td>Electricidad</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="electricidad[descripcion]" 
+                                            value="{{ project.costos.electricidad.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="electricidad[cantidad]" 
+                                            value="{{ project.costos.electricidad.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="electricidad[costo]" 
+                                            value="{{ project.costos.electricidad.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.electricidad.costo * project.costos.electricidad.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'indirectos': subtotals['indirectos'] + (project.costos.electricidad.costo * project.costos.electricidad.cantidad)}) %}
+                                </tr>
+                                
+                                <td>Agua</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="agua[descripcion]" 
+                                            value="{{ project.costos.agua.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="agua[cantidad]" 
+                                            value="{{ project.costos.agua.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="agua[costo]" 
+                                            value="{{ project.costos.agua.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.agua.costo * project.costos.agua.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'indirectos': subtotals['indirectos'] + (project.costos.agua.costo * project.costos.agua.cantidad)}) %}
+                                </tr>
+
+                                <td>Depreciación equipos</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="depreciacion_equipos[descripcion]" 
+                                            value="{{ project.costos.depreciacion_equipos.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="depreciacion_equipos[cantidad]" 
+                                            value="{{ project.costos.depreciacion_equipos.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="depreciacion_equipos[costo]" 
+                                            value="{{ project.costos.depreciacion_equipos.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.depreciacion_equipos.costo * project.costos.depreciacion_equipos.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'indirectos': subtotals['indirectos'] + (project.costos.depreciacion_equipos.costo * project.costos.depreciacion_equipos.cantidad)}) %}
+                                </tr>
+                            
+                            
+                            <tr class="subtotal-row">
+                                <td colspan="4"></td>
+                                <td>Subtotal Gastos Indirectos</td>
+                                <td>{{ "%.2f"|format(subtotals['indirectos']) }}</td>
+                            </tr>
+                            
+                            
+                           
+                            <!-- Otros Costos -->
+                            <tr class="category-row">
+                                <td colspan="6">Otros costos</td>
+                            </tr>
+                            <tr>
+                                <td>Transporte</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="transporte[descripcion]" 
+                                            value="{{ project.costos.transporte.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="electricidad[cantidad]" 
+                                            value="{{ project.costos.transporte.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="transporte[costo]" 
+                                            value="{{ project.costos.transporte.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.transporte.costo * project.costos.transporte.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'otros': subtotals['otros'] + (project.costos.transporte.costo * project.costos.transporte.cantidad)}) %}
+                                </tr>
+                                
+                                <td>Mermas</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="mermas[descripcion]" 
+                                            value="{{ project.costos.mermas.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell">hora</td>
+                                <td>
+                                    <input type="number" class="editable-field" name="mermas[cantidad]" 
+                                            value="{{ project.costos.mermas.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="mermas[costo]" 
+                                            value="{{ project.costos.mermas.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.mermas.costo * project.costos.mermas.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'otros': subtotals['otros'] + (project.costos.mermas.costo * project.costos.mermas.cantidad)}) %}
+                                </tr>
+
+                                <td>Costos adicionales</td>
+                                
+                                <td>
+                                    <input type="text" class="editable-field" name="adicionales[descripcion]" 
+                                            value="{{ project.costos.adicionales.descripcion }}" required>
+                                </td>
+                                <td class="unidad-cell"> </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="adicionales[cantidad]" 
+                                            value="{{ project.costos.adicionales.cantidad }}" step="0.01" min="0" required>
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-field" name="depreciacion_equipos[costo]" 
+                                            value="{{ project.costos.adicionales.costo }}" step="0.01" min="0" required>
+                                </td>
+                                    <td class="total-cell">{{ "%.2f"|format(project.costos.adicionales.costo * project.costos.adicionales.cantidad) }}</td>
+                                    {% set _ = subtotals.update({'otros': subtotals['otros'] + (project.costos.adicionales.costo * project.costos.adicionales.cantidad)}) %}
+                                </tr>
+                            
+                            
+                            <tr class="subtotal-row">
+                                <td colspan="4"></td>
+                                <td>Subtotal Otros Gastos</td>
+                                <td>{{ "%.2f"|format(subtotals['otros']) }}</td>
+                            </tr>
+                            
+                            
+                            <!-- Total -->
+                            <tr class="total-row">
+                                <td colspan="4"></td>
+                                <td><i class="fas fa-calculator me-2"></i>COSTO TOTAL</td>
+                                <td>{{ "%.2f"|format(subtotals['ingredientes'] + subtotals['empaques'] + subtotals['mano_obra'] + subtotals['indirectos'] + subtotals['otros']) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    
+                </div>
+            </div>
+            <div class="text-end mt-3">
+                <button type="submit"  class="btn btn-primary">
+                    <i class="fas fa-sync-alt me-2"></i>Actualizar datos
+                </button>
+            </div>
+        </div>
+        
+    </div>
+</form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

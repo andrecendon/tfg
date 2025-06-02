@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Avance del Proyecto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .semaphore {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        .semaphore-red {
+            background-color: #dc3545;
+        }
+        .semaphore-yellow {
+            background-color: #ffc107;
+        }
+        .semaphore-green {
+            background-color: #28a745;
+        }
+        .semaphore-gray {
+            background-color: #6c757d;
+        }
+        .phase-row:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s;
+        }
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        .status-radio {
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+        .status-cell {
+            text-align: center;
+            vertical-align: middle;
+        }
+        h2 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .commitments-textarea {
+            min-height: 150px; /* Aumentado el espacio para escribir */
+            margin-top: 15px;
+        }
+        .next-phase-checkbox {
+            margin-bottom: 15px;
+        }
+        .date-input {
+            max-width: 150px;
+        }
+        .commitments-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        .form-label {
+            font-size: 1.3rem;       /* Tamaño de fuente un poco más grande */
+            font-weight: 600;        /* Negrita ligera para destacar */
+            color: #2c3e50;          /* Color oscuro para buena legibilidad */
+            margin-bottom: 0.5rem;   /* Espacio inferior */
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            resize: none;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <form id="evaluationForm" action="/funciones/evaluacionAvance/guardar" method="POST">
+            <input type="hidden" name="evaluacion_id" value="{{ evaluacionAvance.id if evaluacionAvance else '' }}">
+            
+            <div class="row">
+                <div class="col-1">
+                    <button type="submit" name="action" value="back" class="border-0 bg-transparent">
+                        <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+                    </button>
+                </div>
+            </div>
+            &nbsp;
+            <h2 class="mb-4">Evaluación de Avance del Proyecto</h2>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Progreso General</h5>
+                            <div class="progress" style="height: 25px;">
+                                {% set total_fases = evaluacionAvance.fases|length if evaluacionAvance else 0 %}
+                                {% set completed = evaluacionAvance.fases|selectattr('estado', 'equalto', 2)|list|length if evaluacionAvance else 0 %}
+                                {% set partial = evaluacionAvance.fases|selectattr('estado', 'equalto', 1)|list|length if evaluacionAvance else 0 %}
+                                {% set progress = ((completed + partial * 0.5) / total_fases * 100)|round(1) if total_fases > 0 else 0 %}
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" 
+                                     aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" id="overall-progress">
+                                    {{ progress }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Fases del Proyecto</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fase</th>
+                                            <th class="status-cell">No Iniciado</th>
+                                            <th class="status-cell">Parcial</th>
+                                            <th class="status-cell">Completo</th>
+                                            <th class="status-cell">Semáforo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="phases-table">
+                                        {% for fase in evaluacionAvance.fases %}
+                                        {% if loop.index0 < numero_fases %}
+                                        <tr class="phase-row" data-phase-id="{{ fase.id }}">
+                                            <td>{{ fase.nombre }}</td>
+                                            <td class="status-cell">
+                                                <input type="radio" class="status-radio" name="estado_{{ fase.id }}" value="0" 
+                                                       {% if fase.estado == 0 %}checked{% endif %} onchange="updateStatus(this)">
+                                            </td>
+                                            <td class="status-cell">
+                                                <input type="radio" class="status-radio" name="estado_{{ fase.id }}" value="1" 
+                                                       {% if fase.estado == 1 %}checked{% endif %} onchange="updateStatus(this)">
+                                            </td>
+                                            <td class="status-cell">
+                                                <input type="radio" class="status-radio" name="estado_{{ fase.id }}" value="2" 
+                                                       {% if fase.estado == 2 %}checked{% endif %} onchange="updateStatus(this)">
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="semaphore 
+                                                      {% if fase.estado == 0 %}semaphore-red
+                                                      {% elif fase.estado == 1 %}semaphore-yellow
+                                                      {% elif fase.estado == 2 %}semaphore-green
+                                                      {% else %}semaphore-gray{% endif %}"
+                                                      id="semaphore-{{ fase.id }}"></span>
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Estado del Proyecto</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Evaluación Cualitativa</h5>
+                        </div>
+                        <div class="card-body">
+            
+                            <div class="mb-3">
+                                <label for="comentarios_cualidades" class="form-label">Cualidades</label>
+                                <textarea class="form-control commitments-textarea" id="comentarios_cualidades" name="comentarios_cualidades"
+                                    placeholder="Describa las cualidades observadas..." rows="4">{{ evaluacionAvance.comentarios_cualidades if evaluacionAvance and evaluacionAvance.comentarios_cualidades else '' }}</textarea>
+                            </div>
+            
+                            <div class="mb-3">
+                                <label for="comentarios_debilidades" class="form-label">Debilidades</label>
+                                <textarea class="form-control commitments-textarea" id="comentarios_debilidades" name="comentarios_debilidades"
+                                    placeholder="Describa las debilidades observadas..." rows="4">{{ evaluacionAvance.comentarios_debilidades if evaluacionAvance and evaluacionAvance.comentarios_debilidades else '' }}</textarea>
+                            </div>
+            
+                            <div class="mb-3">
+                                <label for="comentarios_mejoras" class="form-label">Aspectos a Mejorar</label>
+                                <textarea class="form-control commitments-textarea" id="comentarios_mejoras" name="comentarios_mejoras"
+                                    placeholder="Describa los aspectos a mejorar..." rows="4">{{ evaluacionAvance.comentarios_mejoras if evaluacionAvance and evaluacionAvance.comentarios_mejoras else '' }}</textarea>
+                            </div>
+            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Continuación del Proyecto</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check next-phase-checkbox">
+                                <input class="form-check-input" type="checkbox" id="avance" name="avance" value="true" 
+                                       {% if evaluacionAvance and evaluacionAvance.avance %}checked{% endif %}>
+                                <label class="form-check-label" for="avance">
+                                    Debe continuar a la siguiente fase
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="comentarios" class="form-label">Compromisos</label>
+                                <textarea class="form-control commitments-textarea" id="comentarios" name="comentarios" 
+                                          placeholder="Describa los compromisos adquiridos...">{{ evaluacionAvance.comentarios if evaluacionAvance and evaluacionAvance.comentarios else '' }}</textarea>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" name="action" value="save_{{numero_fases}}" class="btn btn-primary btn-lg">Guardar Evaluación</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Variables para el gráfico
+        let statusChart;
+        
+        // Inicializar el gráfico
+        function initChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            
+            // Contar estados iniciales
+            const redCount = document.querySelectorAll('.semaphore-red').length;
+            const yellowCount = document.querySelectorAll('.semaphore-yellow').length;
+            const greenCount = document.querySelectorAll('.semaphore-green').length;
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Rojo (No iniciado)', 'Amarillo (Parcial)', 'Verde (Completo)'],
+                    datasets: [{
+                        data: [redCount, yellowCount, greenCount],
+                        backgroundColor: [
+                            '#dc3545',
+                            '#ffc107',
+                            '#28a745'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Actualizar el gráfico
+        function updateChart() {
+            const redCount = document.querySelectorAll('.semaphore-red').length;
+            const yellowCount = document.querySelectorAll('.semaphore-yellow').length;
+            const greenCount = document.querySelectorAll('.semaphore-green').length;
+            
+            if (statusChart) {
+                statusChart.data.datasets[0].data = [redCount, yellowCount, greenCount];
+                statusChart.update();
+            }
+            
+            // Actualizar progreso general
+            const totalPhases = redCount + yellowCount + greenCount;
+            const progress = totalPhases > 0 ? 
+                Math.round(((greenCount * 1 + yellowCount * 0.5) / totalPhases) * 100) : 0;
+            
+            const progressBar = document.getElementById('overall-progress');
+            progressBar.style.width = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressBar.textContent = `${progress}%`;
+        }
+        
+        function updateStatus(radio) {
+            const phaseId = radio.closest('tr').getAttribute('data-phase-id');
+            const status = radio.value;
+            const semaphore = document.getElementById(`semaphore-${phaseId}`);
+            
+            // Actualizar el semáforo visualmente
+            semaphore.classList.remove('semaphore-red', 'semaphore-yellow', 'semaphore-green', 'semaphore-gray');
+            
+            if(status == '0') {
+                semaphore.classList.add('semaphore-red');
+            } else if(status == '1') {
+                semaphore.classList.add('semaphore-yellow');
+            } else if(status == '2') {
+                semaphore.classList.add('semaphore-green');
+            } else {
+                semaphore.classList.add('semaphore-gray');
+            }
+            
+            // Actualizar el gráfico
+            updateChart();
+        }
+        
+        // Inicializar el gráfico cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+            
+            // Asegurarse que el textarea tenga el foco al cargar
+            const textarea = document.getElementById('comentarios');
+            if(textarea) {
+                textarea.focus();
+                // Colocar el cursor al principio del texto
+                textarea.setSelectionRange(0, 0);
+            }
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

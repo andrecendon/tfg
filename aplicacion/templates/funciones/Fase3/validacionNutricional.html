@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Prototipo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        /* Nuevo estilo para la tabla nutricional */
+        .nutrition-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .nutrition-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        .nutrition-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .nutrition-table tr:last-child td {
+            border-bottom: none;
+        }
+        .nutrition-header {
+            font-weight: bold;
+            font-size: 1.2em;
+            border-bottom: 2px solid #000;
+            background-color: #f8f8f8 !important;
+        }
+        .sub-item {
+            padding-left: 25px !important;
+            font-style: italic;
+        }
+        
+        /* Estilos originales que se mantienen */
+        .nutri-score-a {
+            background-color: #2ecc71 !important;
+            color: white;
+        }
+        .nutri-score-b {
+            background-color: #27ae60 !important;
+            color: white;
+        }
+        .nutri-score-c {
+            background-color: #f39c12 !important;
+            color: white;
+        }
+        .nutri-score-d {
+            background-color: #e67e22 !important;
+            color: white;
+        }
+        .nutri-score-e {
+            background-color: #e74c3c !important;
+            color: white;
+        }
+        .ia-prompt {
+            margin-top: 30px;
+        }
+        .ia-response {
+            background-color: #f1f8fe;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Botón Atrás -->
+        <div class="col-1 mb-3">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+
+        <!-- Resumen del Prototipo -->
+        <!-- Análisis Nutricional - Tabla rediseñada -->
+        <div class="card mt-4">
+            
+            
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Análisis Nutricional (Nutri-Score)</h3>
+                </div>
+            <div class="card-body">
+            
+            <!-- Input para la porción -->
+            <div class="mb-3">
+                <span class="portion-label">Tamaño de porción:</span>
+                <input type="number" id="portion-size" class="form-control portion-input" value="30" min="1">
+                <span>gramos</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="nutrition-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2" class="nutrition-header">INFORMACIÓN NUTRICIONAL</th>
+                            <th>por 100 g</th>
+                            <th>por PORCIÓN de <span id="portion-size-label">30</span> g</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">Valor energético</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.energia_kcal }}">{{ prototipo.valores_nutricionales.energia_kcal }}</span> kcal</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.energia_kcal }}"></span> kcal</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Proteínas</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.proteinas }}">{{ prototipo.valores_nutricionales.proteinas | default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.proteinas }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Hidratos de carbono</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.carbohidratos }}">{{ prototipo.valores_nutricionales.carbohidratos | default(0) | round(3)}}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.carbohidratos }}"></span>g</td>
+                        </tr>
+                        <tr class="sub-item">
+                            <td colspan="2">de los cuales:</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="padding-left: 125px;">Azúcares</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.azucares }}">{{ prototipo.valores_nutricionales.azucares| default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.azucares }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Grasas</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.grasas_totales }}">{{ prototipo.valores_nutricionales.grasas_totales| default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.grasas_totales }}"></span>g</td>
+                        </tr>
+                        <tr class="sub-item">
+                            <td colspan="2">de las cuales:</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="padding-left: 125px;">Saturadas</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.grasas_saturadas }}">{{ prototipo.valores_nutricionales.grasas_saturadas| default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.grasas_saturadas }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="padding-left: 125px;">Grasas trans</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.grasas_trans | default('0') }}">{{ prototipo.valores_nutricionales.grasas_trans| default(0) | round(3) | default('0') }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.grasas_trans | default('0') }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Fibra alimentaria</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.fibra }}">{{ prototipo.valores_nutricionales.fibra| default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.fibra }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Sal</td>
+                            <td><span class="per-100g" data-value="{{ prototipo.valores_nutricionales.sal }}">{{ prototipo.valores_nutricionales.sal| default(0) | round(3) }}</span>g</td>
+                            <td><span class="per-portion" data-base="{{ prototipo.valores_nutricionales.sal }}"></span>g</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>Nutri-Score</strong></td>
+                            <td><strong>{{ prototipo.nutri_score }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+        <div class="card">
+
+            <div class="row">
+                {%if files %}
+                {% for category, file_list in files.items() %}
+                <!-- Card para {{ category }} -->
+                <div class="col-md-6">
+                    <div class="file-card">
+                        <h5>Análisis {{ category|capitalize }}</h5>
+                        <div id="{{ category }}-container">
+                            {% if file_list and file_list|length > 0 %}
+                            <div class="file-list">
+                                {% for file in file_list %}
+                                <div class="file-item">
+                                    <span>{{ file }}</span>
+                                    <form method="POST" action="eliminar">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('static', filename='ficheros/' + project.name + '/' + category + '/' + file) }}" target="_blank" class="btn btn-sm btn-primary">Ver</a>
+                                        <a href="{{ url_for('static', filename='ficheros/' + project.name + '/' + category + '/' + file) }}" download class="btn btn-sm btn-success">Descargar</a>
+                                        <button class="btn btn-sm btn-danger delete-btn" onclick="return confirm('¿Estás seguro de que quieres eliminar este fichero?');" type="submit" name="eliminar" value="{{ project.name + '/' + category + '/' + file }}" data-category="{{ category }}" data-filename="{{ file }}">Eliminar</button>
+                                    </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <p>No hay archivos cargados</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if file_list and file_list|length < 5 or not file_list %}
+                            <div class="upload-container">
+                                <form method="POST" action="subirArchivos" enctype="multipart/form-data">
+                                    <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
+                                    <input type="hidden" name="project" value="{{ project.name }}">
+                                    <input type="hidden" name="categoria" value="{{ category }}">
+                                    <div> &nbsp;</div>
+                                    <div ><button type="submit" class="btn btn-primary">Subir archivo</button> </div>
+                                </form>
+                                <div class="max-files">Máximo 5 archivos ({{ file_list|length if file_list else 0 }}/5)</div>
+                            </div>
+                            
+                            {% else %}
+                            <div class="alert alert-warning">Has alcanzado el límite máximo de 5 archivos</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {%endif%}
+            </div>
+            
+        </div>
+
+        <!-- Consulta a IA (se mantiene igual) -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Consulta a la Inteligencia Artificial</h3>
+            </div>
+            <div class="card-body">
+                <form id="ia-form" method="POST" action="/consultar-ia">
+                    <input type="hidden" name="prototipo_id" value="{{ prototipo.id }}">
+                    <div class="form-group">
+                        <label for="ia-prompt" class="form-label">Pregunta a la IA sobre este prototipo:</label>
+                        <textarea class="form-control" id="ia-prompt" name="prompt" rows="3" 
+                                  placeholder="Ej: ¿Cómo puedo mejorar el Nutri-Score de este producto?"></textarea>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i> Enviar Consulta
+                        </button>
+                    </div>
+                </form>
+
+                <div class="loading-spinner" id="loading-spinner">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Procesando tu consulta...</p>
+                </div>
+
+                <div class="ia-response" id="ia-response">
+                    <h5><i class="fas fa-robot me-2"></i>Respuesta de la IA:</h5>
+                    <div id="ia-response-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('ia-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const spinner = document.getElementById('loading-spinner');
+            const responseDiv = document.getElementById('ia-response');
+            const responseContent = document.getElementById('ia-response-content');
+            
+            // Mostrar spinner y ocultar respuesta anterior
+            spinner.style.display = 'block';
+            responseDiv.style.display = 'none';
+            
+            // Enviar consulta con AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    responseContent.innerHTML = data.response.replace(/\n/g, '<br>');
+                    responseDiv.style.display = 'block';
+                } else {
+                    responseContent.innerHTML = '<div class="alert alert-danger">Error: ' + data.message + '</div>';
+                    responseDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                responseContent.innerHTML = '<div class="alert alert-danger">Error al procesar la consulta</div>';
+                responseDiv.style.display = 'block';
+            })
+            .finally(() => {
+                spinner.style.display = 'none';
+                // Mantener la posición después de la respuesta
+                responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+    </script>
+    <script>
+        // Función para calcular y mostrar los valores por porción
+        function calculatePortionValues() {
+            const portionSize = parseFloat(document.getElementById('portion-size').value) || 0;
+            document.getElementById('portion-size-label').textContent = portionSize;
+            
+            document.querySelectorAll('.per-portion').forEach(element => {
+                const baseValue = parseFloat(element.getAttribute('data-base')) || 0;
+                const portionValue = (baseValue * portionSize / 100).toFixed(1);
+                element.textContent = portionValue;
+            });
+        }
+        
+        // Calcular al cargar la página
+        document.addEventListener('DOMContentLoaded', calculatePortionValues);
+        
+        // Calcular cuando cambia el input
+        document.getElementById('portion-size').addEventListener('input', calculatePortionValues);
+        
+        // [Mantengo tu código original de AJAX...]
+        document.getElementById('ia-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const spinner = document.getElementById('loading-spinner');
+            const responseDiv = document.getElementById('ia-response');
+            const responseContent = document.getElementById('ia-response-content');
+            
+            spinner.style.display = 'block';
+            responseDiv.style.display = 'none';
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    responseContent.innerHTML = data.response.replace(/\n/g, '<br>');
+                    responseDiv.style.display = 'block';
+                } else {
+                    responseContent.innerHTML = '<div class="alert alert-danger">Error: ' + data.message + '</div>';
+                    responseDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                responseContent.innerHTML = '<div class="alert alert-danger">Error al procesar la consulta</div>';
+                responseDiv.style.display = 'block';
+            })
+            .finally(() => {
+                spinner.style.display = 'none';
+                responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+    </script>
+</body>
+</html>

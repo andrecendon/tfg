@@ -4,31 +4,200 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Alimentos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            margin: 0; /* Reset default margin */
+        }
+        .container {
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            background-color: #ffffff; /* Card background */
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important; /* Keep !important as per original CSS */
+            font-weight: 600;
+            padding: 12px 20px; /* Adjusted padding */
+        }
+        .card-body {
+            padding: 20px; /* Padding for content inside card */
+        }
+        .btn { /* Base button style */
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.15s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            width: 100%;
+            border: 1px solid #ced4da;
+            box-sizing: border-box; /* Important for width calculation */
+            margin-bottom: 10px; /* Spacing below input */
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .back-button { /* Not used in current snippet, but kept */
+            margin-bottom: 20px;
+        }
+        .status-message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .status-message.complete { /* Not used in current snippet, but kept */
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-message.incomplete {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .alimentos-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .alimento-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa; /* Slightly different from card body for contrast or use #ffffff */
+            border-radius: 8px;
+            border-left: 4px solid #2ecc71;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .alimento-item:last-child {
+            margin-bottom: 0;
+        }
+        .alimento-description {
+            flex-grow: 1;
+            margin-right: 15px;
+            color: #333;
+        }
+        .subtitle {
+            color: #6c757d;
+            /* font-style: italic; */ /* Removed italic, personal preference */
+            margin-top: 0; /* Adjusted margin */
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            /* text-align: center; */ /* Can be centered if preferred */
+        }
+        .search-form-group {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <form method="get" action="/funciones/Fase1/composicionQuimica/añadirAlimento" oninput="this.submit()">
-        <input type="text" id="alimento" name="alimento" value="{{ termino }}" placeholder="Buscar alimento..." autofocus>
-    </form>
-
-    {% if resultados %}
-        <ul>
-            {% for alimento in resultados %}
-                <li>{{ alimento.food_description }}</li>
-                <form method="post" action="/funciones/Fase1/composicionQuimica/añadirComida">
-                    <input type="hidden" name="food_id" value="{{ alimento.id }}">
-                    <button type="submit">Añadir alimento</button>
+    <div class="container">
+        &nbsp;
+        <div class="col-1">
+            
+            <a href="/funciones/Fase1/composicionQuimica" class="border-0 bg-transparent back-button">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Atrás" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+        &nbsp;
+        <div class="card">
+            
+            <div class="card-header">
+                Buscador de Alimentos
+            </div>
+            <div class="card-body">
+                <form method="get" action="/funciones/Fase1/composicionQuimica/añadirAlimento" oninput="this.submit()" class="search-form-group">
+                    <label for="alimento" class="form-label">Buscar alimento:</label>
+                    <input type="text" id="alimento" name="alimento" value="{{ termino }}" placeholder="Escribe aquí para buscar..." class="form-control" autofocus>
                 </form>
-            {% endfor %}
-        </ul>
-    {% elif termino %}
-        <p>No se encontraron resultados.</p>
-    {% endif %}
+
+                {% if resultados %}
+                    <h3 class="subtitle">Resultados de la búsqueda:</h3>
+                    <ul class="alimentos-list">
+                        {% for alimento in resultados %}
+                            <li class="alimento-item">
+                                <span class="alimento-description">{{ alimento.food_description }}</span>
+                                <form method="post" action="/funciones/Fase1/composicionQuimica/añadirComida" style="margin:0; flex-shrink: 0;"> <input type="hidden" name="food_id" value="{{ alimento.id }}">
+                                    <button type="submit" class="btn btn-success">Añadir</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% elif termino %}
+                    <p class="status-message incomplete">No se encontraron resultados para "{{ termino }}".</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
     <script>
         window.onload = function() {
             var input = document.getElementById("alimento");
             if (input) {
-                input.selectionStart = input.selectionEnd = input.value.length;
+                input.focus(); // Set focus to the input field
+                // Use a small timeout to ensure the value is rendered and focus is properly set before moving the cursor
+                setTimeout(function() {
+                    // Move cursor to the end of the input's current value
+                    input.selectionStart = input.selectionEnd = input.value.length;
+                }, 0);
             }
         };
     </script>

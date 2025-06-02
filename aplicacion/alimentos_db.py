@@ -3,7 +3,7 @@ from modelo.models import Food, DatabaseSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
 from time import sleep
-
+from chatbot.chatbot import ModeloIA
 session = DatabaseSession()
 
 pr = session.query(Food).all()
@@ -76,7 +76,8 @@ def asignar_nutrientes(food_data, f):
 for food_data in data["FoundationFoods"]:
     nombre = food_data.get('description', 'No description')
     if nombre!= 'No description': 
-        food = Food(food_description=nombre)
+        respuesta = ModeloIA(prompt=f"Solo quiero que me traduzcas el siguiente nombre a castellano ({nombre}, no me devuelvas nada mas que el nombre traducido)")
+        food = Food(food_description=respuesta)
         asignar_nutrientes(food_data, food)
         #metemos en la base de datos
         #print("Metemos comida: ", food)

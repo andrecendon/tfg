@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Equipos Industriales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 1400px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            border: none;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            border: none;
+            color: white;
+        }
+        .equipment-item {
+            transition: all 0.3s ease;
+        }
+        .equipment-item:hover {
+            background-color: #f1f8fe;
+        }
+        .table-equipos {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95em;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .table-equipos thead tr {
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+        }
+        .table-equipos th,
+        .table-equipos td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
+            vertical-align: top;
+        }
+        .table-equipos tbody tr {
+            transition: all 0.3s;
+        }
+        .table-equipos tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .table-equipos tbody tr:last-of-type {
+            border-bottom: 2px solid #3498db;
+        }
+        .table-equipos tbody tr:hover {
+            background-color: #e9f7ef;
+        }
+        .costo-cell {
+            font-weight: 600;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        .dimensiones-cell {
+            white-space: nowrap;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .specs-text {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .observations-text {
+            font-style: italic;
+            color: #666;
+        }
+        .table-ia {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .table-ia thead tr {
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+        }
+        .table-ia th,
+        .table-ia td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
+        }
+        .table-ia tbody tr {
+            transition: all 0.3s;
+        }
+        .table-ia tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .table-ia tbody tr:last-of-type {
+            border-bottom: 2px solid #3498db;
+        }
+        .table-ia tbody tr:hover {
+            background-color: #e9f7ef;
+        }
+        .table-ia a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .table-ia a:hover {
+            text-decoration: underline;
+        }
+        .costo-cell {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mb-3">
+            <a href="/funciones" class="btn btn-light">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+        </div>
+
+        <h1 class="mb-4"><i class="fas fa-industry me-2"></i>Escalamiento</h1>
+        {% if project.simulacion_produccion.etapas %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Diagrama de flujo</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table-ia">
+                    <thead>
+                        <tr>
+                            <th># Etapa</th>
+                            <th>Nombre</th>
+                            <th>Equipos requeridos</th>
+                            <th>Proveedor</th>
+                            <th>Web</th>
+                            <th>Costo estimado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for etapa in project.simulacion_produccion.etapas %}
+                        <tr>
+                            <td>{{ etapa.numero_etapa }}</td>
+                            <td>{{ etapa.nombre }}</td>
+                            <td>{{ etapa.equipos_requeridos }}</td>
+                            <td>{{ etapa.proveedor }}</td>
+                            <td>
+                                {% if etapa.web_proveedor %}
+                                <a href="{{ etapa.web_proveedor }}" target="_blank">
+                                   {{etapa.web_proveedor }}
+                                </a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="costo-cell">
+                                {% if etapa.costo_estimado %}
+                                {{ etapa.costo_estimado }} €
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+        <h1 class="mb-4"><i class="fas fa-industry me-2"></i>Gestión de Equipos Industriales</h1>
+        
+        <!-- Formulario para añadir equipos en planta -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Añadir equipo que está actualmente en planta</h3>
+            </div>
+            <div class="card-body">
+                <form action="añadir" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="nombre_equipo" class="form-label">Nombre del equipo</label>
+                            <input type="text" class="form-control" id="nombre_equipo" name="nombre_equipo" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="especificaciones" class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion"  >
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="costo" class="form-label">Costo</label>
+                            <input type="number" step="0.01" class="form-control" id="costo" name="costo" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="requisitos" class="form-label">Requisitos de uso</label>
+                            <input type="text" class="form-control" id="requisitos_uso" name="requisitos_uso"  >
+                        </div>
+                        <div class="col-md-4">
+                            <label for="observaciones" class="form-label">Observaciones</label>
+                            <input type="text" class="form-control" id="observaciones" name="observaciones">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" name="viejo" value="viejo" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Guardar Equipo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Formulario para añadir equipos -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Añadir Nuevo Equipo</h3>
+            </div>
+            <div class="card-body">
+                <form action="añadir" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="nombre_equipo" class="form-label">Nombre del equipo</label>
+                            <input type="text" class="form-control" id="nombre_equipo" name="nombre_equipo" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="especificaciones" class="form-label">Especificaciones</label>
+                            <input type="text" class="form-control" id="especificaciones" name="especificaciones"  >
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dimensiones" class="form-label">Dimensiones (m)</label>
+                            <input type="text" class="form-control" id="dimensiones" name="dimensiones" placeholder="Ancho x Largo x Alto"  >
+                        </div>
+                        <div class="col-md-3">
+                            <label for="costo" class="form-label">Costo</label>
+                            <input type="number" step="0.01" class="form-control" id="costo" name="costo" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="requisitos" class="form-label">Requisitos de instalación</label>
+                            <input type="text" class="form-control" id="requisitos_instalacion" name="requisitos_instalacion"  >
+                        </div>
+                        <div class="col-md-4">
+                            <label for="observaciones" class="form-label">Observaciones</label>
+                            <input type="text" class="form-control" id="observaciones" name="observaciones">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" name="nuevo" value="nuevo" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Guardar Equipo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+
+        <!-- Lista de equipos existentes -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-cogs me-2"></i>Equipos Registrados Propios</h3>
+                <span class="badge bg-primary rounded-pill">{{ equipos|length }} equipos</span>
+            </div>
+            <div class="card-body">
+                {% if equipos_planta %}
+                    <div class="table-responsive">
+                        <table class="table-equipos">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del equipo</th>
+                                    <th>Especificaciones</th>
+                                    <th>Dimensiones</th>
+                                    <th>Costo</th>
+                                    <th>Requisitos de uso</th>
+                                    <th>Observaciones</th>
+                                    <th style="width: 100px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos_planta %}
+                                <tr class="equipment-item">
+                                    <td>
+                                        <strong>{{ equipo.nombre }}</strong>
+                                    </td>
+                                    <td>
+                                        <p class="specs-text mb-0">{{ equipo.especificaciones }}</p>
+                                    </td>
+                                    <td class="dimensiones-cell">
+                                        {{ equipo.dimensiones }}
+                                    </td>
+                                    <td class="costo-cell">
+                                        {{ "%.2f"|format(equipo.costo) }} $
+                                    </td>
+                                    <td>
+                                        <small>{{ equipo.requisitos_uso }}</small>
+                                    </td>
+                                    <td>
+                                        <p class="observations-text mb-0">{{ equipo.observaciones or '-' }}</p>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <form action="/funciones/Fase3/escalamiento/eliminar" method="POST">
+                                                <button type="submit" name="eliminar" value="{{equipo.id}}" class="btn btn-sm btn-outline-danger eliminar-equipo" 
+                                                            data-equipo-id="{{ equipo.id }}" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3 d-flex justify-content-between">
+                        <div>
+                            <strong>Total equipos:</strong> {{ equipos_planta|length }}
+                        </div>
+                        <div>
+                            <strong>Inversión total:</strong> {{ "%.2f"|format(equipos_planta|sum(attribute='costo')) }} €
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>No hay equipos registrados aún.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    
+
+    <!-- Lista de equipos existentes -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-cogs me-2"></i>Equipos Registrados Nuevos</h3>
+            <span class="badge bg-primary rounded-pill">{{ equipos_nuevos|length }} equipos</span>
+        </div>
+        <div class="card-body">
+            {% if equipos_nuevos %}
+                <div class="table-responsive">
+                    <table class="table-equipos">
+                        <thead>
+                            <tr>
+                                <th>Nombre del equipo</th>
+                                <th>Especificaciones</th>
+                                <th>Dimensiones</th>
+                                <th>Costo</th>
+                                <th>Requisitos Instalación</th>
+                                <th>Observaciones</th>
+                                <th style="width: 100px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for equipo in equipos_nuevos %}
+                            <tr class="equipment-item">
+                                <td>
+                                    <strong>{{ equipo.nombre }}</strong>
+                                </td>
+                                <td>
+                                    <p class="specs-text mb-0">{{ equipo.especificaciones }}</p>
+                                </td>
+                                <td class="dimensiones-cell">
+                                    {{ equipo.dimensiones }}
+                                </td>
+                                <td class="costo-cell">
+                                    {{ "%.2f"|format(equipo.costo) }} $
+                                </td>
+                                <td>
+                                    <small>{{ equipo.requisitos_instalacion }}</small>
+                                </td>
+                                <td>
+                                    <p class="observations-text mb-0">{{ equipo.observaciones or '-' }}</p>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <form action="/funciones/Fase3/escalamiento/eliminar" method="POST">
+                                        <button type="submit" name="eliminar" value="{{equipo.id}}" class="btn btn-sm btn-outline-danger eliminar-equipo" 
+                                                    data-equipo-id="{{ equipo.id }}" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                        </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                           
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3 d-flex justify-content-between">
+                    <div>
+                        <strong>Total equipos:</strong> {{equipos_nuevos|length }}
+                    </div>
+                    <div>
+                        <strong>Inversión total:</strong> {{ "%.2f"|format(equipos_nuevos|sum(attribute='costo')) }} €
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>No hay equipos registrados aún.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+</div>
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar el modal de eliminación
+            const confirmarEliminarModal = new bootstrap.Modal(document.getElementById('confirmarEliminarModal'));
+            
+            document.querySelectorAll('.eliminar-equipo').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const equipoId = this.getAttribute('data-equipo-id');
+                    document.getElementById('equipoIdAEliminar').value = equipoId;
+                    confirmarEliminarModal.show();
+                });
+            });
+            
+            // Opcional: Formatear automáticamente el campo de dimensiones
+            document.getElementById('dimensiones').addEventListener('blur', function(e) {
+                let value = e.target.value.replace(/\s+/g, ''); // Eliminar espacios
+                value = value.replace(/x/gi, ' × '); // Usar × como separador
+                e.target.value = value;
+            });
+        });
+    </script>
+</body>
+</html>

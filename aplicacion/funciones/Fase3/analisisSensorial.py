@@ -19,72 +19,30 @@ analisisSensorial_bp = Blueprint("analisisSensorial", __name__, template_folder=
 Session = DatabaseSession()
 
 
-def generar_grafico(): 
-    # Obtener los datos de la base de datos
-    if 'project_id' in session:
-        tests = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.project_id == session.get('project_id')).all()
-        
-        datos_muestras = defaultdict(list)
-    
-        for test in tests:
-            # Asumiendo que test.muestras es un diccionario {muestra: posición}
-            for muestra, posicion in test.muestras.items():
-                datos_muestras[muestra].append(posicion)
-        
-        # Calcular promedios y conteos
-        resultados = []
-        for muestra, posiciones in datos_muestras.items():
-            resultados.append({
-                'Muestra': muestra,
-                'Posición Promedio': sum(posiciones) / len(posiciones),
-                'Número de Evaluaciones': len(posiciones)
-            })
-        
-        # Crear DataFrame y ordenar (menor posición = mejor)
-        df = pd.DataFrame(resultados)
-        df = df.sort_values('Posición Promedio', ascending=True)
-        
-        # Configurar el gráfico
-        plt.figure(figsize=(12, 6))
-        bars = plt.bar(df['Muestra'], df['Posición Promedio'], color='skyblue')
-        
-        # Añadir etiquetas y valores
-        plt.title('Resultados Sensoriales - Promedio de Posiciones\n(Menor valor = mejor posición)')
-        plt.xlabel('Muestras')
-        plt.ylabel('Posición Promedio')
-        plt.xticks(rotation=45)
-        
-        # Añadir los valores encima de las barras
-        for bar in bars:
-            height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{height:.2f}',
-                    ha='center', va='bottom')
-    
-        # Añadir línea de referencia
-        plt.axhline(y=1, color='red', linestyle='--', alpha=0.3)
-        
-        # Añadir leyenda informativa
-        plt.text(0.02, 0.95, f'Total evaluadores: {len(tests)}', 
-                transform=plt.gca().transAxes)
-        
-        # Ajustar layout y guardar
-        plt.tight_layout()
-            
-        # Guardar el gráfico en un archivo
-        ruta_base = os.path.abspath(os.path.join(os.getcwd(), '..'))  # sube dos carpetas
-        ruta_destino = os.path.join(ruta_base, "app", "static", "graficos")  # carpeta de la imagen
 
-        # Crear carpetas si no existen
-        os.makedirs(ruta_destino, exist_ok=True)
-        grafico_path = os.path.join(ruta_destino, "analisisSensorial.png")
 
-        plt.savefig(grafico_path)
-        print(f"Gráfico guardado en: {grafico_path}")
-        return grafico_path
+def promedios(project):
+    tests =Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).all()
+    numero_muestras = tests[0].numero_muestras if tests else 4
+    promedios = {}
+
+    # Convertir tests a formato serializable y calcular promedios
+    for test in tests:
+        resultados = test.resultados if isinstance(test.resultados, dict) else json.loads(test.resultados)
+        for muestra, posicion in resultados.items():
+            if muestra not in promedios:
+                promedios[muestra] = []
+            promedios[muestra].append(float(posicion))
+
+        # Calcular promedios finales
+        promedios_finales = {
+            muestra: sum(valores)/len(valores) if valores else 0
+            for muestra, valores in promedios.items()
+        }
+    
+        return promedios_finales
+    
     return None
-
-
 
 #### PANTALLA principal ####
 @analisisSensorial_bp.route('/', methods=["POST", "GET"])
@@ -96,54 +54,82 @@ def inicio():
         project = Session.query(Project).filter(Project.id == project_id).first()
     
     
-    for p in project.prototypes:
-        p.actualizar_peso()
     tests = []
+    numero = None
+    atributo = None
     for p in project.tests_sensoriales:
         if p.type=="inicial":
             tests.append(p)
-    #grafico = generar_grafico()
-    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests)
+            numero = p.numero_muestras
+            atributo = p.atributo
+        # Si no hay tests y viene informado la cantidad de muestras, se crea un test por defecto
+    
+    promedios_finales = promedios(project)
+
+    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests, numero_muestras=numero, atributo= atributo, promedios=promedios_finales) 
 
 
-@analisisSensorial_bp.route('/formulario', methods=["POST", "GET"])
+@analisisSensorial_bp.route('/iniciar', methods=["POST", "GET"])
 @login_required
-def form():
+def iniciar():
     
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
     
-   
     
-    return render_template("funciones/Fase3/formulario.html", project=project, test=None)
+    tests = []
+    print("Tests sensoriales del proyecto:")
+    numero = None
+    atributo = None
+    for p in project.tests_sensoriales:
+        if p.type=="inicial":
+            tests.append(p)
+            p.numero_muestras = 4
+            numero = p.numero_muestras
+            atributo = p.atributo
+        
+    if not tests:
+        numero = int(request.form.get('numero_muestras'))
+        atributo = request.form.get('atributo')
 
+        print("Número de muestras:", numero, "Atributo:", atributo)
+        if numero:
+            try:
+                numero_muestras = int(numero)
+                print("Número de muestras:", numero_muestras)
+                resultados = {}
+                if numero_muestras > 0:
+                    for i in range(1, numero_muestras + 1):
+                        resultados[i] = 1
+                    test = Test_Sensorial_Inicial(
+                        project_id=project.id,
+                        atributo=atributo,
+                        numero_muestras=int(numero_muestras),
+                        resultados=resultados,
+                        
+                    )
+                    Session.add(test)
+                    Session.commit()
+                    tests.append(test)
+            except ValueError:
+                print("Número de muestras no válido, se usará el valor por defecto de 4.")
 
-
-@analisisSensorial_bp.route('/editar', methods=["POST", "GET"])
-@login_required
-def editar():
     
-    if 'project_id' in session:
-        project_id = session.get('project_id')
-        project = Session.query(Project).filter(Project.id == project_id).first()
+    promedios_finales = promedios(project)
 
-        if 'editar' in request.form:
-            id = request.form.get("test_id")
-            test = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.id == id).first()
-            
-            if test:
-                evaluador = test.nombre_evaluador
-                fecha = test.fecha
-                atributo = test.atributo
-                muestras_json = test.muestras
-                comentarios = test.comentarios
-                
-                return render_template("funciones/Fase3/formulario.html", project=project, test=test)
-    
-    
-    return render_template("funciones/Fase3/formulario.html", project=project)
+    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests, numero_muestras=4, promedios=promedios_finales, atributo=atributo)
 
+
+
+    
+
+
+
+
+
+
+#Funcion que elimina, guarda y añade tests
 @analisisSensorial_bp.route('/eliminar', methods=["POST", "GET"])
 @login_required
 def eliminar():
@@ -155,65 +141,77 @@ def eliminar():
         print(request.form)
         if 'eliminar' in request.form:
             print("eliminar")
-            id = request.form.get("test_id")
+            id = request.form.get("eliminar")
             test = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.id == id).first()
             if test:
                 Session.delete(test)
                 Session.commit()
             else:   
                 print("No se encontró el test con ID:", id)
+        
+        if 'añadir' in request.form:
             
+            test = Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).first()
+            if test:
+                try:
+                    
+                    if int(test.numero_muestras) > 0:
+                        test = Test_Sensorial_Inicial(
+                            project_id=project.id,
+                            atributo=test.atributo,
+                            numero_muestras=int(test.numero_muestras),
+                            resultados=test.resultados
+                        )
+                        Session.add(test)
+                        Session.commit()
+                except ValueError:
+                    print("Número de muestras no válido, se usará el valor por defecto de 4.")
+        #Actualizamos la lista de tests
+        if 'guardar' in request.form:
+
+            tests_final = []
+            i = 0
+            while f'tests[{i}][nombre_evaluador]' in request.form:
+                nombre = request.form.get(f'tests[{i}][nombre_evaluador]')
+                comentarios = request.form.get(f'tests[{i}][comentarios]', '')
+                id = request.form.get(f'tests[{i}][id]', None)
+                print("Nombre:", nombre, "Comentarios:", comentarios, "ID:", id)
+                if id:
+                    test = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.id == id).first()
+                    print("Test recuperado:", test)
+                    if not test:
+                        print("No se encontró el test con ID:", id)
+                        continue
+                
+                    print("Recuperando datos del test:", nombre, comentarios)
+                    # Recolectamos muestras y posiciones en un dict
+                    resultados = {}
+                    print(request.form)
+                    j = 1
+                    print(f"Recuperando muestras para el test {i}")
+                    print(request.form.get('tests[0][muestra1_codigo]'))
+                    while request.form.get(f'tests[{i}][muestra{j}_codigo]'):
+                        print(f"Recuperando muestra {j} para el test {i}")
+                        muestra = request.form.get(f'tests[{i}][muestra{j}_codigo]')
+                        posicion = request.form.get(f'tests[{i}][posicion{j}]')
+                        print(f"Muestra {j}: {muestra}, Posición: {posicion}")
+                        if muestra and posicion:
+                            resultados[muestra] = int(posicion)
+                        j += 1
+                    test.nombre_evaluador = nombre
+                    test.comentarios = comentarios
+                    test.resultados = resultados
+                    Session.commit()
+                    print("Test actualizado:", test)
+                
+                
+                i += 1
+
+            # Guardar todos en la base de datos
+           
+    
     return redirect("/funciones/Fase3/analisisSensorial")
 
 
-@analisisSensorial_bp.route('/guardarBasico', methods=['POST'])
-@login_required
-def guardar_ordenamiento():
-    evaluador = request.form['evaluador']
-    try:
-            fecha = datetime.strptime(request.form['fecha'], '%Y-%m-%d').date()
-    except ValueError:
-            print("Error al convertir la fecha")
-            fecha = None
-    atributo = request.form['atributo']
-    comentarios = request.form.get('comentarios')
-
-    muestras_json = {}
-    i = 0
-    
-    while True:
-        codigo = request.form.get(f'muestra_{i}')
-        orden = request.form.get(f'orden_{i}')
-        
-        # Si no hay código, terminar el bucle
-        if not codigo:
-            break
-            
-        # Solo agregar si ambos campos existen
-        if codigo and orden:
-            muestras_json[codigo] =int(orden)
-        
-        i += 1
-    
-
-    print({
-        "evaluador": evaluador,
-        "atributo": atributo,
-        "muestras": muestras_json,
-        "comentarios": comentarios
-    })
-
-    test = Test_Sensorial_Inicial(
-        project_id=session.get('project_id'),
-        nombre_evaluador=evaluador,
-        atributo=atributo,
-        fecha=fecha,
-        muestras=muestras_json,
-        comentarios=comentarios
-    )
-    Session.add(test)
-    Session.commit()
-
-    return redirect ("/funciones/Fase3/analisisSensorial")
 
 

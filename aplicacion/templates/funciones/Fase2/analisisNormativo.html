@@ -3,166 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha Inicial de Proyecto</title>
+    <title>Análisis Normativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f4;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
         }
-        .form-container {
-            background: white;
-            justify-content: center;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
+        .container {
+            max-width: 1200px;
         }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-           
-            display: block;
-            margin-bottom: 5px;
-        }
-        textarea {
-            width: 100%;
-            height: 60px;
-            resize: none;
-            padding: 5px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
+        .card {
             border: none;
-            background: #28a745;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-header {
+            background-color: #3498db;
             color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
         }
-        .btn:hover {
-            background: #218838;
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
         }
-        .chat-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 50px auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+        .btn-success {
+            background-color: #2ecc71;
+            border: none;
         }
-        table {
+        .normativa-item {
+            transition: all 0.3s ease;
+        }
+        .normativa-item:hover {
+            background-color: #f1f8fe;
+        }
+        .table-normativas {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-family: Arial, sans-serif;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 25px 0;
+            font-size: 0.95em;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
+        .table-normativas thead tr {
+            background-color: #3498db;
+            color: #ffffff;
             text-align: left;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            text-transform: uppercase;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-            transition: 0.3s;
-        }
-
-        td a {
-            text-decoration: none;
-            color: #007BFF;
             font-weight: bold;
         }
-
-        td a:hover {
+        .table-normativas th,
+        .table-normativas td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
+            vertical-align: top;
+        }
+        .table-normativas tbody tr {
+            transition: all 0.3s;
+        }
+        .table-normativas tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+        .table-normativas tbody tr:last-of-type {
+            border-bottom: 2px solid #3498db;
+        }
+        .table-normativas tbody tr:hover {
+            background-color: #e9f7ef;
+        }
+        .table-normativas a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .table-normativas a:hover {
             text-decoration: underline;
         }
-
-
+        .req-text {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .specs-text {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .time-badge {
+            background-color: #6c757d;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
-    <div class="row col-1">
-        <a href="/funciones" class="border-0 bg-transparent">
-            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
-        </a>
+        <div class="mb-3">
+            <a href="/funciones" class="btn btn-light">
+                <i class="fas fa-arrow-left me-2"></i> Volver
+            </a>
+        </div>
+
+        <h1 class="mb-3"><i class="fas fa-file-contract me-2"></i>Análisis Normativo</h1>
+        <p class="text-muted mb-4">Complete el formulario para generar un análisis de normativas aplicables</p>
+        
+        <!-- Formulario para el análisis normativo -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-search me-2"></i>Solicitar Análisis</h3>
+            </div>
+            <div class="card-body">
+                <form action="/funciones/Fase2/analisisNormativo/enviar" method="POST">
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">Descripción del producto o requisito</label>
+                        <textarea class="form-control" id="prompt" name="prompt" rows="3" required>{{ prompt }}</textarea>
+                        <div class="form-text">Describa el producto o proceso que necesita analizar</div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-2"></i>Generar Análisis
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resultados del análisis normativo -->
+        {% if normativas %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-list-check me-2"></i>Normativas Aplicables</h3>
+                <span class="badge time-badge">Tiempo: {{ '%.3f' | format(time) }} segundos</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table-normativas">
+                        <thead>
+                            <tr>
+                                <th>Requisito</th>
+                                <th>Norma</th>
+                                <th>Requisito Específico</th>
+                                <th>Enlace</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for normativa in normativas %}
+                            <tr class="normativa-item">
+                                <td>
+                                    <span class="req-text">{{ normativa.nombre_requisito }}</span>
+                                </td>
+                                <td>
+                                    {{ normativa.nombre_norma }}
+                                </td>
+                                <td>
+                                    <p class="specs-text mb-0">{{ normativa.requisito_especifico }}</p>
+                                </td>
+                                <td>
+                                    <a href="{{ normativa.link }}" target="_blank">
+                                        <i class="fas fa-external-link-alt me-1"></i>Consultar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <h1>Estudio de mercado</h1>
-    <p class="subtitle">Cubre el formulario y aparecerá un estudio de mercado generado por IA:</p>
-    <div class="form-container">
-        <form action="/funciones/Fase2/analisisNormativo/enviar" method="POST">
-            <div class="input-group">
-                <label for="alimentos">Descripción del producto: </label>
-                <textarea id="alimentos" name="alimentos" required></textarea>
-            </div>
-
-            <div class="input-group">
-                <label for="caracteristicas">Características: </label>
-                <textarea id="caracteristicas" name="caracteristicas" required></textarea>
-            </div>
-            
-            <button type="submit" class="btn">Enviar</button>
-        </form>
-        
-        {% if normativas %}
-            <p><strong>Tiempo de ejecución:</strong> {{ '%.3f' | format(time) }} segundos</p>
-        {% endif %}
-        </div>
-        {% if normativas %}
-            <table >
-                <thead>
-                    <tr>
-                        <th>Nombre General del requisito</th>
-                        <th>Características</th>
-                        <th>Marca</th>
-                        <th>Lugar de Comercialización</th>
-                        <th>Precio Aproximado</th>
-                        <th>Link</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for suplemento in suplementos %}
-                    <tr>
-                        <td>{{ suplemento.Nombre }}</td>
-                        <td>{{ suplemento.Características }}</td>
-                        <td>{{ suplemento.Marca }}</td>
-                        <td>{{ suplemento.Lugar_de_Comercialización }}</td>
-                        <td>{{ suplemento.Precio_Aproximado }}</td>
-                        <td><a href="{{ suplemento.Link }}" target="_blank">Ver</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-        
-
-        
-    
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

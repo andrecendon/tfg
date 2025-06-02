@@ -85,12 +85,12 @@
                         <td>{{ (f.food.sugars * f.cantidad / 100) | round(2) }}</td>
                         <td>{{ (f.food.fiber * f.cantidad / 100) | round(2) }}</td>
                         {% set _ = totals.update({
-                            'energy_kcal': totals.energy_kcal + (f.food.energy_kcal * f.cantidad),
-                            'protein': totals.protein + (f.food.protein * f.cantidad),
-                            'fat': totals.fat + (f.food.total_fat * f.cantidad),
-                            'carbohydrates': totals.carbohydrates + (f.food.carbohydrates * f.cantidad),
-                            'sugars': totals.sugars + (f.food.sugars * f.cantidad),
-                            'fiber': totals.fiber + (f.food.fiber * f.cantidad),
+                            'energy_kcal': totals.energy_kcal + (f.food.energy_kcal * f.cantidad /100),
+                            'protein': totals.protein + (f.food.protein * f.cantidad/100),
+                            'fat': totals.fat + (f.food.total_fat * f.cantidad/100),
+                            'carbohydrates': totals.carbohydrates + (f.food.carbohydrates * f.cantidad/100),
+                            'sugars': totals.sugars + (f.food.sugars * f.cantidad/100),
+                            'fiber': totals.fiber + (f.food.fiber * f.cantidad/100),
                             'cantidad': totals.cantidad + f.cantidad
                         }) %}
                     </tr>
