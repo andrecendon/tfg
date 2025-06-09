@@ -22,11 +22,12 @@ funciones_bp = Blueprint("funciones", __name__, template_folder="aplicacion/temp
 def a():
     print(session)
     
-    projectID = request.args.get('id')
+    projectID = request.form.get('id')
     print("Proyecto ", projectID)
     if(projectID): 
         session['project_id'] = projectID
         project = Session.query(Project).filter(Project.id == session['project_id']).first()
+        print("abriendo ", project)
         return render_template("funciones/funciones.html", project=project)
     else:
         if 'project_id' in session:
