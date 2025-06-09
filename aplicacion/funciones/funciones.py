@@ -3,7 +3,7 @@ from flask import Blueprint, request, redirect, url_for, render_template, sessio
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Food, Prototype, Session
 from aplicacion.chatbot.chatbot import ModeloIA, Suplemento
-from flask_wtf.csrf import CSRFProtect, validate_csrf
+
 
 
 from IPython.display import display
@@ -21,8 +21,7 @@ funciones_bp = Blueprint("funciones", __name__, template_folder="aplicacion/temp
 @login_required
 def a():
     print(session)
-    if not validate_csrf(request.form.get('csrf_token')):
-            return redirect(url_for('login.log'))
+    
     projectID = request.args.get('id')
     if(projectID): 
         session['project_id'] = projectID

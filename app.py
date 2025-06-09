@@ -156,11 +156,6 @@ if len(h2)<1:
 
 Session.commit()
 
-from flask_wtf.csrf import CSRFProtect
-
-
-app.config['WTF_CSRF_ENABLED'] = True
-csrf = CSRFProtect(app)
 
 
 
