@@ -103,6 +103,7 @@
                 <h4 class="project-title">{{ project.name }}</h4>
                 <div class="project-actions">
                     <form action="/funciones" method="POST" style="display: inline;">
+                        <input type="hidden" name="id" value="{{ project.id }}">
                         <button type="submit" class="btn btn-view">
                             <i class="fas fa-folder-open"></i> Abrir
                         </button>
