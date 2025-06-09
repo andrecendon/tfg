@@ -28,7 +28,7 @@ def a():
         project = Session.query(Project).filter(Project.id == session['project_id']).first()
         return render_template("funciones/funciones.html", project=project)
     else:
-        if session['project_id']:
+        if 'project_id' in session:
             project = Session.query(Project).filter(Project.id == session['project_id']).first()
             return render_template("funciones/funciones.html", project=project)
         return redirect("/proyectos")
