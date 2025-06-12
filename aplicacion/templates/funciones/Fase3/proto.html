@@ -2,16 +2,74 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Receta</title>
-    <link rel="stylesheet" href="estilos.css">
+    <style>
+        .table-custom {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin: 20px 0;
+        }
+        .table-custom thead th {
+            background-color: #343a40;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px;
+        }
+        .table-custom tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .table-custom tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        .table-custom td {
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #dee2e6;
+        }
+        .table-custom .label-cell {
+            font-weight: bold;
+            background-color: #e2f0fd;
+            text-align: left;
+        }
+        .table-custom textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .table-custom input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .title-row {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="tabla-container">
-        <table class="tabla-receta">
+    <div class="container">
+        <table class="table-custom">
             <thead>
-                <tr>
-                    <th colspan="4">Nombre: {{prototipo.name}}</th>
-                </tr>
+               
                 <tr>
                     <th>Ingrediente</th>
                     <th>%</th>
@@ -22,36 +80,42 @@
                 {% set cantidad = prototipo.peso_inicial %}
                 
                 {% for food in prototipo.food_prototypes %}
-                
                 {% set porcentaje = (food.cantidad / cantidad) * 100 %}
                     <tr>
                         <td>{{ food.food.food_description }}</td>
                         <td>{{ "%.2f"|format(porcentaje) }}%</td>
                         <td>{{ food.cantidad }}</td>
-                        
                     </tr>
                 {% endfor %}
                 
                 <tr>
                     <td colspan="2" class="label-cell">Total ingredientes producto (Pi)</td>
-                    <td><input type="number" name="total_pi" value="{{prototipo.peso_inicial}}"></td>
-                    
+                    <td>{{prototipo.peso_inicial}}</td>
                 </tr>
                 <tr>
                     <td colspan="2" class="label-cell">Total producto acabado (Pf)</td>
-                    <td><input type="number" name="total_pf" value="{{prototipo.peso_final}}"></td>
-                    
+                    <td>{{ prototipo.peso_final }}</td>
                 </tr>
                 {% set perdida = (prototipo.peso_inicial-prototipo.peso_final)/prototipo.peso_inicial * 100 %}
                 <tr>
-                    <td colspan="2" class="label-cell"> % de pérdida </td>
-                    <td>{{perdida}}</td>
-                    
+                    <td colspan="2" class="label-cell">% de pérdida</td>
+                    <td>{{ "%.2f"|format(perdida) }}%</td>
+                </tr>
+                <form method="post" action="guardar">
+                <tr>
+                    <td class="label-cell">Observaciones importantes del proceso</td>
+                    <td colspan="2"><textarea class="form-control" id="observaciones" name="observaciones" rows="4"> {{prototipo.comentarios if prototipo.comentarios else ''}}</textarea></td>
                 </tr>
 
-                <tr class="">
-                    <td class="label-cell">Obervaciones importantes del proceso </td>
-                    <td colspan="2"><textarea class="form-control" id="prompt" name="prompt" rows="4"> </textarea> </td>
+                <tr>
+                    <td colspan="3" style="text-align: right;">
+                        
+                            <input type="hidden" name="prototipo_id" value="{{ prototipo.id }}">
+                            <button type="submit" class="btn btn-primary" onclick="document.getElementById('observaciones_hidden').value = document.getElementById('prompt').value;">
+                                Guardar observaciones
+                            </button>
+                        </form>
+                    </td>
                 </tr>
             </tbody>
         </table>

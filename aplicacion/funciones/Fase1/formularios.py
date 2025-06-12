@@ -1,9 +1,10 @@
 from flask import Blueprint, request, redirect, url_for, render_template, session
 from sqlalchemy.orm import sessionmaker
-from modelo.models import  Project, Session, DatabaseSession, Food
+from modelo.models import  Project, Session, DatabaseSession, Food, Ideacion
 
 from flask_login import login_required
 from aplicacion.chatbot.chatbot import ModeloIA, Alimento_IA
+import json
 
 
 Session = DatabaseSession()
@@ -133,19 +134,58 @@ def Empatizarguardar():
     return render_template("funciones/funciones.html", project=project)
 
 
+
 @formularios_bp.route('/ideacion', methods=["POST", "GET"])
 @login_required
 def ideacion():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
-    if request.form:
-        if request.form["empatizar1"] != "":
-            project.empatizar1 = request.form["empatizar1"]
-            
-        if request.form["empatizar2"] != "":
-            project.empatizar2 = request.form["empatizar2"]
+    
+
+        
+
           
+        
+
+    return render_template("funciones/Fase1/ideacion.html", project=project)
+
+
+@formularios_bp.route('/ideacion/crear', methods=["POST", "GET"])
+@login_required
+def crearIdea():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+    
+    nombre = request.form.get("nombre", "")
+    impacto = request.form.get("impacto", 3)
+    factibilidad = request.form.get("factibilidad", 3)
+
+    print(request.form)
+
+    if factibilidad and nombre and impacto: 
+        idea = Ideacion(nombre=nombre, impacto=impacto, factibilidad=factibilidad, project=project)
+
+        Session.add(idea)  
         Session.commit()
+
+    return render_template("funciones/Fase1/ideacion.html", project=project)
+
+
+@formularios_bp.route('/ideacion/eliminar', methods=["POST", "GET"])
+@login_required
+def ideacionGuardar():
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+    if request.form:
+
+        id = request.form.get("id")
+        if id: 
+            idea = Session.query(Ideacion).filter(Project.id == project_id, Ideacion.id==int(id)).first()
+            if idea: 
+                Session.delete(idea)
+                Session.commit()
 
     return render_template("funciones/Fase1/ideacion.html", project=project)

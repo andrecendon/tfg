@@ -28,11 +28,7 @@ def estudioMercadoEnv():
         alimentos = request.form["alimentos"]
         caracteristicas = request.form["caracteristicas"]
 
-        prompt = (f"Realizar una búsqueda y tabla resumen de un alimento con la siguiente descripción:  {alimentos}, "
-                  f"y con características como {caracteristicas}. "
-                  "Primera columna nombre del alimento, Segunda características, "
-                  "tercera columna marcas, cuarta lugar de comercialización, "
-                  "quinta columna precio, sexta columna link.")
+        prompt = (f"Genera una tabla para hacer un estudio de mercado acerca de un alimento descrito como: {alimentos} y con las características: {caracteristicas}. La tabla debe incluir las siguientes columnas: Nombre, Características, Marca, Lugar de Comercialización, Precio Aproximado y Link (un solo link a una pagina real). Cada fila de la tabla debe representar un alimento/suplemento del mercado individual.")
      
        
         config={

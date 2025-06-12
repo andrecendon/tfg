@@ -4,99 +4,177 @@
     <meta charset="UTF-8">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-   
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    
-</head>
-<style>
-    .btn-resumen {
-        background-color: #4a6baf;
-        color: white;
-        padding: 10px 25px;
-        border-radius: 25px;
-        font-weight: bold;
-        border: none;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        width: 200px;
-        text-align: center;
-    }
-    .btn-resumen:hover {
-        background-color: #3a5a9f;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-dark: #1e1e1e;
+            --text-dark: #e0e0e0;
+            --border-dark: #333;
+            --primary-dark: #4a6baf;
+            --hover-dark: #3a5a9f;
+            --disabled-dark: #2a2a2a;
+        }
 
-    /* Estilo para el contenedor principal */
-    .avance-fase-container {
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .btn-resumen {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            width: 200px;
+            text-align: center;
+        }
+
+        .btn-resumen:hover {
+            background-color: var(--hover-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avance-fase-container {
         background-color: #f8f9fa;
-        border-radius: 10px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 5px solid #2c3e50;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #4a6baf;
         transition: all 0.3s ease;
     }
 
-    /* Estilo para el título */
-    .avance-fase-container h2.proyecto {
-        color: #2c3e50;
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #e0e0e0;
-        font-weight: 600;
-    }
-
-    /* Estilo para el enlace */
-    .avance-fase-container h2.proyecto a {
-        color: #2c3e50;
+    /* Estilo para el enlace dentro del contenedor */
+    .avance-fase-container a {
+        color: #4a6baf;
         text-decoration: none;
-        transition: color 0.3s;
+        font-size: 1.1rem;
+        font-weight: 500;
         display: flex;
         align-items: center;
     }
 
     /* Icono para el enlace */
-    .avance-fase-container h2.proyecto a::before {
+    .avance-fase-container a::before {
         content: "→";
         margin-right: 10px;
         font-weight: bold;
-        color: #db8a34;
-    }
-
-    /* Efecto hover para el enlace */
-    .avance-fase-container h2.proyecto a:hover {
-        color: #3498db;
-        text-decoration: none;
+        color: #4a6baf;
     }
 
     /* Efecto hover para el contenedor */
     .avance-fase-container:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         border-left-color: #3498db;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .avance-fase-container {
-            padding: 15px;
-        }
-        
-        .avance-fase-container h2.proyecto {
-            font-size: 1.5rem;
-        }
+    /* Efecto hover para el enlace */
+    .avance-fase-container a:hover {
+        color: #3498db;
+        text-decoration: underline;
     }
 
-</style>
-<body>
+        /* Estilo para fases bloqueadas */
+        .fase-bloqueada {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .fase-bloqueada .card {
+            background-color: var(--disabled-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        .fase-bloqueada .card-img-top {
+            filter: grayscale(100%);
+        }
+
+        .fase-bloqueada .card-title {
+            color: #666 !important;
+        }
+
+        .fase-bloqueada {
+            border-left-color: #666;
+        }
+
+        /* Ajuste para imágenes */
+        .card-img-container {
+            height: 180px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-img-top {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            
+            
+            .btn-resumen {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Ajuste para filas de cards */
+        .card-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -10px;
+        }
+
+        .card-col {
+            padding: 10px;
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+
+        @media (max-width: 992px) {
+            .card-col {
+                flex: 0 0 33.33%;
+                max-width: 33.33%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-col {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-col {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
    &nbsp;
@@ -114,242 +192,212 @@
             </div>
         </div>
         
-        <h3>Funcionalidades del proyecto " {{project.name}} "<h3></h3>
-        
-        
-        <h2 class="row proyecto">Fase 1<h2>
-        <div class="row">
-
-            <div class="col my-2">
-                {% with imagen=url_for('static', filename='img/IdeaInicial.jpg'), titulo="Idea Inicial", url="/funciones/formularios/IdeaInicial" %}
+        <h3>Funcionalidades del proyecto "{{project.name}}"</h3>
+        &nbsp;
+        <!-- Fase 1 - Siempre disponible -->
+        <h2 class="row proyecto">Fase 1</h2>
+        <div class="card-row">
+            <div class="card-col">
+                {% with imagen=url_for('static', filename='img/IdeaInicial.jpg'), titulo="Idea Inicial", url="/funciones/Fase1/formularios/IdeaInicial" %}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
 
-            <div class="col my-2">
-                {% with imagen=url_for('static', filename='img/empatizar.jpg'), titulo="Empatizar con el usuario", url="/funciones/formularios/empatizar"%}
+            <div class="card-col">
+                {% with imagen=url_for('static', filename='img/empatizar.jpg'), titulo="Empatizar con el usuario", url="/funciones/Fase1/formularios/empatizar"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
 
-            <div class="col my-2">
+            <div class="card-col">
                 {% with imagen=url_for('static', filename='img/quimico.jpg'), titulo="Composición Química", url="/funciones/Fase1/composicionQuimica" %}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
 
-            <div class="col my-2">
+            <div class="card-col">
                 {% with imagen=url_for('static', filename='img/estudio-mercado.png'), titulo="Estudio del mercado", url="/funciones/Fase1/estudioMercado"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
-        
-        </div> 
-
-        <div class="row">
             
-            <div class="col   my-2">
+            <div class="card-col">
                 {% with imagen=url_for('static', filename='img/ingredientes-sustentables.jpg'), titulo="Matriz de ingredientes sustentables", url="/funciones/Fase1/matrizSustentable"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
-        
-            <div class="col   my-2">
-                {% with imagen=url_for('static', filename='img/ideacion.jpg'), titulo="Ideación", url="/funciones/formularios/ideacion"%}
+            
+            <div class="card-col">
+                {% with imagen=url_for('static', filename='img/ideacion.jpg'), titulo="Ideación", url="/funciones/Fase1/formularios/ideacion"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
 
-            <div class="col   my-2">
+            <div class="card-col">
                 {% with imagen=url_for('static', filename='img/diseño-experimental.jpg'), titulo="Diseño experimental", url="/funciones/Fase1/diseñoExperimental"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
-        
-            <div class="col   my-2">
+            
+            <div class="card-col">
                 {% with imagen=url_for('static', filename='img/macros.png'), titulo="Primer Prototipo", url="/funciones/Fase1/prototipado"%}
                 {% include 'funciones/noticia.html' %}
                 {% endwith %}
             </div>
         </div>
-
-
-
-        &nbsp;
-
-
+         &nbsp;
         <div class="avance-fase-container">
-            
-                <a href="/funciones/evaluacionAvance">Evaluación Avance de la Fase 1</a>
-            
+            <a href="/funciones/evaluacionAvance">Evaluación Avance de la Fase 1</a>
         </div>
+         &nbsp;
         
-        <h2 class="row proyecto">Fase 2<h2>
-            <div class="row">
-    
-                <div class="col my-2">
+        <!-- Fase 2 - Disponible si evaluacion_avance.avance is True -->
+        <div class="{% if not evaluacion_avance or not evaluacion_avance.avance %}fase-bloqueada{% endif %}">
+            <h2 class="row proyecto">Fase 2</h2>
+            <div class="card-row">
+                <div class="card-col">
                     {% with imagen=url_for('static', filename='img/prototipo.webp'), titulo="Prototipo Medio", url="/funciones/Fase2/prototipoMedio" %}
                     {% include 'funciones/noticia.html' %}
                     {% endwith %}
                 </div>
     
-                <div class="col my-2">
+                <div class="card-col">
                     {% with imagen=url_for('static', filename='img/coste.jpg'), titulo="Simulación de coste", url="/funciones/Fase2/simulacionCostes"%}
                     {% include 'funciones/noticia.html' %}
                     {% endwith %}
                 </div>
     
-                <div class="col my-2">
+                <div class="card-col">
                     {% with imagen=url_for('static', filename='img/normativa.jpg'), titulo="Viabilidad normativa", url="/funciones/Fase2/analisisNormativo" %}
                     {% include 'funciones/noticia.html' %}
                     {% endwith %}
                 </div>
     
-                <div class="col my-2">
+                <div class="card-col" id="empaque">
                     {% with imagen=url_for('static', filename='img/empaque.webp'), titulo="Prototipo de empaquetado", url="/funciones/Fase2/empaque"%}
                     {% include 'funciones/noticia.html' %}
                     {% endwith %}
                 </div>
-            
-            </div> 
-            &nbsp;
+            </div>
+             &nbsp;
             <div class="avance-fase-container">
-            
                 <a href="/funciones/evaluacionAvance/Fase2">Evaluación Avance de la Fase 2</a>
-            
+            </div>
+        </div>
+         &nbsp;
+        <!-- Fase 3 - Disponible si evaluacion_avance.avance2 is True -->
+        <div class="{% if not evaluacion_avance or not evaluacion_avance.avance2 %}fase-bloqueada{% endif %}">
+            <h2 class="row proyecto">Fase 3</h2>
+            <div class="card-row">
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/experiencia.webp'), titulo="Prototipado y resultados de primera experiencia", url="/funciones/Fase3/prototipoFinal" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/simulacion_produccion.jpg'), titulo="Simulación de producción", url="/funciones/Fase3/simulacionProduccion"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/precio.png'), titulo="Actualización Precios Alimentos", url="/funciones/Fase3/preciosIngredientes"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/gastos.jpg'), titulo="Simulación de Cálculo de gastos", url="/funciones/Fase3/calculoGastos" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/sensorial.jpg'), titulo="Análisis sensorial", url="/funciones/Fase3/analisisSensorial"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+                
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/composicion_nutricional.webp'), titulo="Validación composición nutricional", url="/funciones/Fase3/validacionNutricional" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/escalamiento.gif'), titulo="Escalamiento", url="/funciones/Fase3/escalamiento"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/costo_produccion.jpg'), titulo="Validación costos producción", url="/funciones/Fase3/calculoGastos/validacionCostos" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/empaque_final.jpg'), titulo="Prototipo empaque alta fidelidad", url="/funciones/Fase3/empaqueFidelidad"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+             &nbsp;
+            <div class="avance-fase-container">
+                <a href="/funciones/evaluacionAvance/Fase3">Evaluación Avance de la Fase 3</a>
+            </div>
+        </div>
+         &nbsp;
+        <!-- Fase 4 - Disponible si evaluacion_avance.avance3 is True -->
+        <div class="{% if not evaluacion_avance or not evaluacion_avance.avance3 %}fase-bloqueada{% endif %}">
+            <h2 class="row proyecto">Fase 4</h2>
+            <div class="card-row">
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/parametrosSustentables.jpg'), titulo="Medición parámetros de sustentabilidad inicial lista de chequeo", url="/funciones/Fase4/chequeo" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/estudioVidaUtil.jpg'), titulo="Estudio de vida útil", url="/funciones/Fase4/vidaUtil"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/analisisSensorial2.webp'), titulo="Análisis sensorial 2", url="/funciones/Fase4/analisisSensorial2"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/empaqueFinal.jpg'), titulo="Validación de empaques", url="/funciones/Fase4/validacionEmpaque" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+                
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/sustentable.jpg'), titulo="Medición parámetros de sustentabilidad", url="/funciones/Fase4/parametrosSustentables" %}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
+        
+                <div class="card-col">
+                    {% with imagen=url_for('static', filename='img/analisisSensorial3.jpg'), titulo="Análisis sensorial 3", url="/funciones/Fase4/analisisSensorial2/aceptacion"%}
+                    {% include 'funciones/noticia.html' %}
+                    {% endwith %}
+                </div>
             </div>
 
-            &nbsp;
-            <h2 class="row proyecto">Fase 3<h2>
-                <div class="row">
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/experiencia.webp'), titulo="Prototipado y resultados de primera experiencia", url="/funciones/Fase3/prototipoFinal" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/simulacion_produccion.jpg'), titulo="Simulación de producción", url="/funciones/Fase3/simulacionProduccion"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/precio.png'), titulo="Actualización Precios Alimentos", url="/funciones/Fase3/preciosIngredientes"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/gastos.jpg'), titulo="Simulación de Cálculo de gastos", url="/funciones/Fase3/calculoGastos" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/sensorial.jpg'), titulo="Análisis sensorial", url="/funciones/Fase3/analisisSensorial"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-                
-                </div> 
-
-                <div class="row">
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/composicion_nutricional.webp'), titulo="Validación composición nutricional", url="/funciones/Fase3/validacionNutricional" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/escalamiento.gif'), titulo="Escalamiento", url="/funciones/Fase3/escalamiento"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/costo_produccion.jpg'), titulo="Validación costos producción", url="/funciones/Fase3/calculoGastos/validacionCostos" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/empaque_final.jpg'), titulo="Prototipo empaque alta fidelidad", url="/funciones/Fase3/empaqueFidelidad"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-                
-                </div> 
-                &nbsp;
-                <div class="avance-fase-container">
+             &nbsp;
             
-                    <a href="/funciones/evaluacionAvance/Fase3">Evaluación Avance de la Fase 3</a>
-                
-                </div>
-
-
-
-                &nbsp;
-            <h2 class="row proyecto">Fase 4<h2>
-                <div class="row">
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/parametrosSustentables.jpg'), titulo="Medición parámetros de sustentabilidad inicial lista de chequeo", url="/funciones/Fase4/chequeo" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/estudioVidaUtil.jpg'), titulo="Estudio de vida útil", url="/funciones/Fase4/vidaUtil"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/analisisSensorial2.webp'), titulo="Análisis sensorial 2", url="/funciones/Fase4/analisisSensorial2"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/empaqueFinal.jpg'), titulo="Validación de empaques", url="/funciones/Fase4/validacionEmpaque" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                   
-                
-                </div> 
-
-                <div class="row">
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/sustentable.jpg'), titulo="Medición parámetros de sustentabilidad", url="/funciones/Fase4/parametrosSustentables" %}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-        
-                    
-        
-                    <div class="col my-2">
-                        {% with imagen=url_for('static', filename='img/analisisSensorial3.jpg'), titulo="Análisis sensorial 3", url="/funciones/Fase4/analisisSensorial2/aceptacion"%}
-                        {% include 'funciones/noticia.html' %}
-                        {% endwith %}
-                    </div>
-                
-                </div> 
-                &nbsp;
-                <div class="avance-fase-container">
-            
-                    <a href="/funciones/evaluacionAvance/Fase4">Evaluación Avance de la Fase 4</a>
-                
-                </div>
-        
-
+            <div class="avance-fase-container">
+                <a href="/funciones/evaluacionAvance/Fase4">Evaluación Avance de la Fase 4</a>
+            </div>
+        </div>
     </div>
 
-   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

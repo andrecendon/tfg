@@ -21,9 +21,9 @@ def mercado():
             project = Session.query(Project).filter(Project.id == project_id).first()
     alimentos=""
     for f in project.foods:
-        alimentos += f"{f.food_description}, "
+        alimentos += f"{f.food_description} // "
 
-    prompt = (f"Realizar una búsqueda de cada uno de los ingredientes {alimentos} para construir un tabla resumen con : nombre del alimento, nivel de sustentabilidad, análisis ciclo de vida, cadena de suministro, huella de carbono, impacto ambiental.")
+    prompt = (f"Realizar una búsqueda de cada uno de los ingredientes //// {alimentos} //// para construir un tabla resumen con : nombre del alimento, nivel de sustentabilidad, análisis ciclo de vida, cadena de suministro, huella de carbono, impacto ambiental.")
 
     return render_template("funciones/Fase1/matrizSustentable.html", prompt=prompt)
 
@@ -38,6 +38,7 @@ def matrizSustentableEnv():
             project = Session.query(Project).filter(Project.id == project_id).first()
     if request.method == "POST":
         prompt = request.form.get("prompt")
+        
              
        
     config={
@@ -45,7 +46,7 @@ def matrizSustentableEnv():
                 'response_schema': list[MatrizSustentable],}
         
 
-    response, tiempo = ModeloIA(prompt, config=config)
+    response, tiempo = ModeloIA(prompt = prompt + ". En el Nivel de Sustenatiblidad inicia con un Alto, Medio o Bajo seguido de una breve explicación. Por ejemplo Alto: Gracias al poco consumo de agua. Cada ingrediente viene separado por una doble barra", config=config)
     respuesta: list[MatrizSustentable] = response.parsed
 
     return render_template("funciones/Fase1/matrizSustentable.html", prompt=prompt,  alimentos=respuesta, time=tiempo)

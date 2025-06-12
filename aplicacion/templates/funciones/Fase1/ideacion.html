@@ -88,6 +88,30 @@
             padding: 15px;
             margin-bottom: 20px;
         }
+        .impact-bg {
+            background-color: rgba(28, 200, 138, 0.2);
+            color: #1cc88a;
+        }
+        .feasibility-bg {
+            background-color: rgba(54, 185, 204, 0.2);
+            color: #36b9cc;
+        }
+        .table th {
+            font-weight: 600;
+            color: #495057;
+        }
+        .badge {
+            font-weight: 500;
+            min-width: 60px;
+        }
+        .btn-danger {
+            background-color: #e74a3b;
+            border: none;
+            padding: 0.35rem 0.5rem;
+        }
+        .btn-danger:hover {
+            background-color: #be2617;
+        }
     </style>
 </head>
 <body>
@@ -112,21 +136,32 @@
         </div>
 
         <div class="idea-form">
-            <form id="addFoodForm">
+            <form action="/funciones/Fase1/formularios/ideacion/crear" method="POST">
                 <div class="row g-3 align-items-center">
                     <div class="col-md-6">
                         <label for="foodName" class="form-label">Nueva idea de alimento:</label>
-                        <input type="text" class="form-control" id="foodName" placeholder="Ej: Snack de proteína vegetal con insectos" required>
+                        <input type="text" name="nombre" class="form-control" id="foodName" placeholder="Ej: Snack de proteína vegetal con insectos" required>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label rating-label impact">Impacto:</label>
-                        <input type="range" class="form-range impact" min="1" max="5" step="1" id="impactRating" value="3">
-                        <div class="rating-value impact" id="impactValue">3</div>
+                        <select class="form-select impact" name="impacto" id="impactRating" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        
                     </div>
                     <div class="col-md-2">
                         <label class="form-label rating-label feasibility">Factibilidad:</label>
-                        <input type="range" class="form-range feasibility" min="1" max="5" step="1" id="feasibilityRating" value="3">
-                        <div class="rating-value feasibility" id="feasibilityValue">3</div>
+                        <select class="form-select feasibility" name="factibilidad" id="feasibilityRating" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-add w-100">
@@ -138,43 +173,69 @@
         </div>
 
         <div class="food-list">
-            <h3 class="mb-4"><i class="bi bi-list-check"></i> Ideas propuestas</h3>
-            
-            <form id="foodIdeasForm" action="/guardar-ideas" method="POST">
-                <div id="foodItemsContainer">
-                    <!-- Las ideas de alimentos se añadirán aquí dinámicamente -->
-                    <div class="alert alert-info" id="emptyMessage">
-                        No hay ideas añadidas todavía. ¡Comienza agregando algunas!
-                    </div>
-                </div>
-                
-                <div class="text-center">
-                    <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
-                        <i class="bi bi-save"></i> Guardar todas las ideas
-                    </button>
-                </div>
-            </form>
-        </div>
+    <h3 class="mb-4"><i class="bi bi-list-check"></i> Ideas propuestas</h3>
+    <div id="foodItemsContainer">
+        {% if not project.ideas %}
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i> Aún no has agregado ideas. Comienza añadiendo tu primera propuesta.
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 45%">Idea</th>
+                            <th scope="col" class="text-center impact">Impacto</th>
+                            <th scope="col" class="text-center feasibility">Factibilidad</th>
+                            <th scope="col" class="text-center">Prioridad</th>
+                            <th scope="col" class="text-center">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for idea in project.ideas %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ idea.nombre }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge impact-bg rounded-pill p-2">
+                                    {{ idea.impacto }} <i class="bi bi-graph-up"></i>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge feasibility-bg rounded-pill p-2">
+                                    {{ idea.factibilidad }} <i class="bi bi-gear"></i>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% set priority = (idea.impacto + idea.factibilidad) / 2 %}
+                                {% if priority >= 4 %}
+                                    <span class="badge bg-success rounded-pill p-2">Alta</span>
+                                {% elif priority >= 2.5 %}
+                                    <span class="badge bg-warning text-dark rounded-pill p-2">Media</span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill p-2">Baja</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <form action="/funciones/Fase1/formularios/ideacion/eliminar" method="POST" style="display: inline;">
+                                    <input type="hidden" name="id" value="{{ idea.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar idea">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
     </div>
 
-    <!-- Plantilla para nuevos items (hidden) -->
-    <template id="foodItemTemplate">
-        <div class="food-item">
-            <input type="hidden" name="foods[]" class="food-data">
-            <div class="food-name" style="flex-grow: 1;"></div>
-            <div class="rating">
-                <span class="rating-label impact">Impacto:</span>
-                <span class="rating-value impact"></span>
-            </div>
-            <div class="rating" style="margin-left: 20px;">
-                <span class="rating-label feasibility">Factibilidad:</span>
-                <span class="rating-value feasibility"></span>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-danger ms-3 remove-btn">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    </template>
+    
 
     <script>
         // Actualizar valores visibles de los sliders
@@ -184,58 +245,6 @@
         
         document.getElementById('feasibilityRating').addEventListener('input', function() {
             document.getElementById('feasibilityValue').textContent = this.value;
-        });
-
-        // Añadir nueva idea
-        document.getElementById('addFoodForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const foodName = document.getElementById('foodName').value;
-            const impact = document.getElementById('impactRating').value;
-            const feasibility = document.getElementById('feasibilityRating').value;
-            
-            if (!foodName) return;
-            
-            // Ocultar mensaje de lista vacía si es la primera idea
-            const emptyMessage = document.getElementById('emptyMessage');
-            if (emptyMessage) emptyMessage.style.display = 'none';
-            
-            // Crear nuevo elemento desde la plantilla
-            const template = document.getElementById('foodItemTemplate');
-            const newItem = template.content.cloneNode(true);
-            
-            // Llenar los datos
-            newItem.querySelector('.food-name').textContent = foodName;
-            newItem.querySelectorAll('.rating-value.impact')[0].textContent = impact;
-            newItem.querySelectorAll('.rating-value.feasibility')[0].textContent = feasibility;
-            
-            // Almacenar datos como JSON en el input hidden
-            const foodData = JSON.stringify({
-                name: foodName,
-                impact: parseInt(impact),
-                feasibility: parseInt(feasibility)
-            });
-            newItem.querySelector('.food-data').value = foodData;
-            
-            // Añadir funcionalidad al botón de eliminar
-            newItem.querySelector('.remove-btn').addEventListener('click', function() {
-                this.closest('.food-item').remove();
-                if (document.querySelectorAll('.food-item').length === 0) {
-                    emptyMessage.style.display = 'block';
-                    document.getElementById('submitBtn').disabled = true;
-                }
-            });
-            
-            // Añadir al contenedor
-            document.getElementById('foodItemsContainer').appendChild(newItem);
-            
-            // Habilitar botón de guardar
-            document.getElementById('submitBtn').disabled = false;
-            
-            // Resetear formulario
-            this.reset();
-            document.getElementById('impactValue').textContent = '3';
-            document.getElementById('feasibilityValue').textContent = '3';
         });
     </script>
 </body>

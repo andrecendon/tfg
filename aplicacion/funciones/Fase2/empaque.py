@@ -79,9 +79,24 @@ def eliminar():
         if 'empaque_id' in request.form:
             empaque_id = request.form.get('empaque_id')
             empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Project.id==project.id).first()
+            #Eliminamos las imagenes del empaque si existe
+            if empaque.imagen1 or empaque.imagen2 or empaque.imagen3:
+                ruta = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'empaques', project.name)
+                old_image_path1 = os.path.join(ruta, empaque.imagen1) if empaque.imagen1 else None
+                old_image_path2 = os.path.join(ruta, empaque.imagen2) if empaque.imagen2 else None
+                old_image_path3 = os.path.join(ruta, empaque.imagen3) if empaque.imagen3 else None
+                
+                for image_path in [old_image_path1, old_image_path2, old_image_path3]:
+                    if image_path and os.path.exists(image_path):
+                        os.remove(image_path)
+                        print(f"[DEBUG] Imagen eliminada: {image_path}")
+                
+            
             Session.delete(empaque)
             Session.commit()
             print(f"[DEBUG] Empaque eliminado: {empaque.nombre}")
+        
+
     return redirect(url_for('empaque.inicio')) 
 
 
@@ -263,8 +278,7 @@ def editar():
             project_id = session.get('project_id')
             project = Session.query(Project).filter(Project.id == project_id).first()
     
-    #Recibe la imagen del prompt y permite editarla con un prompt
-
+    
 
     
     return redirect("/funciones/Fase2/empaque")

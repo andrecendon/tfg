@@ -83,11 +83,12 @@
 </head>
 <body>
     <div class="container">
-        <div class="back-button">
-            <a href="/funciones" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Volver
-            </a>
-        </div>
+        <div class="row col-1">
+        <a href="/funciones" class="border-0 bg-transparent">
+            <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
+        </a>
+    </div>
+    &nbsp;
 
         <h1 class="mb-3"><i class="fas fa-lightbulb me-2"></i>Ficha Inicial de Proyecto</h1>
         <p class="subtitle">Idea de alimento, necesidad de desarrollo, oportunidad</p>
@@ -98,7 +99,7 @@
                 <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Formulario de Idea Inicial</h3>
             </div>
             <div class="card-body">
-                <form id="ideaForm" action="/funciones/formularios/IdeaInicial/guardar" method="POST">
+                <form id="ideaForm" action="/funciones/Fase1/formularios/IdeaInicial/guardar" method="POST">
                     <div class="mb-4">
                         <label for="idea_inicial" class="form-label">Describa en máximo 5 líneas el desafío a resolver o propuesta inicial de alimento:</label>
                         <textarea class="form-control" id="idea_inicial" name="idea_inicial" required>{{ project.idea_inicial if project.idea_inicial else '' }}</textarea>
@@ -135,7 +136,7 @@
                     </div>
                 {% endif %}
                 {% if project.idea_inicial and project.requisitos_iniciales and project.claves_iniciales %}
-                    <a href="/funciones/formularios/IdeaInicial/generarAlimentos" class="btn btn-success mb-4">
+                    <a href="/funciones/Fase1/formularios/IdeaInicial/generarAlimentos" class="btn btn-success mb-4">
                         <i class="fas fa-magic me-2"></i> Generar lista de alimentos sugeridos
                     </a>
                 {% else %}
@@ -145,7 +146,7 @@
                 {% endif %}
 
                 {% if lista_alimentos %}
-                    <form action="/funciones/formularios/IdeaInicial/guardarAlimentos" method="POST">
+                    <form action="/funciones/Fase1/formularios/IdeaInicial/guardarAlimentos" method="POST">
                         <h5 class="mb-3">Lista de alimentos sugeridos:</h5>
                         {% for alimento in lista_alimentos %}
                             <div class="alimento-item">

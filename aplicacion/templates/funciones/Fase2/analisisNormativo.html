@@ -102,14 +102,15 @@
 </head>
 <body>
     <div class="container">
-        <div class="mb-3">
-            <a href="/funciones" class="btn btn-light">
-                <i class="fas fa-arrow-left me-2"></i> Volver
-            </a>
-        </div>
+        <div class="col-1">
+                <a href="/funciones" class="border-0 bg-transparent back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Atrás" style="width: 30px; height: 30px;">
+                </a>
+            </div>
+            &nbsp; 
 
         <h1 class="mb-3"><i class="fas fa-file-contract me-2"></i>Análisis Normativo</h1>
-        <p class="text-muted mb-4">Complete el formulario para generar un análisis de normativas aplicables</p>
+        <p class="text-muted mb-4">Complete el formulario para generar un análisis de normativas aplicables. Si abandona la página la información desaparecerá.</p>
         
         <!-- Formulario para el análisis normativo -->
         <div class="card mb-4">
@@ -162,7 +163,7 @@
                                 </td>
                                 <td>
                                     <a href="{{ normativa.link }}" target="_blank">
-                                        <i class="fas fa-external-link-alt me-1"></i>Consultar
+                                        {{ normativa.link }}
                                     </a>
                                 </td>
                             </tr>

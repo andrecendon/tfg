@@ -65,7 +65,7 @@ class DatabaseSession:
 
 Session = DatabaseSession()
 
-# Clase que nos permite hacer funciones/atbos globales a todos
+# Clase que nos permite hacer funciones/atbos globales a todos. EN este caso no se usa, pero se deja por si acaso
 class BaseModel(Base):
     __abstract__ = True
     __allow_unmapped__ = True
@@ -78,7 +78,7 @@ class User(BaseModel, UserMixin):
     name = Column(String, unique=True)
     contraseña = Column(String, nullable=False)
     email = Column(String)
-    projects = relationship("Project", back_populates="user")
+    projects = relationship("Project", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
 
     def get_id(self):
         return str(self.id)
@@ -223,6 +223,20 @@ class Costos(BaseModel):
     def __repr__(self):
         return f"Costos(id={self.id}, empaque={self.empaque}, ingredientes={self.ingredientes}, mano_obra={self.mano_obra}, electricidad={self.electricidad}, agua={self.agua}, depreciacion_equipos={self.depreciacion_equipos}"
 
+class Ideacion(BaseModel):
+    __tablename__ = 'ideaciones'
+    id = Column(Integer, primary_key=True)
+
+    nombre = Column(String)
+    factibilidad = Column(Integer)
+    impacto = Column(Integer)
+
+    #Relación 1:N con projec, mejor mapeada
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project: Mapped["Project"] = relationship(back_populates="ideas")
+
+
+
 
 class Project(BaseModel):
     __tablename__ = 'projects'
@@ -243,7 +257,7 @@ class Project(BaseModel):
     status = Column(String)
     user_name = Column(Integer, ForeignKey('users.name'))
     user = relationship("User", back_populates="projects")
-    phases = relationship("Phase", back_populates="project")
+    
 
     # Relación 1:1 con simulacion_produccion
     simulacion_produccion = relationship("SimulacionProduccion", back_populates="project",  cascade="all, delete-orphan", uselist=False)
@@ -251,13 +265,16 @@ class Project(BaseModel):
     costos = relationship("Costos", back_populates="project",  cascade="all, delete-orphan", uselist=False)
 
     #Relación 1:N con prototypes, mejor mapeada
-    prototypes: Mapped[List["Prototype"]] = relationship(back_populates="project")
-    empaques: Mapped[List["Empaque"]] = relationship(back_populates="project")
-    evaluaciones_avances: Mapped[List["EvaluacionAvance"]] = relationship(back_populates="project")
+    prototypes: Mapped[List["Prototype"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
+    empaques: Mapped[List["Empaque"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True) 
 
-    tests_sensoriales: Mapped[List["Test_Sensorial"]] = relationship(back_populates="project")
+    #En este caso solo tiene 1. Podriamos llegar a aumentarlo a varios
+    evaluaciones_avances: Mapped[List["EvaluacionAvance"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
+    ideas: Mapped[List["Ideacion"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
 
-    foods = relationship("Food", secondary="food_projects", back_populates="projects",cascade="all, delete")
+    tests_sensoriales: Mapped[List["Test_Sensorial"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
+
+    foods = relationship("Food", secondary="food_projects", back_populates="projects",cascade="save-update, merge",  passive_deletes=True ) #No queremos que elimine las comidas
 
     #constuctor que no crea prototypes ni foods
     def __init__(self, name, user, responsable=None, idea_inicial=None, requisitos_iniciales=None, claves_iniciales=None):
@@ -267,6 +284,7 @@ class Project(BaseModel):
         foods = []
         prototypes  = []
         
+    #Además debemos modificar los Prototipos ya que tienen asociados por otro lado los alimentos
     def añadirAlimento(self, food_id, Session):
         
         food = Session.query(Food).filter(Food.id == food_id).first()
@@ -275,6 +293,14 @@ class Project(BaseModel):
             try: 
                 self.foods.append(food)
                 Session.commit()
+                for prototitpo in self.prototypes:
+                    food_prototype = Session.query(FoodPrototype).filter_by(food_id=food.id, prototype_id=prototitpo.id).first()
+                    print("Buscando food_prototype ", food_prototype)
+                    if not food_prototype:
+                        food_prototype = FoodPrototype(food_id=food.id, prototype_id=prototitpo.id, cantidad=0, food_description=food.food_description)
+                        prototitpo.food_prototypes.append(food_prototype)
+                        Session.add(food_prototype)
+                        Session.commit()
             except:
                 print("Este proyecto ya tiene el alimento asignado\n")
                 Session.rollback()
@@ -291,6 +317,13 @@ class Project(BaseModel):
                 self.foods.remove(f)
                 Session.commit()
                 break
+        for prototipo in self.prototypes:
+            food_prototype = Session.query(FoodPrototype).filter_by(food_id=food.id, prototype_id=prototipo.id).first()
+            if food_prototype:
+                print("Eliminando de food_protype: ", food_prototype)
+                prototipo.food_prototypes.remove(food_prototype)
+                Session.delete(food_prototype)
+                Session.commit()
         
         
 
@@ -303,8 +336,7 @@ class Project(BaseModel):
         return f"Project(name={self.name}, food_description={[food.food_description for food in self.foods]}) \
             prototipos={[p.name for p in self.prototypes]}"
 
-    def add_phase(self, phase):
-        self.phases.append(phase)
+   
 
     def update_status(self, status):
         self.status = status
@@ -335,15 +367,7 @@ class Empaque(BaseModel):
 
 
 
-class Phase(BaseModel):
-    __tablename__ = 'phases'
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    project_id = Column(Integer, ForeignKey('projects.id'))
-    project = relationship("Project", back_populates="phases")
 
-    def __repr__(self):
-        return f"Phase(name={self.name})"
     
 
 
@@ -381,6 +405,7 @@ fase_evaluacion_avance = Table(
     Base.metadata,
     Column("fase_id", ForeignKey("fases.id"), primary_key=True),
     Column("evaluacion_id", ForeignKey("evaluacion_avance.id"), primary_key=True)
+    
 )
 
 class Fase(BaseModel):
@@ -402,11 +427,20 @@ class Fase(BaseModel):
 class EvaluacionAvance(BaseModel):
     __tablename__ = 'evaluacion_avance'
     id = Column(Integer, primary_key=True)
-    avance = Column(Boolean, default=False)
+    avance = Column(Boolean, default=False) 
+    avance2 = Column(Boolean, default=False) 
+    avance3 = Column(Boolean, default=False) 
+    finalizacion = Column(Boolean, default=False)
     comentarios = Column(String)
     numero_fases = Column(Integer, nullable=False, default=0)
+    conclusiones = Column(String)
 
-    # Relación muchos a muchos con Fase
+    #A partir de la sgunda evaluacion se usan
+    cualidades = Column(String)
+    debilidades = Column(String)
+    mejoras = Column(String)
+
+    # Relación muchos a muchos con Fase, no se eliminan las fases al eliminar la evaluación
     fases: Mapped[List["Fase"]] = relationship(
         "Fase",
         secondary=fase_evaluacion_avance,
@@ -417,7 +451,7 @@ class EvaluacionAvance(BaseModel):
     project: Mapped["Project"] = relationship(back_populates="evaluaciones_avances")
 
     def __repr__(self):
-        return f"EvaluacionAvance(id={self.id}, avance={self.avance}, comentarios={self.comentarios}, numero_fases={self.numero_fases}, fases={[fase.nombre for fase in self.fases]})"
+        return f"EvaluacionAvance(id={self.id}, avance={self.avance}, comentarios={self.comentarios}, numero_fases={self.numero_fases}, cualidades={self.cualidades}, debilidades={self.debilidades}, mejoras={self.mejoras}, finalizacion={self.finalizacion})"
 
 
 
@@ -499,9 +533,9 @@ class SimulacionProduccion(BaseModel):
     diagrama_flujo = Column(String)
     imagen = Column(String) #Pueden llegar a subir una imagen de la línea de producción
 
-    # Relación con etapas de producción
-    etapas: Mapped[List["EtapaProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan")
-    equipos_produccion: Mapped[List["EquipoProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan")
+    # Relación con etapas de producción, se borran si se elimina la simulación
+    etapas: Mapped[List["EtapaProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan", passive_deletes=True)
+    equipos_produccion: Mapped[List["EquipoProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan", passive_deletes=True)
 
     # Relación con proyectos
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
@@ -602,6 +636,8 @@ class Prototype(BaseModel):
     peso_inicial = Column(Float, nullable=False, default=0.0)  # Precio en dolares
     peso_final = Column(Float, nullable=False, default=0.0)  # Precio en dolares
 
+    comentarios = Column(String)
+
 
     is_favourite = Column(Boolean, default=False)
 
@@ -641,7 +677,7 @@ class Prototype(BaseModel):
                 else:
                     print(f"Creando FoodPrototype para food_id={f.id} y prototype_id={self.id}")
                     food_prototype = FoodPrototype(food_id=f.id, prototype_id=self.id, cantidad=0, food_description=f.food_description)
-                    Session.add(food_prototype)  # ✅ Solo agregamos aquí
+                    Session.add(food_prototype)
 
         Session.commit()
        
@@ -657,26 +693,35 @@ class Prototype(BaseModel):
        
         Session.commit()
 
-    
-
-
-        
 
     def asignar_cantidad(self, food_id, cantidad):
         
         food_id = int(food_id)
         cantidad = float(cantidad)
+        i=0
         for food_prototype in self.food_prototypes:
             #Aseguramos que es un int para la comparación
             food_prototype.food_id = int(food_prototype.food_id)
             if food_prototype.food_id == food_id:
                 food_prototype.cantidad = cantidad
-                print(f"Asignado cantidad: {food_prototype.food_description}= {food_prototype.cantidad}")
                 Session.commit()
-
+                print(f"Asignado cantidad: {food_prototype.food_description}= {food_prototype.cantidad}")
+                i=1
                 print(self)
                 break
-        print("No se pudo asignar cantidad")
+        #Hay que crear el food_prototype si no existe
+        if i==0:
+            food = Session.query(Food).filter(Food.id == food_id).first()
+            if food:
+                food_prototype = FoodPrototype(food_id=food_id, prototype_id=self.id, cantidad=cantidad, food_description=food.food_description)
+                Session.add(food_prototype)
+                Session.commit()
+                print(f"Creado FoodPrototype para food_id={food_id} y prototype_id={self.id} con cantidad {cantidad}")
+            else:
+                print(f"No se encontró el alimento con id {food_id}")
+
+
+            
 
     def devolver_cantidad(self, food_id):
        
@@ -741,7 +786,6 @@ class Food(BaseModel):
     precio = Column(Float, nullable=False, default=0.0)  # Precio en dolares
     energy_kcal = Column(Float, nullable=False, default=0.0)  # Energía en kilocalorías
 
-    #prototypes = relationship("Prototype", secondary="food_prototypes", back_populates="foods") 
 
     projects = relationship("Project", secondary="food_projects", back_populates="foods")
     # Nutrientes basicos
@@ -760,7 +804,7 @@ class Food(BaseModel):
     potassium = Column(Float, nullable=False, default=0.0)  # Potasio en miligramos
     calcium = Column(Float, nullable=False, default=0.0)  # Calcio en miligramos
     iron = Column(Float, nullable=False, default=0.0)  # Calcio en miligramos
-    #Sodio es sal?
+    #Sodio es sal
 
 
     #Constructor de la clase solo con food_description

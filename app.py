@@ -98,29 +98,38 @@ if len(p)<1:
 
 if len(Session.query(Fase).all())<1:
     fases_data = {
-        "1. Idea inicial de proyecto": "0",
-        "2. Empatizar con los usuarios": "0",
-        "3. Base de datos composición química de alimentos": "0",
-        "4. Estudio de mercado": "0",
-        "5. Ingredientes sustentables (matriz)": "0",
-        "6. Ideación": "0",
-        "7. Diseño experimental": "0",
-        "8. Prototipo 1 – Baja complejidad (diseño experimental)": "0",
-        "9. Evaluación de avance": "0",
-        "10. Prototipo de mediana complejidad (formulación y simulación nutricional)": "0",
-        "11. Simulación de costos": "0",
-        "12. Análisis de viabilidad normativa": "0",
-        "13. Prototipo empírico": "0",
-        "14. Evaluación de avance": "0",
-        "15. Prototipado según diseño": "0",
-        "16. Simulación de producción": "0",
-        "17. Actualización de precios de ingredientes": "0",
-        "18. Análisis sensorial 1": "0",
-        "19. Validación de composición nutricional": "0",
-        "20. Escalamiento": "0",
-        "21. Validación de costos": "0",
-        "22. Prototipo de empaque 3 – Alta fidelidad": "0"
-    }
+    "1. Idea inicial de proyecto": "0",
+    "2. Empatizar con los usuarios": "0",
+    "3. Base de datos composición química de alimentos": "0",
+    "4. Estudio de mercado": "0",
+    "5. Ingredientes sustentables (matriz)": "0",
+    "6. Ideación": "0",
+    "7. Diseño experimental": "0",
+    "8. Prototipo 1 - Baja complejidad": "0",
+
+    "9. Prototipo de mediana complejidad": "0",
+    "10. Simulación de costos": "0",
+    "11. Análisis de viabilidad normativa": "0",
+    "12. Prototipo empaque": "0",
+
+    "13. Prototipado según diseño experimental": "0",
+    "14. Simulación de producción": "0",
+    "15. Actualización de precios de ingredientes": "0",
+    "16. Simulación cálculo gastos de agua y energía": "0",
+    "17. Análisis sensorial 1 - Inicial": "0",
+    "18. Validación de composición nutricional": "0",
+    "19. Escalamiento": "0",
+    "20. Validación de costos producción": "0",
+    "21. Prototipo de empaque alta fidelidad": "0",
+
+    "22. Medición parámetros de sustentabilidad inicial": "0",
+    "23. Estudio de vida útil": "0",
+    "24. Análisis sensorial 2 - Hedónico": "0",
+    "25. Validación de empaques": "0",
+    "26. Medición parámetros de sustentabilidad final": "0",
+    "27. Análisis sensorial 3 - Aceptación": "0",
+    
+}
 
     # Crear una lista con todas las fases
     todas_las_fases = []
@@ -135,7 +144,7 @@ if len(Session.query(Fase).all())<1:
 if len(h2)<1:
     todas_las_fases = Session.query(Fase).all()
 
-    print("Todas las fases:", todas_las_fases)
+    
 
     # Crear una evaluación nueva
     evaluacion = EvaluacionAvance(
@@ -167,7 +176,7 @@ app.register_blueprint(funciones_bp, url_prefix='/funciones')
 app.register_blueprint(resumen_bp, url_prefix='/funciones/resumen')
 app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
 app.register_blueprint(proyectos_bp, url_prefix='/proyectos')
-app.register_blueprint(formularios_bp, url_prefix='/funciones/formularios')
+app.register_blueprint(formularios_bp, url_prefix='/funciones/Fase1/formularios')
 
 app.register_blueprint(evaluacionAvance_bp, url_prefix='/funciones/evaluacionAvance')
 

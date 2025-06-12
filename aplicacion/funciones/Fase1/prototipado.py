@@ -135,6 +135,7 @@ def asignar_comidas(project):
     
 
 
+#Recoge todas las acciones posibles
 @prototipado_bp.route('/guardar_gramos', methods=["POST", "GET"])
 @login_required
 def añadirComida(): 
@@ -159,14 +160,18 @@ def añadirComida():
         prototipo_id = accion.split('_')[1]
         # Recoger todos los datos del formulario
         prototipo = Session.query(Prototype).filter(Prototype.id==prototipo_id).first()
-        
+        print(request.form)
+        print(f"Actualizando prototipo {prototipo_id}")
         #Actualizar el nombre del prototipo
         prototipo.name = request.form.get('prototipo_name_'+prototipo_id)
-        #Falta que actualice el nombre bien
+
+        
         for key, value in request.form.items():
             if key.startswith(f'grams_{prototipo_id}_'):
                 food_id = key.split('_')[2]
                 grams = value
+                print("Gramos y id alimento ", grams, food_id)
+                #No funciona bien asignar cantidad.
                 prototipo.asignar_cantidad(food_id=food_id, cantidad=grams)
         Session.commit()
         

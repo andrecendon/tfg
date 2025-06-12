@@ -3,62 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='compQuimica.css') }}">
     <title>Tabla Nutricional</title>
+    <style>
+        :root {
+            --primary-color: #4a6baf;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ffc107;
+            --text-color: #343a40;
+            --border-radius: 8px;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 1000px;
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+        }
+        
+        
+        
+        
+        .nutrition-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nutrition-table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            font-weight: 500;
+            text-align: left;
+        }
+        
+        .nutrition-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .nutrition-table tbody tr:nth-child(even) {
+            background-color: var(--secondary-color);
+        }
+        
+        .nutrition-table tbody tr:hover {
+            background-color: rgba(74, 107, 175, 0.05);
+        }
+        
+        .nutrition-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .price-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .price-input {
+            flex: 1;
+            max-width: 120px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .price-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 107, 175, 0.25);
+            outline: none;
+        }
+        
+        .update-btn {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .update-btn:hover {
+            background-color: #e0a800;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .update-btn:active {
+            transform: translateY(0);
+        }
+        
+        .serial-number {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-        &nbsp;
+       
+        
+       &nbsp;
         <div class="row col-1">
             <a href="/funciones" class="border-0 bg-transparent">
                 <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
             </a>
         </div>
         &nbsp;
-        <div class="row">
-            <div class="col"><h2>Proyecto: {{proyecto.name}}</h2></div>
-            
-        </div>
         
+        <h1>
+            <i class="fas fa-dollar-sign"></i> Actualización de precios de ingredientes
+        </h1>
         &nbsp;
-        <h3>Tabla Nutricional</h3>
+        <!-- Font Awesome CDN for icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        
+        <!-- Formulario de precios -->
         <form action="/funciones/Fase3/preciosIngredientes/actualizar" method="POST">
-            <table >
-                <thead>
-                    <tr>
-                        <th class="header" style="width: 50px;">Nº</th>
-                        <th class="header" style="width: 250px;">Alimento</th>
-                        <th class="header" style="width: 150px;">Precio ($/kg)</th> <!-- Nueva columna de precio -->
-                        
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for food in proyecto.foods %}
+            <div class="table-responsive">
+                <table class="nutrition-table">
+                    <thead>
                         <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ food.food_description }}</td>
-                
-                           
-                            <td class="d-flex">
-                                <input type="number" step="0.01" min="0" name="precio_{{food.id}}" 
-                                       class="form-control mr-2" value="{{ food.precio if food.precio else '0' }}">
-                                <button type="submit" name="actualizar" value="{{ food.id }}" 
-                                        class="btn btn-sm btn-warning">
-                                    Actualizar
-                                </button>
-                            </td>
-
-                            
-
+                            <th style="width: 80px;">Nº</th>
+                            <th>Alimento</th>
+                            <th style="width: 250px;">Precio ($/kg)</th>
                         </tr>
-                    {% endfor %}
-                
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for food in proyecto.foods %}
+                        <tr>
+                            <td class="serial-number">{{ loop.index }}</td>
+                            <td>{{ food.food_description }}</td>
+                            <td>
+                                <div class="price-input-group">
+                                    <input type="number" step="0.01" min="0" 
+                                           name="precio_{{food.id}}" 
+                                           class="price-input" 
+                                           value="{{ food.precio if food.precio else '0' }}"
+                                           aria-label="Precio por kilogramo">
+                                    <button type="submit" name="actualizar" value="{{ food.id }}" 
+                                            class="update-btn">
+                                        Actualizar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </form>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

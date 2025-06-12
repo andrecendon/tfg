@@ -38,7 +38,7 @@ class Suplemento(BaseModel):
             Características: str
             Marca: str
             Lugar_de_Comercialización: str
-            Precio_Aproximado: str
+            Precio_Aproximado: float
             Link: str
 
 class Empaque_IA(BaseModel):

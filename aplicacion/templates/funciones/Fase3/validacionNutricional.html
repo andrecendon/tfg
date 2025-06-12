@@ -29,7 +29,6 @@
             font-weight: 600;
         }
         
-        /* Nuevo estilo para la tabla nutricional */
         .nutrition-table {
             width: 100%;
             border-collapse: collapse;
@@ -97,6 +96,15 @@
             text-align: center;
             margin: 20px 0;
         }
+        .ia-response-box {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-y: auto;
+            max-height: 400px;
+            background-color: #f8f9fa !important;
+            border-left: 4px solid #3498db !important;
+        }
+        
     </style>
 </head>
 <body>
@@ -202,58 +210,7 @@
 
         <div class="card">
 
-            <div class="row">
-                {%if files %}
-                {% for category, file_list in files.items() %}
-                <!-- Card para {{ category }} -->
-                <div class="col-md-6">
-                    <div class="file-card">
-                        <h5>Análisis {{ category|capitalize }}</h5>
-                        <div id="{{ category }}-container">
-                            {% if file_list and file_list|length > 0 %}
-                            <div class="file-list">
-                                {% for file in file_list %}
-                                <div class="file-item">
-                                    <span>{{ file }}</span>
-                                    <form method="POST" action="eliminar">
-                                    <div class="btn-group">
-                                        <a href="{{ url_for('static', filename='ficheros/' + project.name + '/' + category + '/' + file) }}" target="_blank" class="btn btn-sm btn-primary">Ver</a>
-                                        <a href="{{ url_for('static', filename='ficheros/' + project.name + '/' + category + '/' + file) }}" download class="btn btn-sm btn-success">Descargar</a>
-                                        <button class="btn btn-sm btn-danger delete-btn" onclick="return confirm('¿Estás seguro de que quieres eliminar este fichero?');" type="submit" name="eliminar" value="{{ project.name + '/' + category + '/' + file }}" data-category="{{ category }}" data-filename="{{ file }}">Eliminar</button>
-                                    </form>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                            {% else %}
-                            <div class="empty-state">
-                                <p>No hay archivos cargados</p>
-                            </div>
-                            {% endif %}
-                            
-                            {% if file_list and file_list|length < 5 or not file_list %}
-                            <div class="upload-container">
-                                <form method="POST" action="subirArchivos" enctype="multipart/form-data">
-                                    <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
-                                    <input type="hidden" name="project" value="{{ project.name }}">
-                                    <input type="hidden" name="categoria" value="{{ category }}">
-                                    <div> &nbsp;</div>
-                                    <div ><button type="submit" class="btn btn-primary">Subir archivo</button> </div>
-                                </form>
-                                <div class="max-files">Máximo 5 archivos ({{ file_list|length if file_list else 0 }}/5)</div>
-                            </div>
-                            
-                            {% else %}
-                            <div class="alert alert-warning">Has alcanzado el límite máximo de 5 archivos</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-                {%endif%}
-            </div>
             
-        </div>
 
         <!-- Consulta a IA (se mantiene igual) -->
         <div class="card mt-4">
@@ -261,12 +218,12 @@
                 <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Consulta a la Inteligencia Artificial</h3>
             </div>
             <div class="card-body">
-                <form id="ia-form" method="POST" action="/consultar-ia">
+                <form method="POST" action="consulta">
                     <input type="hidden" name="prototipo_id" value="{{ prototipo.id }}">
                     <div class="form-group">
                         <label for="ia-prompt" class="form-label">Pregunta a la IA sobre este prototipo:</label>
                         <textarea class="form-control" id="ia-prompt" name="prompt" rows="3" 
-                                  placeholder="Ej: ¿Cómo puedo mejorar el Nutri-Score de este producto?"></textarea>
+                                  placeholder="Ej: ¿Cómo puedo mejorar el Nutri-Score de este producto?">{{prompt if prompt else ''}}</textarea>
                     </div>
                     <div class="text-end mt-3">
                         <button type="submit" class="btn btn-primary">
@@ -274,61 +231,31 @@
                         </button>
                     </div>
                 </form>
+                
+                
+            </div>
+            
+        </div>
 
-                <div class="loading-spinner" id="loading-spinner">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <p>Procesando tu consulta...</p>
+        {%if respuestaIA %}
+        <!-- Respuesta a IA - Versión mejorada -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-robot me-2"></i>Respuesta de la Inteligencia Artificial</h3>
+            </div>
+            <div class="card-body">
+                <div class="ia-response-box p-3 bg-light rounded border" style="min-height: 200px; white-space: pre-wrap;">
+                    {{respuestaIA}}
                 </div>
-
-                <div class="ia-response" id="ia-response">
-                    <h5><i class="fas fa-robot me-2"></i>Respuesta de la IA:</h5>
-                    <div id="ia-response-content"></div>
-                </div>
+                
             </div>
         </div>
+        {%endif %}
+        
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('ia-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const form = this;
-            const spinner = document.getElementById('loading-spinner');
-            const responseDiv = document.getElementById('ia-response');
-            const responseContent = document.getElementById('ia-response-content');
-            
-            // Mostrar spinner y ocultar respuesta anterior
-            spinner.style.display = 'block';
-            responseDiv.style.display = 'none';
-            
-            // Enviar consulta con AJAX
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    responseContent.innerHTML = data.response.replace(/\n/g, '<br>');
-                    responseDiv.style.display = 'block';
-                } else {
-                    responseContent.innerHTML = '<div class="alert alert-danger">Error: ' + data.message + '</div>';
-                    responseDiv.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                responseContent.innerHTML = '<div class="alert alert-danger">Error al procesar la consulta</div>';
-                responseDiv.style.display = 'block';
-            })
-            .finally(() => {
-                spinner.style.display = 'none';
-                // Mantener la posición después de la respuesta
-                responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            });
-        });
-    </script>
+    
     <script>
         // Función para calcular y mostrar los valores por porción
         function calculatePortionValues() {

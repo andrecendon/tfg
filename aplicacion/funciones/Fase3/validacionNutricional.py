@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from modelo.models import Food,  Prototype, Project, User, FoodPrototype, DatabaseSession, Costos, ValoresNutricionales
 from collections import defaultdict
 from flask_login import login_required
+
 from aplicacion.chatbot.chatbot import ModeloIA
 import json
 
@@ -37,8 +38,52 @@ def inicio():
             else:
                 prototype.valores_nutricionales.calcular_valores_nutricionales()
         
-        return render_template("funciones/Fase3/validacionNutricional.html", prototipo=prototype)
+        return render_template("funciones/Fase3/validacionNutricional.html", prototipo=prototype, prompt="¿Que valoración de NutriScore le darías a este prototipo? ¿Que cambiarías para mejorar su valor nutricional?")
     
+@validacionNutricional_bp.route('/consulta', methods=["POST", "GET"])
+@login_required
+def consultaIA():
+   
+    
+        if 'prototype_id' in session:
+            prototype_id = session.get('prototype_id')
+            prototype = Session.query(Prototype).filter(Prototype.id == prototype_id).first()
+            print("Prototype recuperado: ", prototype)
+        
+        if 'prompt' in request.form:
+            prompt = request.form.get('prompt', '')
+            print("Prompt recibido:", prompt)
+            
+            food_descriptions = ""
+            for f in prototype.food_prototypes:
+                food_descriptions += f"{f.food_description} ({f.cantidad}g), "
+            
+            proto = f"Prototype(name={prototype.name}, version={ prototype.version}, food_prototypes={food_descriptions})" 
+
+            valores_nutricionales = (
+                f". ValoresNutricionales(energia_kcal={prototype.valores_nutricionales.energia_kcal}, proteinas={prototype.valores_nutricionales.proteinas}, grasas_totales={prototype.valores_nutricionales.grasas_totales}, grasas_saturadas={prototype.valores_nutricionales.grasas_saturadas}, carbohidratos={prototype.valores_nutricionales.carbohidratos}, fibra={prototype.valores_nutricionales.fibra}, azucares={prototype.valores_nutricionales.azucares}, sodio={prototype.valores_nutricionales.sodio}, sal={prototype.valores_nutricionales.sal})"
+            )
+            p = prompt + ". Que la salida tenga el siguiente formato -> Valor NutriScore: A /n Comentarios: Breves comentarios. El prototipo es el siguiente: " + proto + valores_nutricionales
+            print("Prompt para IA:", p)
+            # Crear una instancia del modelo IA
+            respuesta, tiempo = ModeloIA(prompt=p)
+
+         
+            
+            
+            
+            print("Respuesta del modelo IA:", respuesta)
+            
+            # Guardar la respuesta en el prototipo
+            if prototype.valores_nutricionales is None: 
+                valores_nutricionales = ValoresNutricionales(prototype=prototype)
+                Session.add(valores_nutricionales)
+                Session.commit()
+            else:
+                prototype.valores_nutricionales.respuesta_ia = respuesta
+                Session.commit()
+        
+        return render_template("funciones/Fase3/validacionNutricional.html", prototipo=prototype, prompt=prompt, respuestaIA=respuesta, tiempo=tiempo)
 
 
 

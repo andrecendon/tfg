@@ -3,166 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha Inicial de Proyecto</title>
+    <title>Estudio de Mercado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
             padding: 20px;
         }
-        .form-container {
-            background: white;
-            justify-content: center;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
         }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        label {
-           
-            display: block;
-            margin-bottom: 5px;
-        }
-        textarea {
-            width: 100%;
-            height: 60px;
-            resize: none;
-            padding: 5px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
+        .card {
             border: none;
-            background: #28a745;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-header {
+            background-color: #3498db;
             color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
         }
-        .btn:hover {
-            background: #218838;
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
         }
-        .chat-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 50px auto;
-            background-color: #fff;
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control {
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            padding: 10px 15px;
         }
-        table {
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .back-button {
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+        .execution-time {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 15px;
+        }
+        .market-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-family: Arial, sans-serif;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
+        .market-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            padding: 12px 15px;
             text-align: left;
         }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-            text-transform: uppercase;
+        .market-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e9ecef;
         }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .market-table tr:nth-child(even) {
+            background-color: #f8f9fa;
         }
-
-        tr:hover {
-            background-color: #f1f1f1;
-            transition: 0.3s;
+        .market-table tr:hover {
+            background-color: #e9f7fe;
         }
-
-        td a {
+        .market-table a {
+            color: #3498db;
             text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
+            font-weight: 500;
         }
-
-        td a:hover {
+        .market-table a:hover {
             text-decoration: underline;
         }
-
-
     </style>
 </head>
 <body>
-
     <div class="container">
-    <div class="row col-1">
+        <div class="row col-1">
         <a href="/funciones" class="border-0 bg-transparent">
             <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
         </a>
+        </div>
+        &nbsp;
+
+        <h1 class="mb-3"><i class="fas fa-chart-line me-2"></i>Estudio de Mercado</h1>
+        <p class="subtitle">Complete el formulario para generar un estudio de mercado con IA. Ten en cuenta que al abandonar la página el estudio se perderá.</p>
+        
+        <!-- Formulario principal -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Datos del Producto</h3>
+            </div>
+            <div class="card-body">
+                <form action="/funciones/Fase1/estudioMercado/enviar" method="POST">
+                    <div class="mb-4">
+                        <label for="alimentos" class="form-label">Descripción del producto:</label>
+                        <textarea class="form-control" id="alimentos" name="alimentos" required></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="caracteristicas" class="form-label">Características principales:</label>
+                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i> Generar estudio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resultados del estudio -->
+        {% if suplementos %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-table me-2"></i>Resultados del Estudio</h3>
+            </div>
+            <div class="card-body">
+                <p class="execution-time">
+                    <i class="fas fa-clock me-1"></i> Tiempo de ejecución: {{ '%.3f' | format(time) }} segundos
+                </p>
+                
+                <div class="table-responsive">
+                    <table class="market-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Características</th>
+                                <th>Marca</th>
+                                <th>Comercialización</th>
+                                <th>Precio Aprox</th>
+                                <th>Enlace</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suplemento in suplementos %}
+                            <tr>
+                                <td>{{ suplemento.Nombre }}</td>
+                                <td>{{ suplemento.Características }}</td>
+                                <td>{{ suplemento.Marca }}</td>
+                                <td>{{ suplemento.Lugar_de_Comercialización }}</td>
+                                <td>{{ suplemento.Precio_Aproximado }} $</td>
+                                <td>
+                                    <a href="{{ suplemento.Link }}" target="_blank">
+                                       {{suplemento.Link}}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <h1>Estudio de mercado</h1>
-    <p class="subtitle">Cubre el formulario y aparecerá un estudio de mercado generado por IA:</p>
-    <div class="form-container">
-        <form action="/funciones/Fase1/estudioMercado/enviar" method="POST">
-            <div class="input-group">
-                <label for="alimentos">Descripción del producto: </label>
-                <textarea id="alimentos" name="alimentos" required></textarea>
-            </div>
-
-            <div class="input-group">
-                <label for="caracteristicas">Características: </label>
-                <textarea id="caracteristicas" name="caracteristicas" required></textarea>
-            </div>
-            
-            <button type="submit" class="btn">Enviar</button>
-        </form>
-        
-        {% if suplementos %}
-            <p><strong>Tiempo de ejecución:</strong> {{ '%.3f' | format(time) }} segundos</p>
-        {% endif %}
-        </div>
-        {% if suplementos %}
-            <table >
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Características</th>
-                        <th>Marca</th>
-                        <th>Lugar de Comercialización</th>
-                        <th>Precio Aproximado</th>
-                        <th>Link</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for suplemento in suplementos %}
-                    <tr>
-                        <td>{{ suplemento.Nombre }}</td>
-                        <td>{{ suplemento.Características }}</td>
-                        <td>{{ suplemento.Marca }}</td>
-                        <td>{{ suplemento.Lugar_de_Comercialización }}</td>
-                        <td>{{ suplemento.Precio_Aproximado }}</td>
-                        <td><a href="{{ suplemento.Link }}" target="_blank">Ver</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-        
-
-        
-    
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

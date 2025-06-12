@@ -238,109 +238,81 @@
         </div>
 
         <div class="chat-area">
+            <form action="/chatbot/agente/enviar" method="POST" id="chatForm">
             <div class="chat-messages" id="chatMessages">
-                <div class="message bot">
-                    Hola! Soy el asistente del proyecto. ¿En qué puedo ayudarte hoy?
-                    <span class="timestamp">10:00 AM</span>
-                </div>
-                </div>
+                {% for rol, mensaje in mensajes.items() %}
+                    <input type="hidden" name="rol[{{ loop.index0 }}]" value="{{ rol }}">
+                    <input type="hidden" name="mensaje[{{ loop.index0 }}]" value="{{ mensaje }}">
+
+                    {% if "user" in rol%}
+                        <div class="message user">
+                            {{ mensaje }}
+                        </div>
+                    {% elif "chatbot" in rol %}
+                        <div class="message bot">
+                            {{ mensaje }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
             <div class="chat-input-area">
-                <input type="text" id="userInput" placeholder="Escribe tu mensaje aquí...">
-                <button id="sendMessageBtn">Enviar</button>
+                
+                    <input type="hidden" name="mensajes" value="{{ mensajes }}">
+                    <input type="text" name="prompt" id="userInput" placeholder="Escribe tu mensaje aquí..." required>
+                    <button type="submit" id="sendMessageBtn">Enviar</button>
+                </form>
             </div>
         </div>
+
     </div>
 
-    <script>
+    
+        <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.getElementById('sidebarToggle');
             const chatMessages = document.getElementById('chatMessages');
-            const userInput = document.getElementById('userInput');
-            const sendMessageBtn = document.getElementById('sendMessageBtn');
-            const fileUpload = document.getElementById('fileUpload');
-            const uploadBtn = document.getElementById('uploadBtn');
-            const uploadedFilesList = document.getElementById('uploadedFilesList');
-
-            // Sidebar Toggle
+            const chatForm = document.getElementById('chatForm');
+            
+            // Sidebar Toggle (mantener igual)
             sidebarToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('collapsed');
-                if (sidebar.classList.contains('collapsed')) {
-                    sidebarToggle.innerHTML = '☰'; // Icon when collapsed
-                } else {
-                    sidebarToggle.innerHTML = '✕'; // Icon when open
-                }
+                sidebarToggle.innerHTML = sidebar.classList.contains('collapsed') ? '☰' : '✕';
             });
 
-            // Function to add a message to the chat
-            function addMessage(text, sender, time) {
+            // Cargar mensajes desde el historial
+            const mensajes = JSON.parse(document.querySelector('input[name="mensajes"]').value || {});
+            
+            // Mostrar mensajes existentes
+            for (const [key, value] of Object.entries(mensajes)) {
+                const sender = key.startsWith('user') ? 'user' : 'bot';
                 const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message', sender);
-                
-                const messageText = document.createElement('span');
-                messageText.textContent = text;
-                messageDiv.appendChild(messageText);
-
-                const timestampSpan = document.createElement('span');
-                timestampSpan.classList.add('timestamp');
-                timestampSpan.textContent = time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                messageDiv.appendChild(timestampSpan);
-                
+                messageDiv.className = `message ${sender}`;
+                messageDiv.innerHTML = `${value}<span class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
                 chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
             }
-
-            // Send Message
-            function handleSendMessage() {
-                const text = userInput.value.trim();
-                if (text) {
-                    addMessage(text, 'user');
+            
+            // Auto-scroll al final
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Manejar envío de formulario
+            chatForm.addEventListener('submit', function(e) {
+                const userInput = document.getElementById('userInput');
+                if (userInput.value.trim()) {
+                    // Agregar mensaje de usuario inmediatamente (feedback visual)
+                    const userMessageDiv = document.createElement('div');
+                    userMessageDiv.className = 'message user';
+                    userMessageDiv.innerHTML = `${userInput.value}<span class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+                    chatMessages.appendChild(userMessageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Limpiar input
                     userInput.value = '';
-
-                    // Simulate bot response
-                    setTimeout(() => {
-                        addMessage("Gracias por tu mensaje. Estoy procesando tu solicitud...", 'bot');
-                        // Add more sophisticated bot logic here based on 'text'
-                        if (text.toLowerCase().includes("hola") || text.toLowerCase().includes("buenos dias")) {
-                             setTimeout(() => {
-                                addMessage("¡Hola! ¿Cómo puedo ayudarte con el proyecto hoy?", 'bot');
-                            }, 1000);
-                        } else if (text.toLowerCase().includes("archivo")) {
-                             setTimeout(() => {
-                                addMessage("Puedes subir archivos usando el panel de la izquierda. ¿Necesitas ayuda con algo más?", 'bot');
-                            }, 1000);
-                        }
-                    }, 500);
-                }
-            }
-
-            sendMessageBtn.addEventListener('click', handleSendMessage);
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleSendMessage();
-                }
-            });
-
-            // File Upload Mock
-            uploadBtn.addEventListener('click', () => {
-                if (fileUpload.files.length > 0) {
-                    for (const file of fileUpload.files) {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = file.name + ` (${(file.size / 1024).toFixed(2)} KB)`;
-                        uploadedFilesList.appendChild(listItem);
-                    }
-                    addMessage(`Se han añadido ${fileUpload.files.length} archivo(s) para contexto.`, 'bot', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-                    fileUpload.value = ''; // Clear the input
-                } else {
-                    alert('Por favor, selecciona al menos un archivo para subir.');
                 }
             });
             
-            // Initial state for toggle button if sidebar starts open
-             if (!sidebar.classList.contains('collapsed')) {
-                sidebarToggle.innerHTML = '✕';
-            }
-
+            // Resto del código para manejar archivos (mantener igual)
         });
     </script>
 

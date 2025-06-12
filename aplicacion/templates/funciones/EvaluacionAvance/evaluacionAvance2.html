@@ -106,6 +106,7 @@
 <body>
     <div class="container mt-4">
         <form id="evaluationForm" action="/funciones/evaluacionAvance/guardar" method="POST">
+            <input type="hidden" name="numero_fases" value="{{ numero_fases }}">
             <input type="hidden" name="evaluacion_id" value="{{ evaluacionAvance.id if evaluacionAvance else '' }}">
             
             <div class="row">
@@ -124,9 +125,10 @@
                         <div class="card-body">
                             <h5 class="card-title">Progreso General</h5>
                             <div class="progress" style="height: 25px;">
-                                {% set total_fases = evaluacionAvance.fases|length if evaluacionAvance else 0 %}
-                                {% set completed = evaluacionAvance.fases|selectattr('estado', 'equalto', 2)|list|length if evaluacionAvance else 0 %}
-                                {% set partial = evaluacionAvance.fases|selectattr('estado', 'equalto', 1)|list|length if evaluacionAvance else 0 %}
+                                {% set total_fases = numero_fases %}
+                                {% set relevant_fases = evaluacionAvance.fases | selectattr('numero_paso', 'le', total_fases) | list if evaluacionAvance else [] %}
+                                {% set completed = relevant_fases|selectattr('estado', 'equalto', 2)|list|length %}
+                                {% set partial = relevant_fases|selectattr('estado', 'equalto', 1)|list|length %}
                                 {% set progress = ((completed + partial * 0.5) / total_fases * 100)|round(1) if total_fases > 0 else 0 %}
                                 <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" 
                                      aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" id="overall-progress">
@@ -216,21 +218,21 @@
                         <div class="card-body">
             
                             <div class="mb-3">
-                                <label for="comentarios_cualidades" class="form-label">Cualidades</label>
-                                <textarea class="form-control commitments-textarea" id="comentarios_cualidades" name="comentarios_cualidades"
-                                    placeholder="Describa las cualidades observadas..." rows="4">{{ evaluacionAvance.comentarios_cualidades if evaluacionAvance and evaluacionAvance.comentarios_cualidades else '' }}</textarea>
+                                <label for="cualidades" class="form-label">Cualidades</label>
+                                <textarea class="form-control commitments-textarea" id="cualidades" name="cualidades"
+                                    placeholder="Describa las cualidades observadas..." rows="4">{{ evaluacionAvance.cualidades if evaluacionAvance and evaluacionAvance.cualidades else '' }}</textarea>
                             </div>
             
                             <div class="mb-3">
-                                <label for="comentarios_debilidades" class="form-label">Debilidades</label>
-                                <textarea class="form-control commitments-textarea" id="comentarios_debilidades" name="comentarios_debilidades"
-                                    placeholder="Describa las debilidades observadas..." rows="4">{{ evaluacionAvance.comentarios_debilidades if evaluacionAvance and evaluacionAvance.comentarios_debilidades else '' }}</textarea>
+                                <label for="debilidades" class="form-label">Debilidades</label>
+                                <textarea class="form-control commitments-textarea" id="debilidades" name="debilidades"
+                                    placeholder="Describa las debilidades observadas..." rows="4">{{ evaluacionAvance.debilidades if evaluacionAvance and evaluacionAvance.debilidades else '' }}</textarea>
                             </div>
             
                             <div class="mb-3">
-                                <label for="comentarios_mejoras" class="form-label">Aspectos a Mejorar</label>
-                                <textarea class="form-control commitments-textarea" id="comentarios_mejoras" name="comentarios_mejoras"
-                                    placeholder="Describa los aspectos a mejorar..." rows="4">{{ evaluacionAvance.comentarios_mejoras if evaluacionAvance and evaluacionAvance.comentarios_mejoras else '' }}</textarea>
+                                <label for="mejoras" class="form-label">Aspectos a Mejorar</label>
+                                <textarea class="form-control commitments-textarea" id="mejoras" name="mejoras"
+                                    placeholder="Describa los aspectos a mejorar..." rows="4">{{ evaluacionAvance.mejoras if evaluacionAvance and evaluacionAvance.mejoras else '' }}</textarea>
                             </div>
             
                         </div>
@@ -243,13 +245,22 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
+                        {% if numero_fases > fase1 and numero_fases < fase4 %}
                         <div class="card-header">
                             <h5>Continuación del Proyecto</h5>
                         </div>
+                        
                         <div class="card-body">
                             <div class="form-check next-phase-checkbox">
-                                <input class="form-check-input" type="checkbox" id="avance" name="avance" value="true" 
-                                       {% if evaluacionAvance and evaluacionAvance.avance %}checked{% endif %}>
+                                {% if numero_fases == fase3  %}
+                                <input class="form-check-input" type="checkbox" id="avance" name="avance3" 
+                                       {% if evaluacionAvance and evaluacionAvance.avance3 %}checked{% endif %}>
+                                {% else %}
+                                <input class="form-check-input" type="checkbox" id="avance" name="avance2"
+                                   
+                                    {% if evaluacionAvance and evaluacionAvance.avance2 %}checked{% endif %}>
+                                
+                                {% endif %}
                                 <label class="form-check-label" for="avance">
                                     Debe continuar a la siguiente fase
                                 </label>
@@ -265,6 +276,32 @@
                                 <button type="submit" name="action" value="save_{{numero_fases}}" class="btn btn-primary btn-lg">Guardar Evaluación</button>
                             </div>
                         </div>
+                        {% else %}
+                        <div class="card-header">
+                            <h5>Finalización del Proyecto</h5>
+                        </div>
+                         <div class="card-body">
+                            <div class="form-check next-phase-checkbox">
+                                
+                                <input class="form-check-input" type="checkbox" id="avance" name="finalizacion" 
+                                       {% if evaluacionAvance and evaluacionAvance.finalizacion %}checked{% endif %}>
+                                
+                                <label class="form-check-label" for="avance">
+                                    Debe finalizar el proyecto
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="comentarios" class="form-label">Conclusiones</label>
+                                <textarea class="form-control commitments-textarea" id="conclusiones" name="conclusiones" 
+                                          placeholder="Describa las conclusiones finales...">{{ evaluacionAvance.conclusiones if evaluacionAvance and evaluacionAvance.conclusiones else '' }}</textarea>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" name="action" value="save_{{numero_fases}}" class="btn btn-primary btn-lg">Guardar Evaluación</button>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -368,14 +405,6 @@
         // Inicializar el gráfico cuando se carga la página
         document.addEventListener('DOMContentLoaded', function() {
             initChart();
-            
-            // Asegurarse que el textarea tenga el foco al cargar
-            const textarea = document.getElementById('comentarios');
-            if(textarea) {
-                textarea.focus();
-                // Colocar el cursor al principio del texto
-                textarea.setSelectionRange(0, 0);
-            }
         });
     </script>
     

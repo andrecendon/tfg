@@ -87,7 +87,9 @@
 <body>
     <div class="container mt-4">
         <form id="evaluationForm" action="/funciones/evaluacionAvance/guardar" method="POST">
+            <input type="hidden" name="numero_fases" value="{{ numero_fases }}">
             <input type="hidden" name="evaluacion_id" value="{{ evaluacionAvance.id if evaluacionAvance else '' }}">
+            
             
             <div class="row">
                 <div class="col-1">
@@ -105,9 +107,10 @@
                         <div class="card-body">
                             <h5 class="card-title">Progreso General</h5>
                             <div class="progress" style="height: 25px;">
-                                {% set total_fases = evaluacionAvance.fases|length if evaluacionAvance else 0 %}
-                                {% set completed = evaluacionAvance.fases|selectattr('estado', 'equalto', 2)|list|length if evaluacionAvance else 0 %}
-                                {% set partial = evaluacionAvance.fases|selectattr('estado', 'equalto', 1)|list|length if evaluacionAvance else 0 %}
+                                {% set total_fases = numero_fases %}
+                                {% set relevant_fases = evaluacionAvance.fases | selectattr('numero_paso', 'le', total_fases) | list if evaluacionAvance else [] %}
+                                {% set completed = relevant_fases|selectattr('estado', 'equalto', 2)|list|length %}
+                                {% set partial = relevant_fases|selectattr('estado', 'equalto', 1)|list|length %}
                                 {% set progress = ((completed + partial * 0.5) / total_fases * 100)|round(1) if total_fases > 0 else 0 %}
                                 <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" 
                                      aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" id="overall-progress">
@@ -196,7 +199,7 @@
                         </div>
                         <div class="card-body">
                             <div class="form-check next-phase-checkbox">
-                                <input class="form-check-input" type="checkbox" id="avance" name="avance" value="true" 
+                                <input class="form-check-input" type="checkbox" id="avance" name="avanceFase1"
                                        {% if evaluacionAvance and evaluacionAvance.avance %}checked{% endif %}>
                                 <label class="form-check-label" for="avance">
                                     Debe continuar a la siguiente fase
@@ -210,6 +213,7 @@
                             </div>
                             
                             <div class="text-end">
+                                <input type="hidden" name="numero_fases" value="{{ numero_fases }}">
                                 <button type="submit" name="action" value="save_{{ numero_fases }}" class="btn btn-primary btn-lg">Guardar Evaluación</button>
                             </div>
                         </div>
@@ -316,14 +320,6 @@
         // Inicializar el gráfico cuando se carga la página
         document.addEventListener('DOMContentLoaded', function() {
             initChart();
-            
-            // Asegurarse que el textarea tenga el foco al cargar
-            const textarea = document.getElementById('comentarios');
-            if(textarea) {
-                textarea.focus();
-                // Colocar el cursor al principio del texto
-                textarea.setSelectionRange(0, 0);
-            }
         });
     </script>
     

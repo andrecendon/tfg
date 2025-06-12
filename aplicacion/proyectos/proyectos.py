@@ -3,7 +3,7 @@ from flask import Blueprint, request, redirect, url_for, render_template, sessio
 from sqlalchemy.orm import sessionmaker
 from modelo.models import User,  Project, Session
 from flask_login import login_required
-
+import os
 
 # Crear el Blueprint
 proyectos_bp = Blueprint("proyectos", __name__, template_folder="aplicacion/templates")
@@ -50,6 +50,21 @@ def crearProyecto():
     
 
 
+def eliminar_carpetas(proyecto):
+   
+    if proyecto:
+                empaque = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'empaques', proyecto.name)
+                ficheros = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'static', 'ficheros', proyecto.name)
+                
+                
+                
+                if ficheros and os.path.exists(ficheros):
+                        os.remove(ficheros)
+                        print(f"[DEBUG] Carpeta eliminada: {ficheros}")
+                if empaque and os.path.exists(empaque):
+                        os.remove(empaque)
+                        print(f"[DEBUG] Carpeta eliminada: {empaque}")
+                
 
 @proyectos_bp.route('/eliminar', methods=["POST", "GET"])
 @login_required
@@ -67,6 +82,8 @@ def eliminar():
         if project_id:
             project = Session.query(Project).filter(Project.id == project_id).first()
             if project:
+                #Eliminarmos primero todas las carpetas que depende de este proyecto
+
                 Session.delete(project)
                 Session.commit()
                 print("Proyecto eliminado correctamente")

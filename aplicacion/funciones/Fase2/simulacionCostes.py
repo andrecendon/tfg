@@ -39,17 +39,17 @@ def inicio():
 @simulacionCostes_bp.route('/actualizar', methods=["POST", "GET"])
 @login_required
 def actualizar_peso_final():
-    print("Actualizar peso final")
-    data = request.get_json()
-    prototipo_id = data.get('prototipo_id')
-    peso_final = data.get('peso_final')
+    
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        
+        for prototipo in project.prototypes:
+            peso_final = request.form.get(f'peso_final_{prototipo.id}', '')
+            if peso_final:
+                prototipo.peso_final = float(peso_final)
+                print(f"Actualizando peso final del prototipo {prototipo.id} a {peso_final}")
+        
+                Session.commit()
 
-    # Aquí iría tu lógica de base de datos para actualizar el peso final
-    # ejemplo ficticio:
-    prototipo = Session.query(Prototype).get(prototipo_id)
-    if prototipo:
-        prototipo.peso_final = peso_final
-        Session.commit()
-        return jsonify({'success': True}), 200
-
-    return jsonify({'success': False, 'error': 'Prototipo no encontrado'}), 404
+    return redirect("/funciones/Fase2/simulacionCostes/")

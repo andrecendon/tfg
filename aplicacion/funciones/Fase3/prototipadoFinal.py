@@ -27,3 +27,27 @@ def inicio():
     
     return render_template("funciones/Fase3/prototipoFinal.html", proyecto=project)
 
+
+
+
+@prototipoFinal_bp.route('/guardar', methods=["POST", "GET"])
+@login_required
+def guardar():
+    
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+    
+    
+    print(request.form)
+
+    if 'observaciones' in request.form and 'prototipo_id' in request.form:
+        proto = Session.query(Prototype).filter(Prototype.id == request.form.get("prototipo_id"), Prototype.project_id==project.id).first()
+        print("Prototipo encontrado:", proto)
+        if proto:
+            proto.comentarios = request.form.get("observaciones", "")
+            Session.commit()
+            print(proto.comentarios)
+        
+    
+    return redirect("/funciones/Fase3/prototipoFinal/")

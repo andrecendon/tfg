@@ -254,42 +254,17 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header with Back Button -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <a href="/funciones" class="btn back-button">
-                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 20px; height: 20px;">
+         <div class="col-1">
+                <a href="#" onclick="history.back(); return false;" class="border-0 bg-transparent back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Atrás" style="width: 30px; height: 30px;">
                 </a>
             </div>
-            <h2 class="project-title mb-0">
-                <i class="fas fa-box-open me-2"></i>Proyecto: {{ proyecto.name }}
-            </h2>
-            <div></div> <!-- Espaciador -->
-        </div>
+            &nbsp; 
 
-        <!-- Upload Folder Section -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="mb-0"><i class="fas fa-folder-upload me-2"></i>Subir Carpeta de Imágenes</h3>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/upload" enctype="multipart/form-data">
-                    <div class="file-input-container">
-                        <label for="folder-upload" class="file-input-label">
-                            <div class="file-input-icon"><i class="fas fa-folder-open"></i></div>
-                            <div>Selecciona una carpeta con imágenes</div>
-                            <small class="text-muted">Se cargarán todos los archivos de la carpeta</small>
-                        </label>
-                        <input id="folder-upload" type="file" name="files" webkitdirectory directory multiple>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-upload me-2"></i>Subir carpeta completa
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <h1 class="mb-3"><i class="fas fa-box-open me-2"></i>Prototipado de empaques</h1>
+        
+        &nbsp;
+        
 
         <div class="card">
             <div class="card-header">
