@@ -101,7 +101,6 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     if model is None:
         model = "gemini-1.5-flash"
     if api_key is None:
-        #api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
         api_key = os.getenv("GEMINI_API_KEY")
     
     start_time = time.time()
