@@ -6,16 +6,15 @@ from flask import Blueprint, request, redirect, url_for, render_template
 import requests
 import time
 import ollama  # Usa ollama directamente
-from modelo.models import Prototype
+from modelo.models import Prototype, Session, Project
 from PIL import Image
 from io import BytesIO
 import base64
 from google.genai import types
 import json 
-
-
 from google import genai
-
+from flask import jsonify, session
+import json
 import time
 import base64
 
@@ -37,58 +36,56 @@ def index():
     #Gestiona peticiones del usuario y envía respuesta del chat
 
     
-    mensajes = {}
+   
     
+    return render_template("chatbot/agente.html")
 
-    return render_template("chatbot/agente.html", mensajes = mensajes)
 
-@agente_bp.route('/enviar', methods=["POST", "GET"])
+@agente_bp.route('/enviar', methods=['POST'])
 def enviar():
-    if request.method == 'POST':
-        # Obtener el historial de mensajes
+    # Obtener el historial como JSON
+    historial_json = request.form.get('historial', '{}')
+    print("Historial recibido:", historial_json)
+    try:
+        mensajes = json.loads(historial_json)
+    except json.JSONDecodeError:
+        mensajes = {}
+    
+    # Obtener el nuevo prompt
+    nuevo_prompt = request.form.get('prompt', '')
+    
+    respuesta_texto = ""
+    if nuevo_prompt:
+        # Construir contexto
+        if 'project_id' in session:
+                project = Session.query(Project).filter(Project.id == session['project_id']).first()
+                if project:
+                    resumen = project.resumen()
 
-        mensajes = request.form.get('mensajes', '{}')
-        print("Rq ", request.form)
-        try:
-            mensajes = eval(mensajes)  # Convertir string a dict (cuidado en producción)
-        except:
-            mensajes = {}
-        
-        # Obtener el nuevo prompt
-        nuevo_prompt = request.form.get('prompt', '')
-        if not nuevo_prompt:
-            return render_template("chatbot/agente.html", mensajes=mensajes)
-        
-        # Construir el contexto para Gemini
-        contexto = "Historial de conversación:\n"
-        for key, value in mensajes.items():
-            tipo = "Usuario" if key.startswith('user') else "Asistente"
-            contexto += f"{tipo}: {value}\n"
+        contexto = "Contexto del proyecto: " + resumen + "\n\n"
+        contexto += "\n".join(
+            f"Usuario: {value}" if key.startswith('user') else f"Asistente: {value}"
+            for key, value in mensajes.items()
+        )
         
         # Generar respuesta
         try:
-            respuesta, tiempo = ModeloIA(prompt = contexto + "\nNuevo mensaje: " + nuevo_prompt)
-            print("rePuesta: ", respuesta)
-
-            # Añadir el nuevo mensaje del usuario y la respuesta del chatbot al diccionario
-            # Buscar el siguiente índice disponible
-            user_idx = max([int(k.replace('user', '')) for k in mensajes.keys() if k.startswith('user')] + [0]) + 1
-            chatbot_idx = max([int(k.replace('chatbot', '')) for k in mensajes.keys() if k.startswith('chatbot')] + [0]) + 1
-
-            mensajes[f'user{user_idx}'] = nuevo_prompt
-            mensajes[f'chatbot{chatbot_idx}'] = respuesta
-
-            print("MENsajes ", mensajes)
-            
+            respuesta, _ = ModeloIA(prompt=f"{contexto}\n\nUsuario: {nuevo_prompt}")
+           
+            respuesta_texto = respuesta
+            print("Respuesta generada:", respuesta_texto)
+            # Añadir nuevos mensajes al historial
+            nuevo_idx = len(mensajes) // 2 + 1
+            mensajes[f'user{nuevo_idx}'] = nuevo_prompt
+            mensajes[f'chatbot{nuevo_idx}'] = respuesta
             
         except Exception as e:
-            print(f"Error con Gemini: {str(e)}")
-            respuesta = "Lo siento, hubo un error procesando tu solicitud."
-            mensajes[f'chatbot{chatbot_idx}'] = respuesta
-        
-        print("mensajes ", mensajes)
-        return render_template("chatbot/agente.html", mensajes=mensajes)
+            print(f"Error: {str(e)}")
+            respuesta_texto = "Lo siento, hubo un error procesando tu solicitud."
     
-    # GET request - mostrar chat vacío
-    return render_template("chatbot/agente.html", mensajes={})
+    # Devolver JSON con la respuesta y el historial actualizado
+    return jsonify({
+        'respuesta': respuesta_texto,
+        'historial': mensajes
+    })
 

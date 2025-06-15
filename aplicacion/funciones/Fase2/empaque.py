@@ -55,6 +55,8 @@ def favorito():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if 'empaque_id' in request.form:
             empaque_id = request.form.get('empaque_id')
             empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Project.id==project.id).first()
@@ -76,6 +78,8 @@ def eliminar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if 'empaque_id' in request.form:
             empaque_id = request.form.get('empaque_id')
             empaque = Session.query(Empaque).filter(Empaque.id == empaque_id, Project.id==project.id).first()
@@ -106,6 +110,8 @@ def guardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     if 'empaque_id' in request.form: 
         empaque_id = request.form.get('empaque_id')
@@ -161,6 +167,8 @@ def imagen():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     if 'nueva_imagen' not in request.files:
         return "No se envió ningún archivo", 400

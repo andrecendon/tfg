@@ -1,12 +1,14 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date, Boolean, inspect, Inspector, MetaData
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, Boolean, inspect, Inspector, MetaData, DateTime
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Mapped, mapped_column, scoped_session
 from sqlalchemy import ForeignKey, text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from typing import List
 from flask_login import UserMixin
 from sqlalchemy import Table, UniqueConstraint
+
 from sqlalchemy.ext.mutable import MutableDict
+import json
 # Ensure the directory exists
 
 Base = declarative_base()
@@ -78,7 +80,8 @@ class User(BaseModel, UserMixin):
     name = Column(String, unique=True)
     contraseña = Column(String, nullable=False)
     email = Column(String)
-    projects = relationship("Project", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    last_activity = Column(DateTime(timezone=True))
+    projects = relationship("Project", back_populates="user", cascade="all, delete-orphan" )
 
     def get_id(self):
         return str(self.id)
@@ -127,7 +130,7 @@ class Test_Sensorial(BaseModel):
     numero_muestras = Column(Integer, nullable=True)  # Número de muestras evaluadas
     
     # Relación con proyectos
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE") )
     project: Mapped["Project"] = relationship(back_populates="tests_sensoriales")
     
     __mapper_args__ = {
@@ -142,14 +145,15 @@ class Test_Sensorial_Inicial(Test_Sensorial):
     __tablename__ = 'tests_sensoriales_iniciales'
     __mapper_args__ = {'polymorphic_identity': 'inicial'}
     
-    id = Column(Integer, ForeignKey('tests_sensoriales.id'), primary_key=True)
-    muestras = Column(JSON)  
+    id = Column(Integer, ForeignKey('tests_sensoriales.id', ondelete="CASCADE"), primary_key=True)
+    muestra = Column(String)  
+    posicion = Column(Integer)  
 
 class Test_Hedonico(Test_Sensorial): 
     __tablename__ = 'tests_hedonicos'
     __mapper_args__ = {'polymorphic_identity': 'hedonico'}
     
-    id = Column(Integer, ForeignKey('tests_sensoriales.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('tests_sensoriales.id',  ondelete="CASCADE"), primary_key=True)
 
     #Codigo de la muestra, en hedonico solo se usa una por fila
     muestra = Column(String)  
@@ -163,7 +167,7 @@ class Test_Aceptacion(Test_Sensorial):
     __tablename__ = 'tests_aceptacion'
     __mapper_args__ = {'polymorphic_identity': 'aceptacion'}
     
-    id = Column(Integer, ForeignKey('tests_sensoriales.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('tests_sensoriales.id' , ondelete="CASCADE"), primary_key=True)
     muestra = Column(String)
     agrado = Column(String)  # Cambiado a String
     sabor = Column(String)
@@ -184,7 +188,7 @@ class Costos(BaseModel):
     mermas = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 1, "costo": 1})  # Precio de las mermas en JSON
     adicionales = Column(MutableDict.as_mutable(JSON), default={"descripcion": " ", "cantidad": 0, "costo": 0})
     
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="costos")
 
     def asignar_ingredientes(self):
@@ -232,7 +236,7 @@ class Ideacion(BaseModel):
     impacto = Column(Integer)
 
     #Relación 1:N con projec, mejor mapeada
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="ideas")
 
 
@@ -255,7 +259,9 @@ class Project(BaseModel):
     start_date = Column(Date)
     end_date = Column(Date)
     status = Column(String)
-    user_name = Column(Integer, ForeignKey('users.name'))
+
+    #Relación
+    user_name = Column(Integer, ForeignKey('users.name',  ondelete="CASCADE"))
     user = relationship("User", back_populates="projects")
     
 
@@ -263,18 +269,17 @@ class Project(BaseModel):
     simulacion_produccion = relationship("SimulacionProduccion", back_populates="project",  cascade="all, delete-orphan", uselist=False)
     parametros_sustentables = relationship("ParametrosSustentables", back_populates="project",  cascade="all, delete-orphan", uselist=False)
     costos = relationship("Costos", back_populates="project",  cascade="all, delete-orphan", uselist=False)
+    evaluacion_avance= relationship("EvaluacionAvance", back_populates="project", cascade="all, delete-orphan", uselist=False )
 
     #Relación 1:N con prototypes, mejor mapeada
-    prototypes: Mapped[List["Prototype"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
-    empaques: Mapped[List["Empaque"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True) 
+    prototypes: Mapped[List["Prototype"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    empaques: Mapped[List["Empaque"]] = relationship(back_populates="project", cascade="all, delete-orphan" ) 
+    ideas: Mapped[List["Ideacion"]] = relationship(back_populates="project", cascade="all, delete-orphan" )
 
-    #En este caso solo tiene 1. Podriamos llegar a aumentarlo a varios
-    evaluaciones_avances: Mapped[List["EvaluacionAvance"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
-    ideas: Mapped[List["Ideacion"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
+    tests_sensoriales: Mapped[List["Test_Sensorial"]] = relationship(back_populates="project", cascade="all, delete-orphan" )
 
-    tests_sensoriales: Mapped[List["Test_Sensorial"]] = relationship(back_populates="project", cascade="all, delete-orphan", passive_deletes=True)
-
-    foods = relationship("Food", secondary="food_projects", back_populates="projects",cascade="save-update, merge",  passive_deletes=True ) #No queremos que elimine las comidas
+    # Relacion N-N
+    foods = relationship("Food", secondary="food_projects", back_populates="projects",cascade="save-update, merge" ) #No queremos que elimine las comidas
 
     #constuctor que no crea prototypes ni foods
     def __init__(self, name, user, responsable=None, idea_inicial=None, requisitos_iniciales=None, claves_iniciales=None):
@@ -307,7 +312,175 @@ class Project(BaseModel):
         else:
             print("No se encontró el alimento")
         
-       
+    
+    #Genera un resumen del proyecto en formato JSON
+    def resumen(self):
+        resumen = {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "responsable": self.responsable,
+            "start_date": str(self.start_date) if self.start_date else None,
+            "end_date": str(self.end_date) if self.end_date else None,
+            "status": self.status,
+            "idea_inicial": self.idea_inicial,
+            "requisitos_iniciales": self.requisitos_iniciales,
+            "claves_iniciales": self.claves_iniciales,
+            "empatizar1": self.empatizar1,
+            "empatizar2": self.empatizar2,
+            "user": self.user.name if self.user else None,
+            "foods": [
+            {
+                "id": food.id,
+                "food_description": food.food_description,
+                "precio $": food.precio
+            }
+            for food in self.foods
+            ],
+            "prototypes": [
+            {
+                "id": proto.id,
+                "name": proto.name,
+                "version": proto.version,
+                "is_favourite": proto.is_favourite,
+                "food_prototypes": [
+                {
+                    "food_id": fp.food_id,
+                    "food_description": fp.food_description,
+                    "cantidad grs": fp.cantidad
+                }
+                for fp in proto.food_prototypes
+                ],
+                "valores_nutricionales": {
+                "energia_kcal": proto.valores_nutricionales.energia_kcal if proto.valores_nutricionales else None,
+                "proteinas": proto.valores_nutricionales.proteinas if proto.valores_nutricionales else None,
+                "grasas_totales": proto.valores_nutricionales.grasas_totales if proto.valores_nutricionales else None,
+                "carbohidratos": proto.valores_nutricionales.carbohidratos if proto.valores_nutricionales else None,
+                "fibra": proto.valores_nutricionales.fibra if proto.valores_nutricionales else None,
+                "azucares": proto.valores_nutricionales.azucares if proto.valores_nutricionales else None,
+                "sodio": proto.valores_nutricionales.sodio if proto.valores_nutricionales else None,
+                "sal": proto.valores_nutricionales.sal if proto.valores_nutricionales else None,
+                } if proto.valores_nutricionales else None
+            }
+            for proto in self.prototypes
+            ],
+            "costos": {
+            "empaque": self.costos.empaque if self.costos else None,
+            "ingredientes": self.costos.ingredientes if self.costos else None,
+            "mano_obra": self.costos.mano_obra if self.costos else None,
+            "electricidad": self.costos.electricidad if self.costos else None,
+            "agua": self.costos.agua if self.costos else None,
+            "depreciacion_equipos": self.costos.depreciacion_equipos if self.costos else None,
+            "transporte": self.costos.transporte if self.costos else None,
+            "mermas": self.costos.mermas if self.costos else None,
+            "adicionales": self.costos.adicionales if self.costos else None,
+            } if self.costos else None,
+            "ideas": [
+            {
+                "id": idea.id,
+                "nombre": idea.nombre,
+                "factibilidad": idea.factibilidad,
+                "impacto": idea.impacto
+            }
+            for idea in self.ideas
+            ],
+            "empaques": [
+            {
+                "id": empaque.id,
+                "nombre": empaque.nombre,
+                "precio": empaque.precio,
+                "is_favourite": empaque.is_favourite
+            }
+            for empaque in self.empaques
+            ],
+            "tests_sensoriales": [
+            {
+                "id": test.id,
+                "nombre_evaluador": test.nombre_evaluador,
+                "atributo": test.atributo,
+                "fecha": str(test.fecha) if test.fecha else None,
+                "resultados": test.resultados,
+                "comentarios": test.comentarios,
+                "type": test.type,
+                "numero_muestras": test.numero_muestras
+            }
+            for test in self.tests_sensoriales
+            ],
+            "evaluacion_avance": {
+            "id": self.evaluacion_avance.id if self.evaluacion_avance else None,
+            "avance": self.evaluacion_avance.avance if self.evaluacion_avance else None,
+            "comentarios": self.evaluacion_avance.comentarios if self.evaluacion_avance else None,
+            "numero_fases": self.evaluacion_avance.numero_fases if self.evaluacion_avance else None,
+            "cualidades": self.evaluacion_avance.cualidades if self.evaluacion_avance else None,
+            "debilidades": self.evaluacion_avance.debilidades if self.evaluacion_avance else None,
+            "mejoras": self.evaluacion_avance.mejoras if self.evaluacion_avance else None,
+            "finalizacion": self.evaluacion_avance.finalizacion if self.evaluacion_avance else None
+            } if self.evaluacion_avance else None,
+            "parametros_sustentables": {
+            "comentarios": self.parametros_sustentables.comentarios if self.parametros_sustentables else None,
+            "chequeo": self.parametros_sustentables.chequeo if self.parametros_sustentables else None,
+            "observaciones": self.parametros_sustentables.observaciones if self.parametros_sustentables else None,
+            "mejoras": self.parametros_sustentables.mejoras if self.parametros_sustentables else None,
+            "consumo_agua": self.parametros_sustentables.consumo_agua if self.parametros_sustentables else None,
+            "consumo_electricidad": self.parametros_sustentables.consumo_electricidad if self.parametros_sustentables else None,
+            "consumo_gas_licuado": self.parametros_sustentables.consumo_gas_licuado if self.parametros_sustentables else None,
+            "materia_prima_usada": self.parametros_sustentables.materia_prima_usada if self.parametros_sustentables else None,
+            "uso_empaques": self.parametros_sustentables.uso_empaques if self.parametros_sustentables else None,
+            "residuos_solidos_generados": self.parametros_sustentables.residuos_solidos_generados if self.parametros_sustentables else None,
+            "residuos_liquidos": self.parametros_sustentables.residuos_liquidos if self.parametros_sustentables else None,
+            "emisiones_directas_co2": self.parametros_sustentables.emisiones_directas_co2 if self.parametros_sustentables else None,
+            "emisiones_indirectas_electricidad": self.parametros_sustentables.emisiones_indirectas_electricidad if self.parametros_sustentables else None,
+            "subproductos_valorizados": self.parametros_sustentables.subproductos_valorizados if self.parametros_sustentables else None,
+            "km_recorridos_insumos": self.parametros_sustentables.km_recorridos_insumos if self.parametros_sustentables else None,
+            "tipo_transporte_principal": self.parametros_sustentables.tipo_transporte_principal if self.parametros_sustentables else None,
+            "carga_total_transportada": self.parametros_sustentables.carga_total_transportada if self.parametros_sustentables else None,
+            "produccion_mensual_batido": self.parametros_sustentables.produccion_mensual_batido if self.parametros_sustentables else None,
+            "mermas_proceso": self.parametros_sustentables.mermas_proceso if self.parametros_sustentables else None,
+            "uso_productos_limpieza": self.parametros_sustentables.uso_productos_limpieza if self.parametros_sustentables else None,
+            "ubicacion_proveedores": self.parametros_sustentables.ubicacion_proveedores if self.parametros_sustentables else None,
+            "origen_insumos_local": self.parametros_sustentables.origen_insumos_local if self.parametros_sustentables else None,
+            "origen_insumos_importado": self.parametros_sustentables.origen_insumos_importado if self.parametros_sustentables else None,
+            "consumo_energia_renovable": self.parametros_sustentables.consumo_energia_renovable if self.parametros_sustentables else None,
+            } if self.parametros_sustentables else None,
+            "simulacion_produccion": {
+            "id": self.simulacion_produccion.id,
+            "diagrama_flujo": self.simulacion_produccion.diagrama_flujo,
+            "imagen": self.simulacion_produccion.imagen,
+            "etapas": [
+                {
+                "id": etapa.id,
+                "nombre": etapa.nombre,
+                "descripcion": etapa.descripcion,
+                "equipos_requeridos": etapa.equipos_requeridos,
+                "proveedor": etapa.proveedor,
+                "web_proveedor": etapa.web_proveedor,
+                "costo_estimado": etapa.costo_estimado,
+                "numero_etapa": etapa.numero_etapa
+                }
+                for etapa in self.simulacion_produccion.etapas
+            ] if self.simulacion_produccion and self.simulacion_produccion.etapas else [],
+            "equipos_produccion": [
+                {
+                "id": equipo.id,
+                "nombre": equipo.nombre,
+                "esta_en_planta": equipo.esta_en_planta,
+                "ubicacion": equipo.ubicacion,
+                "especificaciones": equipo.especificaciones,
+                "dimensiones": equipo.dimensiones,
+                "proveedor": equipo.proveedor,
+                "web_proveedor": equipo.web_proveedor,
+                "costo": equipo.costo,
+                "imagen": equipo.imagen,
+                "requisitos_uso": equipo.requisitos_uso,
+                "requisitos_instalacion": equipo.requisitos_instalacion,
+                "observaciones": equipo.observaciones
+                }
+                for equipo in self.simulacion_produccion.equipos_produccion
+            ] if self.simulacion_produccion and self.simulacion_produccion.equipos_produccion else []
+            } if self.simulacion_produccion else None
+        }
+
+        return json.dumps(resumen, ensure_ascii=False, indent=2)
         
 
     def quitarAlimento(self, food, Session):
@@ -359,7 +532,7 @@ class Empaque(BaseModel):
     chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
 
 
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="empaques")
 
     def __repr__(self):
@@ -400,13 +573,7 @@ class FoodPrototype(BaseModel):
                 self.food_description = None
         
         
-fase_evaluacion_avance = Table(
-    "fase_evaluacion_avance",
-    Base.metadata,
-    Column("fase_id", ForeignKey("fases.id"), primary_key=True),
-    Column("evaluacion_id", ForeignKey("evaluacion_avance.id"), primary_key=True)
-    
-)
+
 
 class Fase(BaseModel):
     __tablename__ = 'fases'
@@ -417,11 +584,9 @@ class Fase(BaseModel):
     fecha_inicio = Column(Date)
     fecha_fin = Column(Date)
 
-    evaluaciones: Mapped[List["EvaluacionAvance"]] = relationship(
-        "EvaluacionAvance",
-        secondary=fase_evaluacion_avance,
-        back_populates="fases"
-    )
+    # Ahora es una relación 1:N (una fase pertenece a una evaluación)
+    evaluacion_avance_id = Column(Integer, ForeignKey('evaluacion_avance.id',  ondelete="CASCADE"))
+    evaluacion_avance = relationship("EvaluacionAvance", back_populates="fases")
 
 
 class EvaluacionAvance(BaseModel):
@@ -440,15 +605,12 @@ class EvaluacionAvance(BaseModel):
     debilidades = Column(String)
     mejoras = Column(String)
 
-    # Relación muchos a muchos con Fase, no se eliminan las fases al eliminar la evaluación
-    fases: Mapped[List["Fase"]] = relationship(
-        "Fase",
-        secondary=fase_evaluacion_avance,
-        back_populates="evaluaciones"
-    )
+    # Relación 1:N inversa (una evaluación tiene muchas fases)
+    fases = relationship("Fase", back_populates="evaluacion_avance", cascade="all, delete-orphan")
 
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
-    project: Mapped["Project"] = relationship(back_populates="evaluaciones_avances")
+    # Relación 1:1 con project
+    project = relationship("Project", back_populates="evaluacion_avance", uselist=False)
+    project_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"), unique=True)
 
     def __repr__(self):
         return f"EvaluacionAvance(id={self.id}, avance={self.avance}, comentarios={self.comentarios}, numero_fases={self.numero_fases}, cualidades={self.cualidades}, debilidades={self.debilidades}, mejoras={self.mejoras}, finalizacion={self.finalizacion})"
@@ -459,8 +621,12 @@ class ParametrosSustentables(BaseModel):
     __tablename__ = 'parametros_sustentables'
     id = Column(Integer, primary_key=True)
     comentarios = Column(String)
-    chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
 
+    #Pertenece a chequeo
+    chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
+    observaciones = Column(String)  # Observaciones generales sobre la sustentabilidad del proyecto
+    mejoras = Column(String)
+    
     consumo_agua = Column(Float)  # m³/mes
     consumo_electricidad = Column(Float)  # kWh/mes
     consumo_gas_licuado = Column(Float)  # L/mes
@@ -482,7 +648,7 @@ class ParametrosSustentables(BaseModel):
     origen_insumos_importado= Column(Float) 
     consumo_energia_renovable = Column(Float)  # kWh/mes
 
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="parametros_sustentables")
 
 
@@ -499,7 +665,7 @@ class EtapaProduccion(BaseModel):
     numero_etapa = Column(Integer, nullable=False, default=0)  
 
     # Relación con proyectos
-    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id"))
+    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id", ondelete="CASCADE"))
     simulacion: Mapped["SimulacionProduccion"] = relationship(back_populates="etapas")
 
 
@@ -521,7 +687,7 @@ class EquipoProduccion(BaseModel):
     observaciones = Column(String)  # Observaciones sobre el equipo
 
     # Relación con proyectos
-    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id"))
+    simulacion_id: Mapped[int] = mapped_column(ForeignKey("simulacion_produccion.id" , ondelete="CASCADE"))
     simulacion: Mapped["SimulacionProduccion"] = relationship(back_populates="equipos_produccion")
 
 
@@ -534,11 +700,11 @@ class SimulacionProduccion(BaseModel):
     imagen = Column(String) #Pueden llegar a subir una imagen de la línea de producción
 
     # Relación con etapas de producción, se borran si se elimina la simulación
-    etapas: Mapped[List["EtapaProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan", passive_deletes=True)
-    equipos_produccion: Mapped[List["EquipoProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan", passive_deletes=True)
+    etapas: Mapped[List["EtapaProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan" )
+    equipos_produccion: Mapped[List["EquipoProduccion"]] = relationship(back_populates="simulacion", cascade="all, delete-orphan" )
 
     # Relación con proyectos
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="simulacion_produccion")
 
     def __repr__(self):
@@ -561,7 +727,7 @@ class ValoresNutricionales(BaseModel):
     sodio = Column(Float, nullable=False, default=0.0)  # Sodio en gramos
     sal = Column(Float, nullable=False, default=0.0)  # Sal en gramos
 
-    prototype_id: Mapped[int] = mapped_column(ForeignKey("prototypes.id"))
+    prototype_id: Mapped[int] = mapped_column(ForeignKey("prototypes.id", ondelete="CASCADE") )
     prototype: Mapped["Prototype"] = relationship(back_populates="valores_nutricionales")
 
     def calcular_valores_nutricionales(self):
@@ -647,7 +813,7 @@ class Prototype(BaseModel):
 
 
     #Relación 1:N con prototypes, mejor mapeada
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
     project: Mapped["Project"] = relationship(back_populates="prototypes")
     
 

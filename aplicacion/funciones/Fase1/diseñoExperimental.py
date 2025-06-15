@@ -20,6 +20,8 @@ def IA():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     config={
                 'response_mime_type': 'application/json',
@@ -72,6 +74,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     n = len(project.prototypes)
     # Obtener lista de ingredientes con comillas

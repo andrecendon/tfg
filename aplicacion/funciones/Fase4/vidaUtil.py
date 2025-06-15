@@ -56,6 +56,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     files = get_project_files(project.name)
     return render_template("funciones/Fase4/vidaUtil.html", files=files, project=project )
 
@@ -68,6 +70,8 @@ def eliminar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     print(f"\n[DEBUG] Proyecto actual: {project.name} (ID: {project_id})")
     if request.method == 'POST':
         fichero = request.form.get('eliminar')
@@ -94,6 +98,8 @@ def upload_files():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     if 'file' not in request.files:
         return "No se envió ningún archivo", 400

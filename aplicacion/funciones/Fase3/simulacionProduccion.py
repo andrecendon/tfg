@@ -22,6 +22,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if project.simulacion_produccion is None:
             project.simulacion_produccion = SimulacionProduccion(project=project)
             Session.add(project.simulacion_produccion)
@@ -49,18 +51,25 @@ def etapa():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     numero_etapa = request.form.get("numero_etapa")
     nombre_etapa = request.form.get("nombre_etapa")
     descripcion_etapa = request.form.get("descripcion_etapa")
     print("Datos recibidos: ", numero_etapa, nombre_etapa, descripcion_etapa)
+
     if nombre_etapa and descripcion_etapa and numero_etapa:
         
             if project.simulacion_produccion is None:
                 project.simulacion_produccion = SimulacionProduccion(project=project)
                 Session.add(project.simulacion_produccion)
                 Session.commit()
-        
+            if project.simulacion_produccion.etapas is None:
+                for etapa in project.simulacion_produccion.etapas:
+                    if etapa.numero_etapa == numero_etapa:
+                        print("Ya existe una etapa con este número: ", numero_etapa)
+                        return redirect(url_for('simulacionProduccion.inicio'))
             etapa = EtapaProduccion(numero_etapa=numero_etapa, nombre=nombre_etapa, descripcion=descripcion_etapa, simulacion = project.simulacion_produccion)
             Session.add(etapa)
             Session.commit()
@@ -92,6 +101,8 @@ def chat():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if project.simulacion_produccion is None:
             project.simulacion_produccion = SimulacionProduccion(project=project)
             Session.add(project.simulacion_produccion)
@@ -130,3 +141,56 @@ def chat():
 
     
     return redirect("/funciones/Fase3/simulacionProduccion")
+
+
+@simulacionProduccion_bp.route('/actualizar', methods=["POST", "GET"])
+@login_required
+def act():
+    
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
+    
+    
+    #Hay que actualizar todos las etapas.
+    try:
+        
+        
+        
+        # Procesar las etapas recibidas y ver que tienen distintos números
+        numeros = []
+        i=0
+        while f"etapas[{i}][id]" in request.form:
+            
+            id = request.form.get(f'etapas[{i}][id]')
+            numero = int(request.form.get(f'etapas[{i}][numero]'))
+            nombre = request.form.get(f'etapas[{i}][nombre]')
+            descripcion = request.form.get(f'etapas[{i}][descripcion]')
+            etapa = Session.query(EtapaProduccion).filter(EtapaProduccion.id == id, EtapaProduccion.simulacion == project.simulacion_produccion).first()
+            if numero not in numeros:
+                numeros.append(numero)
+                if etapa:
+                    etapa.numero_etapa = numero
+                    etapa.nombre = nombre
+                    etapa.descripcion = descripcion
+                    print(f"Actualizando etapa: {etapa.numero_etapa} - {etapa.nombre} - {etapa.descripcion}")
+                    numeros.append(numero)
+            else: 
+                i=-1
+            
+           
+            i += 1
+
+        if i>0:
+            Session.commit()
+        else:
+            print("Hay números repetidos en las etapas.")
+        
+        
+        return redirect(url_for('simulacionProduccion.inicio'))
+    
+    except:
+
+        return redirect(url_for('simulacion_produccion', project_id=project_id))

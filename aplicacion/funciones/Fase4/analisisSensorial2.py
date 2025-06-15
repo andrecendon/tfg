@@ -50,7 +50,7 @@ def promedios(project):
     
     return None
 
-#### PANTALLA principal ####
+#### PANTALLA principal #### Tests Hedonico
 @analisisSensorial2_bp.route('/', methods=["POST", "GET"])
 @login_required
 def inicio():
@@ -58,6 +58,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     
     tests = Session.query(Test_Hedonico).filter(Project.id==project.id).all()
@@ -82,6 +84,73 @@ def inicio():
     return render_template("funciones/Fase4/analisisSensorial2.html", project=project, tests = tests, numero_muestras=len(promedios_finales), promedios=promedios_finales) 
 
 
+
+
+#Funcion que elimina, guarda y añade tests
+@analisisSensorial2_bp.route('/actualizar', methods=["POST", "GET"])
+@login_required
+def act():
+    
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
+
+        print(request.form)
+        if 'eliminar' in request.form:
+            print("eliminar")
+            id = request.form.get("eliminar")
+            test = Session.query(Test_Hedonico).filter(Test_Hedonico.id == id).first()
+            if test:
+                Session.delete(test)
+                Session.commit()
+            else:   
+                print("No se encontró el test con ID:", id)
+        
+        if 'añadir' in request.form:
+
+                        test = Test_Hedonico(
+                            project_id=project.id,
+                            project=project,
+                            nombre_evaluador = "Nombre", 
+                            muestra = "1",
+                            puntuacion = 1,
+                            comentarios = "Comentarios",
+                        )
+                        Session.add(test)
+                        Session.commit()
+                
+        if 'guardar' in request.form:
+
+            i=0
+            print("Guardar tests")
+            print("Datos recibidos:", request.form)
+            while f'{i}[test_id]' in request.form:
+                test_id = request.form.get(f"{i}[test_id]")
+                test = Session.query(Test_Hedonico).filter(Test_Hedonico.id == int(test_id)).first()
+                if not test:
+                    print(f"No se encontró el test con ID: {test_id}")
+                    i += 1
+                    continue
+                if request.form.get(f"{test_id}[comentarios]"): test.comentarios = request.form.get(f"{test_id}[comentarios]")
+                if request.form.get(f"{test_id}[muestra]"): test.muestra = request.form.get(f"{test_id}[muestra]")
+                if request.form.get(f"{test_id}[puntuacion]"): test.puntuacion = request.form.get(f"{test_id}[puntuacion]")
+                if request.form.get(f"{test_id}[evaluador]"): test.nombre_evaluador = request.form.get(f"{test_id}[evaluador]")
+
+                Session.commit()
+                print(f"Test actualizado: {test_id} - {test.comentarios}, {test.muestra}, {test.puntuacion}, {test.nombre_evaluador}")
+
+                #recuperamos el resto de valores
+                i += 1
+           
+
+            # Guardar todos en la base de datos
+           
+    
+    return redirect(url_for('analisisSensorial2.inicio'))
+
+
 #Tercer analisis sensorial
 @analisisSensorial2_bp.route('/aceptacion', methods=["POST", "GET"])
 @login_required
@@ -90,6 +159,8 @@ def aceptacion():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     tests = Session.query(Test_Aceptacion).filter(Project.id==project.id).all()
     if not tests:
@@ -110,63 +181,8 @@ def aceptacion():
     return render_template("funciones/Fase4/analisisSensorialAceptacion.html", project=project, tests = tests) 
 
 
-@analisisSensorial2_bp.route('/iniciar', methods=["POST", "GET"])
-@login_required
-def iniciar():
-    
-    if 'project_id' in session:
-        project_id = session.get('project_id')
-        project = Session.query(Project).filter(Project.id == project_id).first()
-    
-    
-    tests = []
-    print("Tests sensoriales del proyecto:")
-    numero = None
-    atributo = None
-    for p in project.tests_sensoriales:
-        if p.type=="inicial":
-            tests.append(p)
-            p.numero_muestras = 4
-            numero = p.numero_muestras
-            atributo = p.atributo
-        
-    if not tests:
-        numero = int(request.form.get('numero_muestras'))
-        atributo = request.form.get('atributo')
 
-        print("Número de muestras:", numero, "Atributo:", atributo)
-        if numero:
-            try:
-                numero_muestras = int(numero)
-                print("Número de muestras:", numero_muestras)
-                resultados = {}
-                if numero_muestras > 0:
-                    for i in range(1, numero_muestras + 1):
-                        resultados[i] = 1
-                    test = Test_Hedonico(
-                        project_id=project.id,
-                        atributo=atributo,
-                        numero_muestras=int(numero_muestras),
-                        resultados=resultados,
-                        
-                    )
-                    Session.add(test)
-                    Session.commit()
-                    tests.append(test)
-            except ValueError:
-                print("Número de muestras no válido, se usará el valor por defecto de 4.")
-
-    
-    promedios_finales = promedios(project)
-
-    return render_template("funciones/Fase4/analisisSensorial2.html", project=project, tests = tests, numero_muestras=4, promedios=promedios_finales, atributo=atributo)
-
-
-
-
-
-
-#Funcion que elimina, guarda y añade tests
+#Funcion que elimina, guarda y añade tests de Aceptacion
 @analisisSensorial2_bp.route('/aceptacion/actualizar', methods=["POST", "GET"])
 @login_required
 def eliminar():
@@ -174,6 +190,8 @@ def eliminar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
         print(request.form)
         if 'eliminar' in request.form:
@@ -236,68 +254,6 @@ def eliminar():
 
 
 
-
-#Funcion que elimina, guarda y añade tests
-@analisisSensorial2_bp.route('/actualizar', methods=["POST", "GET"])
-@login_required
-def act():
-    
-    if 'project_id' in session:
-        project_id = session.get('project_id')
-        project = Session.query(Project).filter(Project.id == project_id).first()
-
-        print(request.form)
-        if 'eliminar' in request.form:
-            print("eliminar")
-            id = request.form.get("eliminar")
-            test = Session.query(Test_Hedonico).filter(Test_Hedonico.id == id).first()
-            if test:
-                Session.delete(test)
-                Session.commit()
-            else:   
-                print("No se encontró el test con ID:", id)
-        
-        if 'añadir' in request.form:
-
-                        test = Test_Hedonico(
-                            project_id=project.id,
-                            project=project,
-                            nombre_evaluador = "Nombre", 
-                            muestra = "1",
-                            puntuacion = 1,
-                            comentarios = "Comentarios",
-                        )
-                        Session.add(test)
-                        Session.commit()
-                
-        if 'guardar' in request.form:
-
-            i=0
-            print("Guardar tests")
-            print("Datos recibidos:", request.form)
-            while f'{i}[test_id]' in request.form:
-                test_id = request.form.get(f"{i}[test_id]")
-                test = Session.query(Test_Hedonico).filter(Test_Hedonico.id == int(test_id)).first()
-                if not test:
-                    print(f"No se encontró el test con ID: {test_id}")
-                    i += 1
-                    continue
-                if request.form.get(f"{test_id}[comentarios]"): test.comentarios = request.form.get(f"{test_id}[comentarios]")
-                if request.form.get(f"{test_id}[muestra]"): test.muestra = request.form.get(f"{test_id}[muestra]")
-                if request.form.get(f"{test_id}[puntuacion]"): test.puntuacion = request.form.get(f"{test_id}[puntuacion]")
-                if request.form.get(f"{test_id}[evaluador]"): test.nombre_evaluador = request.form.get(f"{test_id}[evaluador]")
-
-                Session.commit()
-                print(f"Test actualizado: {test_id} - {test.comentarios}, {test.muestra}, {test.puntuacion}, {test.nombre_evaluador}")
-
-                #recuperamos el resto de valores
-                i += 1
-           
-
-            # Guardar todos en la base de datos
-           
-    
-    return redirect(url_for('analisisSensorial2.inicio'))
 
 
 

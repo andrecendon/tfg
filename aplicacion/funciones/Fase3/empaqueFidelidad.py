@@ -21,6 +21,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     imagenes = []
     print("EMpaqueFidelidad: ", project.empaques)
@@ -66,6 +68,8 @@ def upload_files():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
     if 'file' not in request.files:
         return "No se envió ningún archivo", 400
@@ -109,6 +113,8 @@ def eliminar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     print(f"\n[DEBUG] Proyecto actual: {project.name} (ID: {project_id})")
     if request.method == 'POST':
         fichero = request.form.get('eliminar')

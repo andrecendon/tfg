@@ -24,10 +24,27 @@ def inicio():
     #try:
         print("Validacion nutricional inicio")
         #Recuperamos el favorito 
-        if 'prototype_id' in session:
+        if 'prototype_id' in session or 'project_id' in session:
             prototype_id = session.get('prototype_id')
             prototype = Session.query(Prototype).filter(Prototype.id == prototype_id).first()
+            if prototype is None:
+                if 'project_id' in session:
+                    project_id = session.get('project_id')
+                    project = Session.query(Project).filter(Project.id == project_id).first()
+                    if project is None:
+                        return redirect('/funciones')
+                    else:
+                        for p in project.prototypes:
+                            if p.is_favourite:
+                                prototype = p
+                                session['prototype_id'] = prototype.id
+                                print("Prototype favorito recuperado: ", prototype)
+                                break
+
             print("Prototype recuperado: ", prototype)
+            if not prototype:
+                return redirect('/funciones/Fase2/prototipoMedio/')
+            
             if prototype.valores_nutricionales is None: 
                 valores_nutricionales = ValoresNutricionales(prototype=prototype)
 
@@ -35,8 +52,9 @@ def inicio():
                 Session.add(valores_nutricionales)
             
                 Session.commit()
-            else:
-                prototype.valores_nutricionales.calcular_valores_nutricionales()
+           
+            prototype.valores_nutricionales.calcular_valores_nutricionales()
+            
         
         return render_template("funciones/Fase3/validacionNutricional.html", prototipo=prototype, prompt="¿Que valoración de NutriScore le darías a este prototipo? ¿Que cambiarías para mejorar su valor nutricional?")
     
@@ -93,6 +111,8 @@ def validacionCostos():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     if project.costos is None: 
         c = Costos(project = project)
@@ -112,6 +132,8 @@ def actualizar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     
     try:

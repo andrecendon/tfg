@@ -24,6 +24,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     return render_template("funciones/Fase2/prototipoMedio.html", proyecto=project)
 
@@ -35,6 +37,8 @@ def fav():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
         if request.method == "POST" and 'favorito' in request.form:
             fav = request.form.get("favorito")

@@ -27,9 +27,13 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if project.parametros_sustentables is None: 
             # Si no existe, creamos una nueva instancia
             chequeo = ParametrosSustentables(project=project)
+            Session.add(chequeo)
+            Session.commit()
         if project.parametros_sustentables.chequeo is None: 
             print("Creando nuevo")
             project.parametros_sustentables.chequeo = [
@@ -65,10 +69,10 @@ def inicio():
                                 { "texto": "¿Hemos mejorado prácticas tras la observación directa de nuestros usuarios finales?", "check": False }
                                 ]
             
-
+            
+            flag_modified(project.parametros_sustentables, "chequeo")
             Session.commit()
 
-    print("HH ", project.parametros_sustentables.chequeo)
     
     return render_template("funciones/Fase4/chequeo.html", project=project)
 
@@ -81,6 +85,8 @@ def guardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     if request.method == "POST":
 
@@ -101,7 +107,14 @@ def guardar():
                          i = i+1
 
     
-          
+    #Guardamos comentarios y acciones de mejora
+    mejoras = request.form.get('mejoras', '')
+    observaciones = request.form.get('observaciones', '')
+    if mejoras:
+        project.parametros_sustentables.mejoras = mejoras
+    if observaciones:
+        project.parametros_sustentables.observaciones = observaciones
+
     Session.commit()     
     if request.form.get('action') == 'save':
         return redirect('/funciones/Fase4/chequeo/')

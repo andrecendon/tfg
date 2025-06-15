@@ -29,6 +29,8 @@ def IdeaInicialguardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     if request.form and project:
         if request.form["claves_iniciales"] != "":
             project.claves_iniciales = request.form["claves_iniciales"]
@@ -48,6 +50,8 @@ def generar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     if request.form and project:
         if request.form["claves_iniciales"] != "":
             project.claves_iniciales = request.form["claves_iniciales"]
@@ -91,6 +95,8 @@ def guardarAlimentos():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
 
     #Recuperamos los alimentos y los metemos en el proyecto. Luego dirigmos a la pantallal de ingredientes. 
@@ -114,6 +120,8 @@ def empatizar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     return render_template("funciones/Fase1/empatizar.html", project=project)
 
 @formularios_bp.route('/empatizar/guardar', methods=["POST", "GET"])
@@ -122,6 +130,8 @@ def Empatizarguardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     if request.form:
         if request.form["empatizar1"] != "":
             project.empatizar1 = request.form["empatizar1"]
@@ -141,6 +151,8 @@ def ideacion():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
 
         
@@ -157,6 +169,8 @@ def crearIdea():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     nombre = request.form.get("nombre", "")
     impacto = request.form.get("impacto", 3)
@@ -179,6 +193,8 @@ def ideacionGuardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     if request.form:
 
         id = request.form.get("id")

@@ -17,6 +17,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         if not project.foods:
             return redirect(url_for("analisisNormativo.inicio"))
         alimentos = ", ".join([food.food_description for food in project.foods])

@@ -21,6 +21,8 @@ def quitarAlimento():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     else: 
         print("No hay proyecto")
     if food_id and project:
@@ -110,6 +112,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     n = len(project.prototypes)
     #Recuperamos todos los FoodPrototype de este prototipo para pasrle al html 
@@ -143,6 +147,8 @@ def añadirComida():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     accion = request.form.get('accion')
 
     if accion.startswith('eliminar_'):

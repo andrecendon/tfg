@@ -35,138 +35,58 @@ from aplicacion.funciones.resumen import resumen_bp
 from aplicacion.login.login import login_bp
 from flask_login import login_required, current_user, LoginManager, login_user, logout_user
 from datetime import timedelta
-
-# from aplicacion.funciones.Fase1.chatbot import Fase1_bp
+from flask_bcrypt import Bcrypt
 import json
 import atexit
+from datetime import datetime
+from flask import flash, url_for, request
 
 
+MAX_SEGUNDOS_INACTIVO = 30 * 60 # 30 minutos de inactividad se cierra sesión y el usuario debe volver a iniciar.
 app = Flask(__name__, static_folder="aplicacion/static", template_folder="aplicacion/templates")
 app.secret_key = 'your_secret_key'
+app.config['SQLALCHEMY_POOL_SIZE'] = 10
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 20
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 30
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 3600
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=MAX_SEGUNDOS_INACTIVO)  #cierra cookies en 30min
+bcrypt = Bcrypt(app)  # Inicializa Bcrypt con tu app Flask
 
 
+
+  
+SEGUNDOS_INACTIVOS = 0
+FECHA_ULTIMA_ACTIVIDAD = None
 
 # Configuración de Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login.log'
-app.secret_key="my_secret_key"
-
-
-app.config['SECRET_KEY'] ="my_secret_key"
+app.secret_key = "my_secret_key"
+app.config['SECRET_KEY'] = "my_secret_key"
 
 @login_manager.user_loader
 def load_user(user_id):
     user = Session.query(User).filter_by(id=user_id).first()
     return user  
 
+import pytz
 
 Session = DatabaseSession()
 
+#Comprueba si se cerraron las cookies en ese caso se hace logout
+@app.before_request
+def check_session_expiration():
+    if request.endpoint == 'login.log':
+        return
+    if not session:
+                logout_user()
+                session.clear() # Para que no acceda a otro proyecto, prototipo sin querer. 
+                Session.commit()
+                return redirect(url_for('login.log'))
 
-p = Session.query(Project).all()
-p2 = Session.query(FoodProject).all()
-
-proj = Session.query(Project).filter(Project.id == 1).first()
-
-
-    
-estado=0
-h = Session.query(User).all()
-
-h2 = Session.query(EvaluacionAvance).all()
-
-h3 = Session.query(Test_Sensorial).all()
-
-
-for u in h:
-    if u.name == "Andre2":
-        estado = 1
-        andre = u
-        break
-
-if estado==0: 
-    andre = User(name="Andre2", contraseña="1234")
-    Session.add(andre)
-
-
-if len(p)<1:
-    jo = Project(name="Ejemplo", user=andre)
-    Session.add_all([jo])
-
-##Projecto 
-
-if len(Session.query(Fase).all())<1:
-    fases_data = {
-    "1. Idea inicial de proyecto": "0",
-    "2. Empatizar con los usuarios": "0",
-    "3. Base de datos composición química de alimentos": "0",
-    "4. Estudio de mercado": "0",
-    "5. Ingredientes sustentables (matriz)": "0",
-    "6. Ideación": "0",
-    "7. Diseño experimental": "0",
-    "8. Prototipo 1 - Baja complejidad": "0",
-
-    "9. Prototipo de mediana complejidad": "0",
-    "10. Simulación de costos": "0",
-    "11. Análisis de viabilidad normativa": "0",
-    "12. Prototipo empaque": "0",
-
-    "13. Prototipado según diseño experimental": "0",
-    "14. Simulación de producción": "0",
-    "15. Actualización de precios de ingredientes": "0",
-    "16. Simulación cálculo gastos de agua y energía": "0",
-    "17. Análisis sensorial 1 - Inicial": "0",
-    "18. Validación de composición nutricional": "0",
-    "19. Escalamiento": "0",
-    "20. Validación de costos producción": "0",
-    "21. Prototipo de empaque alta fidelidad": "0",
-
-    "22. Medición parámetros de sustentabilidad inicial": "0",
-    "23. Estudio de vida útil": "0",
-    "24. Análisis sensorial 2 - Hedónico": "0",
-    "25. Validación de empaques": "0",
-    "26. Medición parámetros de sustentabilidad final": "0",
-    "27. Análisis sensorial 3 - Aceptación": "0",
-    
-}
-
-    # Crear una lista con todas las fases
-    todas_las_fases = []
-    for i, (nombre, estado) in enumerate(fases_data.items(), start=1):
-        fase = Fase(nombre=nombre, numero_paso=i, estado=int(estado))
-        todas_las_fases.append(fase)
-        Session.add(fase)
-
-    # Commit intermedio para que las fases tengan ID si fuera necesario
-    Session.commit()
-
-if len(h2)<1:
-    todas_las_fases = Session.query(Fase).all()
-
-    
-
-    # Crear una evaluación nueva
-    evaluacion = EvaluacionAvance(
-        id=1,  
-        avance=False,
-        comentarios="Evaluación inicial",
-        numero_fases=len(todas_las_fases),
-        fases=todas_las_fases,  # Asigna todas las fases directamente
-        project_id=1  # Asegúrate de que el proyecto con ID=1 exista
-    )
-
-    # Añadir y guardar
-    Session.add(evaluacion)
-    Session.commit()
-
-
-
-
-Session.commit()
-
-
-
+       
+            
 
 # Rutas
 
@@ -217,6 +137,10 @@ app.register_blueprint(login_bp, url_prefix='/login')
 # Base de datos
 @app.route("/")
 def home():
+    #todas las cookies 
+    print("Cookies:", request.cookies)
+    print("USUARIO LOGEADO? ", current_user.is_authenticated)
+    
     return render_template("login/login.html")
 
 if __name__ == '__main__':

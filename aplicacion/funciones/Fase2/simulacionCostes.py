@@ -43,6 +43,8 @@ def actualizar_peso_final():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
         
         for prototipo in project.prototypes:
             peso_final = request.form.get(f'peso_final_{prototipo.id}', '')

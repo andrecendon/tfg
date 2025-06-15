@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nuevo Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #28a745;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row col-1">
+            <a href="/proyectos" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+            </a>
+        </div>
+
+        <h1>Crear Editar Usuario</h1>
+
+        <div class="form-container">
+            <form action="/login/editarUsuario" method="POST" onsubmit="return validatePasswords()">
+                <input type="hidden" name="user_id" value="{{user.id}}">
+                <div class="input-group">
+                    <label for="email" class="optional-field">Correo electrónico:</label>
+                    <input type="email" id="email" name="email" value="{{user.email if user.email else ''}}" placeholder="ejemplo@dominio.com">
+                </div>
+
+                <div class="input-group">
+                    <label for="username" class="required-field">Nombre de usuario:</label>
+                    <input type="text" id="username" name="username" value="{{user.name if user.name else ''}}" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password" class="required-field">Contraseña:</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                    <small>Mínimo 6 caracteres</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm_password" class="required-field">Confirmar contraseña:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <div id="password-error" class="error-message"></div>
+                </div>
+
+                <p><small>Los campos marcados con * son obligatorios</small></p>
+                
+                <button type="submit" class="btn">Modificar Usuario</button>
+                
+                {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function validatePasswords() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const errorElement = document.getElementById('password-error');
+            
+            if (password !== confirmPassword) {
+                errorElement.textContent = "Las contraseñas no coinciden";
+                return false;
+            }
+            
+            if (password.length < 6) {
+                errorElement.textContent = "La contraseña debe tener al menos 6 caracteres";
+                return false;
+            }
+            
+            errorElement.textContent = "";
+            return true;
+        }
+    </script>
+</body>
+</html>

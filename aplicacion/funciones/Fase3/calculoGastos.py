@@ -25,6 +25,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
   
     #Hacemos una matriz para meter los precios de los ingredientes
@@ -60,6 +62,8 @@ def validacionCostos():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     if project.costos is None: 
         c = Costos(project = project)
@@ -79,6 +83,8 @@ def actualizar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     
     try:

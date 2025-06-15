@@ -150,13 +150,15 @@
 </head>
 <body>
     <div class="container">
-        <div class="mb-3">
-            <a href="/funciones" class="btn btn-light">
-                <i class="fas fa-arrow-left me-2"></i> Volver
+        &nbsp;
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Macronutrientes" style="width: 30px; height: 30px;">
             </a>
         </div>
+        &nbsp;
 
-        <h1 class="mb-4"><i class="fas fa-industry me-2"></i>Escalamiento</h1>
+        <h1 class="mb-4"><i class="fas fa-expand-arrows-alt me-2"></i>Escalamiento</h1>
         {% if project.simulacion_produccion.etapas %}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">

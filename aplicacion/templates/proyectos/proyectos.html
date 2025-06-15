@@ -84,16 +84,49 @@
             color: #5a5c69;
             font-weight: 600;
         }
+        .header {
+    display: flex;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+}
+
+.user-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.edit-btn, .logout-btn {
+    color: #333;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.edit-btn:hover {
+    color: #007bff;
+}
+
+.logout-btn:hover {
+    color: #dc3545;
+}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="welcome-message">Bienvenido, {{user.name}}</h1>
-            <a href="/logout" class="logout-btn" title="Cerrar sesión">
-                <i class="fas fa-sign-out-alt logout-icon"></i>
-            </a>
-        </div>
+    <h1 class="welcome-message">Bienvenido, {{user.name}}</h1>
+    <div class="user-actions">
+        <form action="/login/editarUsuario" method="GET">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <button type="submit" class="btn edit-btn" title="Modificar información">
+                <i class="fas fa-user-edit"></i>
+            </button>
+        </form>
+        
+        <a href="/login/logout" class="logout-btn" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt logout-icon"></i>
+        </a>
+    </div>
+</div>
         
         <h3 class="mb-4">Tus Proyectos</h3>
         
@@ -108,11 +141,19 @@
                             <i class="fas fa-folder-open"></i> Abrir
                         </button>
                     </form>
+                    <div style="display: inline-block;">    
                     <form action="/proyectos/eliminar" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-delete"  name="eliminar" value="{{project.id}}" onclick="return confirm('¿Estás seguro de que quieres eliminar este proyecto?');">
                             <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
+                     </form>
+                    <form action="/proyectos/actualizar" method="POST" style="display: inline;">
+                        <input type="hidden" name="id" value="{{ project.id }}">
+                        <button type="submit" class="btn" style="background-color: #ffc107;" name="editar" value="{{project.id}}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
                     </form>
+                   </div>
                 </div>
             </div>
             {% endfor %}

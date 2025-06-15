@@ -18,6 +18,8 @@ session.commit()
 #Diccionario para asignar al json el nombre de los atributos
 dic_nutrientes = {
     "Iron, Fe": "iron",
+    "Energy (Atwater General Factors)": "energy_kcal",
+    "Energy (Atwater Specific Factors)": "energy_kcal",
     "Energy": "energy_kcal",
     "Magnesium, Mg": "magnesium",
     "Phosphorus, P": "phosphorus",
@@ -30,19 +32,19 @@ dic_nutrientes = {
     "Manganese, Mn": "manganese",
     "Ash": "ash",
     "Selenium, Se": "selenium",
+    "Total dietary fiber (AOAC 2011.25)": "fiber",
     "Fiber, total dietary": "fiber",
     "Fiber, insoluble": "fiber",
     "Fatty acids, total saturated": "saturated_fat",
     "Fatty acids, total monounsaturated": "monounsaturated_fat",
     "Fatty acids, total polyunsaturated": "polyunsaturated_fat",
-    "Fatty acids, total trans": "trans_fat",
     "Cholesterol": "cholesterol",
     "Sugars, Total": "sugars",
     "Water": "water",
     "Calcium, Ca": "calcium",
     "Protein": "protein",
     "Carbohydrate, by difference": "carbohydrates",
-    #""Carbohydrate, by summation": "carbohydrates","
+    "Carbohydrate, by summation": "carbohydrates"
 }
 
 # Load JSON data
@@ -61,11 +63,13 @@ def asignar_nutrientes(food_data, f):
                     if mediana is None: 
                         mediana = n.get('amount', None)
                     nombre_nutriente = n2['name']
-                    #print("NUTRIENT : ", nombre_nutriente)
                     
-                    if(nombre_nutriente in dic_nutrientes):
+                    
+                    if(nombre_nutriente in dic_nutrientes and mediana is not None and mediana>0): 
                         nombre_nutriente_final = dic_nutrientes[nombre_nutriente]                     
                         setattr(f, nombre_nutriente_final, mediana)
+                        if nombre_nutriente == "Energy (Atwater Specific Factors)":
+                            print("Asignando energia especifica: ", mediana)
                         #sleep(1)
                         #print("\t Asignando: ", nombre_nutriente_final, nombre_nutriente, mediana)
 

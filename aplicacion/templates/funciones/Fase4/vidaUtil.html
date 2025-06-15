@@ -104,7 +104,7 @@
                         {% if file_list and file_list|length < 5 or not file_list %}
                         <div class="upload-container">
                             <form method="POST" action="subirArchivos" enctype="multipart/form-data">
-                                <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
+                                <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
                                 <input type="hidden" name="project" value="{{ project.name }}">
                                 <input type="hidden" name="categoria" value="{{ category }}">
                                 <div> &nbsp;</div>

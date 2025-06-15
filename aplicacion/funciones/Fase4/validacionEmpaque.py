@@ -27,6 +27,8 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
       
         empaque = Session.query(Empaque).filter(Empaque.project_id == project.id, Empaque.is_favourite==True).first()
         if empaque.chequeo is None: 
@@ -68,6 +70,8 @@ def guardar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     if request.method == "POST":
 

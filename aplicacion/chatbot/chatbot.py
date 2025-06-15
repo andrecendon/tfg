@@ -20,7 +20,7 @@ import base64
 from io import BytesIO
 import pathlib
 import textwrap
-
+import os
 from IPython.display import display
 from IPython.display import Markdown
 
@@ -101,7 +101,8 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     if model is None:
         model = "gemini-1.5-flash"
     if api_key is None:
-        api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
+        #api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
+        api_key = os.getenv("GEMINI_API_KEY")
     
     start_time = time.time()
     # Crea el modelo generativo

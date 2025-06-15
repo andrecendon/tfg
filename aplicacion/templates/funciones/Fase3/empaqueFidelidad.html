@@ -309,8 +309,9 @@
                                 <p class="text-muted">Sube imágenes para visualizarlas aquí</p>
                             </div>
                             {% endif %}
-
+                            
                             <div class="upload-container">
+                                {% if imagenes and imagenes|length < 3 %}
                                 <form method="POST" action="/funciones/Fase3/empaqueFidelidad/subirArchivos" enctype="multipart/form-data">
                                     <div class="file-input-container">
                                         <label for="file-upload" class="file-input-label">
@@ -326,9 +327,11 @@
                                             <i class="fas fa-upload me-2"></i>Subir archivos
                                         </button>
                                     </div>
-                                </form>
-                                <div class="max-files">Máximo 5 archivos ({{ imagenes|length if imagenes else 0 }}/5)</div>
+                                </form>{% endif %}
+
+                                <div class="max-files">Máximo 3 imágenes ({{ imagenes|length if imagenes else 0 }}/3)</div>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -483,9 +486,9 @@
             const fileInput = document.getElementById('file-upload');
             const currentCount = {{ imagenes|length if imagenes else 0 }};
             
-            if(fileInput.files.length + currentCount > 5) {
+            if(fileInput.files.length + currentCount > 3) {
                 e.preventDefault();
-                alert('No puedes exceder el límite de 5 archivos. Ya tienes ' + currentCount + ' archivos subidos.');
+                alert('No puedes exceder el límite de 3 archivos. Ya tienes ' + currentCount + ' archivos subidos.');
             }
         });
 

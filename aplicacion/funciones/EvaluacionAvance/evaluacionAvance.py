@@ -20,24 +20,13 @@ FASE4 = 27
 @evaluacionAvance_bp.route('/', methods=["POST", "GET"])
 @login_required
 def inicio():
-   if 'evaluacion_id' in session and 'project_id' in session:
-       evaluacion_id = session.get('evaluacion_id')
-       avance = Session.query(EvaluacionAvance).filter(EvaluacionAvance.project_id == session.get('project_id') ).first()
+   
+   if 'project_id' in session:
+       avance = Session.query(EvaluacionAvance).filter(EvaluacionAvance.project_id == int(session.get('project_id')) ).first()
+       session['evaluacion_id'] = avance.id
        
-   elif avance is None:
-      
-      todas_las_fases = Session.query(Fase).all()
-                # Crear una evaluación nueva
-      avance = EvaluacionAvance(
-                    avance=False,
-                    numero_fases=len(todas_las_fases),
-                    fases=todas_las_fases,  # Asigna todas las fases directamente
-                    project_id=session.get('project_id')
-                )
-      
-      Session.add(avance)
-      Session.commit()
-      session['evaluacion_id'] = avance.id
+   if avance is None:
+       return redirect("/funciones/")
    
    print( avance.id ," AVANCES ", avance.avance, avance.avance2, avance.avance3)
    print(avance)
@@ -48,12 +37,17 @@ def inicio():
 ## Se puede recibir a traves de la flecha back, tiene que probarse pero 
 @evaluacionAvance_bp.route('/guardar', methods=["POST", "GET"])
 def save_evaluation():
-   if 'evaluacion_id' in session:
+   
+   if 'project_id' in session:
+       
+       project = Session.query(Project).filter(Project.id == session.get('project_id')).first()
+       
+       
+       evaluacion = project.evaluacion_avance
+       
        
           
-       evaluacion_id = session.get('evaluacion_id')
-       print("evaluacion_id: ", evaluacion_id)
-       evaluacion = Session.query(EvaluacionAvance).filter(EvaluacionAvance.project_id == session.get('project_id')).first()
+       
        comentario = request.form.get("comentarios", "")
        print(request.form)
        print("Evaluando ", evaluacion)

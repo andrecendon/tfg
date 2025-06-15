@@ -19,32 +19,36 @@ analisisSensorial_bp = Blueprint("analisisSensorial", __name__, template_folder=
 Session = DatabaseSession()
 
 
-
-
 def promedios(project):
     tests =Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).all()
-    numero_muestras = tests[0].numero_muestras if tests else 4
     promedios = {}
+    num_muestras = {}
 
-    # Convertir tests a formato serializable y calcular promedios
+    #Recorrer los tests, si se encuentra en la lista calcular el promedio 
     for test in tests:
-        resultados = test.resultados if isinstance(test.resultados, dict) else json.loads(test.resultados)
-        for muestra, posicion in resultados.items():
-            if muestra not in promedios:
-                promedios[muestra] = []
-            promedios[muestra].append(float(posicion))
-
-        # Calcular promedios finales
-        promedios_finales = {
-            muestra: sum(valores)/len(valores) if valores else 0
-            for muestra, valores in promedios.items()
-        }
+        if test.type == "inicial":
+            if test.muestra not in promedios:
+                promedios[test.muestra] = test.posicion
+                num_muestras[test.muestra] = 1
+            else:
+                promedios[test.muestra] += test.posicion
+                num_muestras[test.muestra] += 1
+    print("Promedios:", promedios)
+    print("Número de muestras:", num_muestras)
+    # Calcular el promedio final
+    promedios_finales = {}
+    for muestra, total in promedios.items():
+        if num_muestras[muestra] > 0:
+            promedios_finales[muestra] = total / num_muestras[muestra]
+        else:
+            promedios_finales[muestra] = 0
     
+    if promedios_finales:
         return promedios_finales
     
     return None
 
-#### PANTALLA principal ####
+
 @analisisSensorial_bp.route('/', methods=["POST", "GET"])
 @login_required
 def inicio():
@@ -52,21 +56,25 @@ def inicio():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
     
-    tests = []
-    numero = None
-    atributo = None
-    for p in project.tests_sensoriales:
-        if p.type=="inicial":
-            tests.append(p)
-            numero = p.numero_muestras
-            atributo = p.atributo
-        # Si no hay tests y viene informado la cantidad de muestras, se crea un test por defecto
+    tests = Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).all()
     
-    promedios_finales = promedios(project)
+    
+       
+    if tests:
+        promedios_finales = promedios(project)
+    else: 
+        promedios_finales = {}
 
-    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests, numero_muestras=numero, atributo= atributo, promedios=promedios_finales) 
+    print("Tests sensoriales iniciales del proyecto:", tests)
+
+    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests, numero_muestras=len(promedios_finales), promedios=promedios_finales) 
+
+#### PANTALLA principal ####
+
 
 
 @analisisSensorial_bp.route('/iniciar', methods=["POST", "GET"])
@@ -76,67 +84,44 @@ def iniciar():
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
     
-    
-    tests = []
-    print("Tests sensoriales del proyecto:")
-    numero = None
-    atributo = None
-    for p in project.tests_sensoriales:
-        if p.type=="inicial":
-            tests.append(p)
-            p.numero_muestras = 4
-            numero = p.numero_muestras
-            atributo = p.atributo
-        
+    tests = Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).all()
     if not tests:
-        numero = int(request.form.get('numero_muestras'))
-        atributo = request.form.get('atributo')
-
-        print("Número de muestras:", numero, "Atributo:", atributo)
-        if numero:
-            try:
-                numero_muestras = int(numero)
-                print("Número de muestras:", numero_muestras)
-                resultados = {}
-                if numero_muestras > 0:
-                    for i in range(1, numero_muestras + 1):
-                        resultados[i] = 1
-                    test = Test_Sensorial_Inicial(
-                        project_id=project.id,
-                        atributo=atributo,
-                        numero_muestras=int(numero_muestras),
-                        resultados=resultados,
-                        
-                    )
-                    Session.add(test)
-                    Session.commit()
-                    tests.append(test)
-            except ValueError:
-                print("Número de muestras no válido, se usará el valor por defecto de 4.")
-
+        atributo = request.form.get("atributo", "Atributo")
+        test = Test_Sensorial_Inicial(
+            project_id=project.id,
+            nombre_evaluador = "Nombre",
+            atributo=atributo,
+            muestra = "1",
+            posicion = 1,
+            comentarios = " ",
+        )
+        
+        Session.add(test)
+        Session.commit()
+        
+    else:
+        atributo = request.form.get("atributo", tests[0].atributo)
+        for test in tests:
+            if test.atributo != atributo:
+                test.atributo = atributo
+                Session.commit()
     
-    promedios_finales = promedios(project)
-
-    return render_template("funciones/Fase3/analisisSensorial.html", project=project, tests = tests, numero_muestras=4, promedios=promedios_finales, atributo=atributo)
+    return redirect(url_for('analisisSensorial.inicio'))
 
 
 
-    
-
-
-
-
-
-
-#Funcion que elimina, guarda y añade tests
-@analisisSensorial_bp.route('/eliminar', methods=["POST", "GET"])
+@analisisSensorial_bp.route('/actualizar', methods=["POST", "GET"])
 @login_required
-def eliminar():
+def act():
     
     if 'project_id' in session:
         project_id = session.get('project_id')
         project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
 
         print(request.form)
         if 'eliminar' in request.form:
@@ -150,67 +135,49 @@ def eliminar():
                 print("No se encontró el test con ID:", id)
         
         if 'añadir' in request.form:
-            
-            test = Session.query(Test_Sensorial_Inicial).filter(Project.id==project.id).first()
-            if test:
-                try:
-                    
-                    if int(test.numero_muestras) > 0:
+            atributo = request.form.get("atributo", "")
+            if atributo:
                         test = Test_Sensorial_Inicial(
                             project_id=project.id,
-                            atributo=test.atributo,
-                            numero_muestras=int(test.numero_muestras),
-                            resultados=test.resultados
+                            project=project,
+                            atributo = atributo,
+                            nombre_evaluador = "Nombre", 
+                            muestra = "1",
+                            posicion = 1,
+                            comentarios = "Comentarios",
                         )
                         Session.add(test)
                         Session.commit()
-                except ValueError:
-                    print("Número de muestras no válido, se usará el valor por defecto de 4.")
-        #Actualizamos la lista de tests
+                
         if 'guardar' in request.form:
 
-            tests_final = []
-            i = 0
-            while f'tests[{i}][nombre_evaluador]' in request.form:
-                nombre = request.form.get(f'tests[{i}][nombre_evaluador]')
-                comentarios = request.form.get(f'tests[{i}][comentarios]', '')
-                id = request.form.get(f'tests[{i}][id]', None)
-                print("Nombre:", nombre, "Comentarios:", comentarios, "ID:", id)
-                if id:
-                    test = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.id == id).first()
-                    print("Test recuperado:", test)
-                    if not test:
-                        print("No se encontró el test con ID:", id)
-                        continue
-                
-                    print("Recuperando datos del test:", nombre, comentarios)
-                    # Recolectamos muestras y posiciones en un dict
-                    resultados = {}
-                    print(request.form)
-                    j = 1
-                    print(f"Recuperando muestras para el test {i}")
-                    print(request.form.get('tests[0][muestra1_codigo]'))
-                    while request.form.get(f'tests[{i}][muestra{j}_codigo]'):
-                        print(f"Recuperando muestra {j} para el test {i}")
-                        muestra = request.form.get(f'tests[{i}][muestra{j}_codigo]')
-                        posicion = request.form.get(f'tests[{i}][posicion{j}]')
-                        print(f"Muestra {j}: {muestra}, Posición: {posicion}")
-                        if muestra and posicion:
-                            resultados[muestra] = int(posicion)
-                        j += 1
-                    test.nombre_evaluador = nombre
-                    test.comentarios = comentarios
-                    test.resultados = resultados
-                    Session.commit()
-                    print("Test actualizado:", test)
-                
-                
+            i=0
+            print("Guardar tests")
+            print("Datos recibidos:", request.form)
+            while f'{i}[test_id]' in request.form:
+                test_id = request.form.get(f"{i}[test_id]")
+                test = Session.query(Test_Sensorial_Inicial).filter(Test_Sensorial_Inicial.id == int(test_id)).first()
+                if not test:
+                    print(f"No se encontró el test con ID: {test_id}")
+                    i += 1
+                    continue
+                if request.form.get(f"{test_id}[comentarios]"): test.comentarios = request.form.get(f"{test_id}[comentarios]")
+                if request.form.get(f"{test_id}[muestra]"): test.muestra = request.form.get(f"{test_id}[muestra]")
+                if request.form.get(f"{test_id}[posicion]"): test.posicion = request.form.get(f"{test_id}[posicion]")
+                if request.form.get(f"{test_id}[evaluador]"): test.nombre_evaluador = request.form.get(f"{test_id}[evaluador]")
+
+                Session.commit()
+                print(f"Test actualizado: {test_id} - {test.comentarios}, {test.muestra}, {test.posicion}, {test.nombre_evaluador}")
+
+                #recuperamos el resto de valores
                 i += 1
+           
 
             # Guardar todos en la base de datos
            
     
-    return redirect("/funciones/Fase3/analisisSensorial")
+    return redirect(url_for('analisisSensorial.inicio'))
+    
 
 
 
