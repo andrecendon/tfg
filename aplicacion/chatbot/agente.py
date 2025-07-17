@@ -62,7 +62,7 @@ def enviar():
                 if project:
                     resumen = project.resumen()
 
-        contexto = "Contexto del proyecto: " + resumen + "\n\n"
+        contexto = "Función: Eres un asistente que responde de manera clara usando la información que se te proporciona. Formato: Devuelve un formato de texto plano ya que no se va a estructurar ni dar estilo, además no muestre ningún tipo de ID. Contexto del proyecto: " + resumen + "\n\n"
         contexto += "\n".join(
             f"Usuario: {value}" if key.startswith('user') else f"Asistente: {value}"
             for key, value in mensajes.items()
@@ -70,8 +70,9 @@ def enviar():
         
         # Generar respuesta
         try:
+            print("EMpezando")
             respuesta, _ = ModeloIA(prompt=f"{contexto}\n\nUsuario: {nuevo_prompt}")
-           
+            print("acabo")
             respuesta_texto = respuesta
             print("Respuesta generada:", respuesta_texto)
             # Añadir nuevos mensajes al historial

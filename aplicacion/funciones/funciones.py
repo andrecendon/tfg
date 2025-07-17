@@ -103,7 +103,7 @@ def a():
 
         return render_template("funciones/funciones.html", project=project, evaluacion_avance=ev)
     except:
-         return "Vuelve a iniciar sesión"
+         return redirect(url_for('login.login'))
     
 
 @funciones_bp.route('/accion', methods=["POST", "GET"])

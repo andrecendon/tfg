@@ -132,7 +132,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="atributo" class="form-label">Atributo a Evaluar:</label>
-                        <input type="text" id="atributo" name="atributo" class="form-control" value="{{ tests[0].atributo or '' }}" placeholder="No especificado"  >
+                        <input type="text" id="atributo" name="atributo" class="form-control" value="{{ tests[0].atributo if tests else '' }}" placeholder="No especificado"  >
                     </div>
                 </div>
             </div>

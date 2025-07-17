@@ -54,7 +54,7 @@ def etapa():
         if not project:
             return redirect("/proyectos")
 
-    numero_etapa = request.form.get("numero_etapa")
+    numero_etapa = int(request.form.get("numero_etapa"))
     nombre_etapa = request.form.get("nombre_etapa")
     descripcion_etapa = request.form.get("descripcion_etapa")
     print("Datos recibidos: ", numero_etapa, nombre_etapa, descripcion_etapa)
@@ -65,9 +65,9 @@ def etapa():
                 project.simulacion_produccion = SimulacionProduccion(project=project)
                 Session.add(project.simulacion_produccion)
                 Session.commit()
-            if project.simulacion_produccion.etapas is None:
+            if project.simulacion_produccion.etapas:
                 for etapa in project.simulacion_produccion.etapas:
-                    if etapa.numero_etapa == numero_etapa:
+                    if etapa.numero_etapa == int(numero_etapa):
                         print("Ya existe una etapa con este número: ", numero_etapa)
                         return redirect(url_for('simulacionProduccion.inicio'))
             etapa = EtapaProduccion(numero_etapa=numero_etapa, nombre=nombre_etapa, descripcion=descripcion_etapa, simulacion = project.simulacion_produccion)
@@ -171,6 +171,7 @@ def act():
             etapa = Session.query(EtapaProduccion).filter(EtapaProduccion.id == id, EtapaProduccion.simulacion == project.simulacion_produccion).first()
             if numero not in numeros:
                 numeros.append(numero)
+                print("Meteemos en numeros ", numero, numeros)
                 if etapa:
                     etapa.numero_etapa = numero
                     etapa.nombre = nombre
@@ -182,8 +183,10 @@ def act():
             
            
             i += 1
+        
 
         if i>0:
+            
             Session.commit()
         else:
             print("Hay números repetidos en las etapas.")

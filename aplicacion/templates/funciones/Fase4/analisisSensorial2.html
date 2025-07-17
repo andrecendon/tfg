@@ -182,7 +182,7 @@
                                         <td>
                                             <textarea class="form-control" 
                                                       name="{{test.id}}[comentarios]" 
-                                                      rows="1">{{ test.comentarios }}</textarea>
+                                                      rows="1">{{ test.comentarios if test.comentarios else ''}}</textarea>
                                         </td>
                                     
                                     

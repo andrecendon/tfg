@@ -6,7 +6,7 @@ from collections import defaultdict
 from flask_login import login_required
 from aplicacion.chatbot.chatbot import ModeloIA
 import json
-
+from sqlalchemy.orm.attributes import flag_modified
 
 # Crear el Blueprint
 calculoGastos_bp = Blueprint("calculoGastos", __name__, template_folder="templates")
@@ -93,18 +93,30 @@ def actualizar():
         print("Datos recibidos:", request.form)
         
         # Procesar ingredientes
-        ingredientes = {}
-        for key, value in request.form.items():
+        
+        ingredientes_json = {}
+
+        datos_formulario = request.form
+        # Iterar sobre los datos del formulario para construir el JSON
+        for key, value in datos_formulario.items():
             if key.startswith('ingredientes['):
-                parts = key.split('[')
-                nombre = parts[1].split(']')[0]
-                campo = parts[2].split(']')[0]
-                
-                if nombre not in ingredientes:
-                    ingredientes[nombre] = {}
-                
-                ingredientes[nombre][campo] = value
-        print("Ingredientes procesados:", ingredientes)
+                # Extraer el nombre del ingrediente y el campo (descripcion, cantidad, costo)
+                # Ejemplo de key: 'ingredientes[Egg, white, raw, frozen, pasteurized][descripcion]'
+                parts = key.split('][')
+                nombre_ingrediente = parts[0].replace('ingredientes[', '')
+                campo = parts[1].replace(']', '')
+
+                # Asegurarse de que el ingrediente exista en el diccionario final
+                if nombre_ingrediente not in ingredientes_json:
+                    ingredientes_json[nombre_ingrediente] = {}
+                print("Nombre ingrediente: ", nombre_ingrediente, " Campo: ", campo, " Valor: ", value)
+                # Convertir cantidad y costo a float si el campo lo requiere
+                if campo in ['cantidad', 'costo']:
+                    ingredientes_json[nombre_ingrediente][campo] = float(value)
+                else:
+                    ingredientes_json[nombre_ingrediente][campo] = value
+
+        
         # Procesar empaque
         empaque = {}
         for key, value in request.form.items():
@@ -122,6 +134,7 @@ def actualizar():
                         empaque[nombre][campo] = float(value)
                     except ValueError:
                         empaque[nombre][campo] = 0.0
+                
                 else:
                     empaque[nombre][campo] = value
         
@@ -171,7 +184,10 @@ def actualizar():
         }
         
         # Actualizar el objeto de costos
-        project.costos.ingredientes = ingredientes
+        #Session.begin()  # Inicia explícitamente la transacción
+        project.costos.ingredientes = ingredientes_json
+        flag_modified(project.costos, 'ingredientes')
+        Session.commit()  # Confirma explícitamente
         project.costos.empaque = empaque
         project.costos.mano_obra = mano_obra
         project.costos.electricidad = electricidad
@@ -181,8 +197,11 @@ def actualizar():
         project.costos.mermas = mermas
         project.costos.adicionales = adicionales
 
+        #Marcar que se produjeron cambios en el json
         Session.commit()
-        print("Costos actualizados:", project.costos)
+        Session.refresh(project.costos)
+        
+        print("Ingredientes dssps JSON:", project.costos.ingredientes)
 
         if 'action' in request.form and request.form['action'] == 'back':
             return redirect('/funciones')

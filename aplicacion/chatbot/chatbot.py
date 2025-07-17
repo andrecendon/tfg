@@ -99,7 +99,7 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     # Configura tu API Key
     
     if model is None:
-        model = "gemini-1.5-flash"
+        model = "gemini-2.0-flash"
     if api_key is None:
         api_key = "AIzaSyD4nvMaH39V07jGRL_vuJxUnbhjNInUHCI"
         #api_key = os.getenv("GEMINI_API_KEY")
@@ -107,11 +107,14 @@ def ModeloIA(prompt, model=None, config=None, api_key=None):
     start_time = time.time()
     # Crea el modelo generativo
     client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(
-        model=model,
-        contents=prompt,
-        config=config,
-    )
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=config,
+        )
+    except:
+         response = None
     
 
     # Genera la respuesta

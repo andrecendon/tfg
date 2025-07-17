@@ -199,25 +199,25 @@
                                         <td>
                                             <select name="{{ test.id }}[apariencia]" class="form-control text-center" >
                                                 <option value="" disabled selected>Selecciona una opción</option>
-                                                <option value="5" {% if test.apariencia == "5" %}selected{% endif %}>Muy mala</option>
-                                                <option value="4" {% if test.apariencia == "4" %}selected{% endif %}>Mala</option>
+                                                <option value="5" {% if test.apariencia == "5" %}selected{% endif %}>Muy buena</option>
+                                                <option value="4" {% if test.apariencia == "4" %}selected{% endif %}>Buena</option>
                                                 <option value="3" {% if test.apariencia == "3" %}selected{% endif %}>Regular</option>
-                                                <option value="2" {% if test.apariencia == "2" %}selected{% endif %}>Buena</option>
-                                                <option value="1" {% if test.apariencia == "1" %}selected{% endif %}>Muy buena</option>
+                                                <option value="2" {% if test.apariencia == "2" %}selected{% endif %}>Mala</option>
+                                                <option value="1" {% if test.apariencia == "1" %}selected{% endif %}>Muy mala</option>
                                             </select>
                                         </td>
                                         <td>
                                             <select name="{{ test.id }}[compra]" class="form-control text-center" >
                                                 <option value="" disabled selected>Selecciona una opción</option>
-                                                <option value="5" {% if test.compra == "3" %}selected{% endif %}>Sí</option>
-                                                <option value="4" {% if test.compra == "2" %}selected{% endif %}>Tal vez</option>
-                                                <option value="3" {% if test.compra == "1" %}selected{% endif %}>No</option>
+                                                <option value="3" {% if test.compra == "3" %}selected{% endif %}>Sí</option>
+                                                <option value="2" {% if test.compra == "2" %}selected{% endif %}>Tal vez</option>
+                                                <option value="1" {% if test.compra == "1" %}selected{% endif %}>No</option>
                                             </select>
                                         </td>
                                         <td>
                                             <textarea class="form-control" 
                                                       name="{{test.id}}[comentarios]" 
-                                                      rows="1">{{ test.comentarios }}</textarea>
+                                                      rows="1">{{ test.comentarios if test.comentarios else '' }}</textarea>
                                         </td>
                                     
                                     
@@ -250,13 +250,7 @@
        
         <div class="d-flex justify-content-between mt-3">
            
-            <div>
-                <button type="submit" name="resultados" value="mostrar_resultados" class="btn btn-info">
-                    <i class="fas fa-chart-pie me-1"></i> Mostrar resultados
-                </button>
-               
-            </div>
-        </div>
+            
     </form>
 
        

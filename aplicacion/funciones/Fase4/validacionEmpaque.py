@@ -29,9 +29,11 @@ def inicio():
         project = Session.query(Project).filter(Project.id == project_id).first()
         if not project:
             return redirect("/proyectos")
-      
+        
         empaque = Session.query(Empaque).filter(Empaque.project_id == project.id, Empaque.is_favourite==True).first()
-        if empaque.chequeo is None: 
+        if not empaque:
+            return redirect("/funciones/Fase2/empaque/")
+        if empaque.chequeo is None or len(empaque.chequeo) == 0: 
             print("Creando nuevo")
             empaque.chequeo = [
                 { "texto": "¿El envase final cumple con la normativa de contacto alimentario aplicable (UE, FDA, Mercosur)?", "check": False },

@@ -114,7 +114,7 @@
                                 <th>Descripción</th>
                                 <th style="width: 50px;">Unidad</th>
                                 <th>Cantidad</th>
-                                <th>Costo Unitario (USD)</th>
+                                <th>Costo Unitario ($/kg)</th>
                                 <th>Costo Total (USD)</th>
                             </tr>
                         </thead>
@@ -130,14 +130,15 @@
                         <tr>
                             <td>{{ clave }}</td>
                             <td>
-                            <input type="text" class="editable-field" name="ingredientes[{{ clave }}][descripcion]" 
-                                    value="{{ valor.descripcion }}" required>
+                            <!-- <input type="text" class="editable-field" name="ingredientes[{{ clave }}][descripcion]" value="{{ valor.descripcion }}" required> -->
                             </td>
                             <td class="unidad-cell">g</td>
                             <td>{{ valor.cantidad }}</td>
+                            <input type="hidden" name="ingredientes[{{ clave }}][cantidad]" value="{{ valor.cantidad }}">
+                            <input type="hidden" name="ingredientes[{{ clave }}][costo]" value="{{ valor.costo }}">
                             <td>{{ valor.costo }}</td>
-                            <td>{{ "%.2f"|format(valor.costo * valor.cantidad) }}</td>
-                            {% set _ = subtotals.update({'ingredientes': subtotals['ingredientes'] + (valor.costo * valor.cantidad)}) %}
+                            <td>{{ "%.2f"|format(valor.costo/100 * valor.cantidad) }}</td>
+                            {% set _ = subtotals.update({'ingredientes': subtotals['ingredientes'] + (valor.costo/100 * valor.cantidad)}) %}
                         </tr>
                         {% endfor %}
                         {% endif %}
@@ -159,7 +160,7 @@
                                     <td>{{ clave }}</td>
                                     <td>
                                     <input type="text" class="editable-field" name="empaque[{{ clave }}][descripcion]" 
-                                            value="{{ valor.descripcion }}" required>
+                                            value="{{ valor.descripcion }}" >
                                     </td>
                                     <td class="unidad-cell">unidad</td>
                                     <td>
@@ -191,7 +192,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="operario[descripcion]" 
-                                            value="{{ project.costos.mano_obra.descripcion }}" required>
+                                            value="{{ project.costos.mano_obra.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
@@ -211,7 +212,7 @@
                             <tr class="subtotal-row">
                                 <td colspan="4"></td>
                                 <td>Subtotal Mano de Obra</td>
-                                <td>{{ "%.2f"|format(subtotals['empaques']) }}</td>
+                                <td>{{ "%.2f"|format(subtotals['mano_obra']) }}</td>
                             </tr>
 
                             <!-- Costos indirectos -->
@@ -223,7 +224,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="electricidad[descripcion]" 
-                                            value="{{ project.costos.electricidad.descripcion }}" required>
+                                            value="{{ project.costos.electricidad.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
@@ -242,7 +243,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="agua[descripcion]" 
-                                            value="{{ project.costos.agua.descripcion }}" required>
+                                            value="{{ project.costos.agua.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
@@ -261,7 +262,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="depreciacion_equipos[descripcion]" 
-                                            value="{{ project.costos.depreciacion_equipos.descripcion }}" required>
+                                            value="{{ project.costos.depreciacion_equipos.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
@@ -294,11 +295,11 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="transporte[descripcion]" 
-                                            value="{{ project.costos.transporte.descripcion }}" required>
+                                            value="{{ project.costos.transporte.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
-                                    <input type="number" class="editable-field" name="electricidad[cantidad]" 
+                                    <input type="number" class="editable-field" name="transporte[cantidad]" 
                                             value="{{ project.costos.transporte.cantidad }}" step="0.01" min="0" required>
                                 </td>
                                 <td>
@@ -313,7 +314,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="mermas[descripcion]" 
-                                            value="{{ project.costos.mermas.descripcion }}" required>
+                                            value="{{ project.costos.mermas.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell">hora</td>
                                 <td>
@@ -332,7 +333,7 @@
                                 
                                 <td>
                                     <input type="text" class="editable-field" name="adicionales[descripcion]" 
-                                            value="{{ project.costos.adicionales.descripcion }}" required>
+                                            value="{{ project.costos.adicionales.descripcion }}" >
                                 </td>
                                 <td class="unidad-cell"> </td>
                                 <td>
@@ -340,7 +341,7 @@
                                             value="{{ project.costos.adicionales.cantidad }}" step="0.01" min="0" required>
                                 </td>
                                 <td>
-                                    <input type="number" class="editable-field" name="depreciacion_equipos[costo]" 
+                                    <input type="number" class="editable-field" name="adicionales[costo]" 
                                             value="{{ project.costos.adicionales.costo }}" step="0.01" min="0" required>
                                 </td>
                                     <td class="total-cell">{{ "%.2f"|format(project.costos.adicionales.costo * project.costos.adicionales.cantidad) }}</td>

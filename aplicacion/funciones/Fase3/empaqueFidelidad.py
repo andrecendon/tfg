@@ -25,12 +25,14 @@ def inicio():
             return redirect("/proyectos")
     
     imagenes = []
-    print("EMpaqueFidelidad: ", project.empaques)
+    #print("EMpaqueFidelidad: ", project.empaques)
     if len(project.empaques) == 0:
-        emp = Empaque(project_id=project.id, is_favourite=True)
-        Session.add(emp)
+        #lista de 18 items inicializada a 0 todos. 
+        chequeo_inicial = {i: 0 for i in range(18)}  # Creates {0: 0, 1: 0, ..., 17: 0}
+        empa = Empaque(project_id=project.id, is_favourite=True, chequeo_inicial=chequeo_inicial, chequeo=None)
+        Session.add(empa)
         Session.commit()
-        print("EMPAQUE: ", emp.imagen1)
+        print("Imagen empaque: ", empa.imagen1)
     for p in project.empaques:
         if p.is_favourite == True:
             if p.imagen1:
@@ -55,9 +57,19 @@ def inicio():
     else:
         print("La carpeta no se pudo crear.")
     
-    print("Imagenes: ", imagenes)   
+    print("Imagenes: ", imagenes)
+    i =0 
+    for p in project.empaques:
+        if p.is_favourite == True:
+            print("EMPAQUE FAV: ", p)
+            chequeo_inicial = p.chequeo_inicial
+            i = 1
+            break
+    if i==0:
+        return redirect("/funciones/Fase2/empaque/")
     
-    return render_template("funciones/Fase3/empaqueFidelidad.html", proyecto=project, imagenes=imagenes)
+    
+    return render_template("funciones/Fase3/empaqueFidelidad.html", proyecto=project, imagenes=imagenes, chequeo_inicial=chequeo_inicial)
 
 
 
@@ -139,4 +151,42 @@ def eliminar():
         else:
             print(f"[DEBUG] Archivo no encontrado: {file_path}")
 
+    return redirect("/funciones/Fase3/empaqueFidelidad/")
+
+
+
+@empaqueFidelidad_bp.route('/chequeo', methods=["POST", "GET"])
+@login_required
+def chequeo():
+    print(request.form)
+    if 'project_id' in session:
+        project_id = session.get('project_id')
+        project = Session.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            return redirect("/proyectos")
+    
+    # Procesar los datos del formulario y actualizar el campo chequeo
+    for p in project.empaques:
+        if p.is_favourite == True:
+            #print("EMPAQUE FAV: ", p)
+            chequeo_dict = p.chequeo_inicial
+            break
+    if not chequeo_dict:
+        p.chequeo_inicial = {i: 0 for i in range(18)}
+    
+    for i in range(1, 19):
+        key = f"item{i}"
+        hidden_key = f"item{i}_hidden"
+        # Si el item está en el form, usar su valor, si no, usar el valor oculto
+        #print(f"[DEBUG] Procesando item {i}: clave={key}, clave oculta={hidden_key}")
+        if key in request.form:
+            chequeo_dict[str(i-1)] = int(request.form[key]) #Nuestro chequeo es de 0 a 17, por eso i-1
+        elif hidden_key in request.form:
+            chequeo_dict[str(i-1)] = int(request.form[hidden_key])
+        else:
+            chequeo_dict[str(i-1)] = 0  # Valor por defecto
+
+    p.chequeo_inicial = chequeo_dict
+    Session.commit()
+    
     return redirect("/funciones/Fase3/empaqueFidelidad/")

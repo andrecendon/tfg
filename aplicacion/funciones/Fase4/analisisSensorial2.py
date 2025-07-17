@@ -168,7 +168,6 @@ def aceptacion():
             project_id=project.id,
             nombre_evaluador = "1",
             agrado = "3",
-            aceptacion = "3",
             compra = "2",
             apariencia = "3",
             textura = "3",
@@ -239,7 +238,7 @@ def eliminar():
                 if request.form.get(f"{test_id}[textura]"): test.textura = request.form.get(f"{test_id}[textura]")
 
                 Session.commit()
-                print(f"Test actualizado: {test_id} - {test.comentarios}, {test.apariencia}, {test.agrado}, {test.nombre_evaluador}")
+                print(f"Test actualizado: {test_id} - apariencia: {test.apariencia}, agrado: {test.agrado}, compra: {test.compra}, textura: {test.textura}, sabor: {test.sabor}, evaluador: {test.nombre_evaluador}")
 
                 #recuperamos el resto de valores
                 i += 1

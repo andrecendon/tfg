@@ -1,0 +1,382 @@
+/* General Styles */
+body {
+    background-color: #f8f9fa;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Header Styles */
+.project-header {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.btn-back {
+    color: #6c757d;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    color: #0d6efd;
+    transform: translateX(-3px);
+}
+
+.project-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.project-name {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* Section Headers */
+.section-header {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+/* Card Styles */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    margin-bottom: 25px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Food List Styles */
+.food-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.food-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 4px solid #3498db;
+}
+
+.food-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.nutrient-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    padding: 0.5em 0.8em;
+    border-radius: 20px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.protein-badge {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.carbs-badge {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.fat-badge {
+    background-color: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
+    border: 1px solid #f1c40f;
+}
+
+/* Prototype Table Styles */
+.nutrient-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nutrient-table th {
+    font-weight: 600;
+    background-color: #f8f9fa !important;
+}
+
+.nutrient-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.nutrient-table tfoot {
+    font-weight: 600;
+}
+
+/* Packaging Styles */
+.packaging-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.packaging-item {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.packaging-item:hover {
+    border-color: #3498db;
+}
+
+.packaging-img {
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.no-image {
+    color: #95a5a6;
+    padding: 40px 20px;
+}
+
+.packaging-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.packaging-description {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* Production Stages Styles */
+.stages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.stage-item {
+    border-left: 4px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.stage-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stage-number .badge {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+}
+
+.stage-name {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.stage-description {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* AI Conclusions Styles */
+.ai-conclusions {
+    position: relative;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    font-style: italic;
+    color: #555;
+}
+
+.quote-icon {
+    color: #95a5a6;
+    font-size: 1.5rem;
+    opacity: 0.3;
+}
+
+.quote-icon:first-child {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.quote-icon:last-child {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.conclusions-content {
+    padding: 0 30px;
+}
+
+/* Empty State Styles */
+.empty-state {
+    color: #95a5a6;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.empty-state i {
+    font-size: 1.2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .project-title {
+        font-size: 1.5rem;
+    }
+    
+    .project-name {
+        font-size: 1.2rem;
+    }
+    
+    .section-header {
+        font-size: 1.1rem;
+    }
+    
+    .packaging-grid,
+    .stages-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Etapas */
+/* Vertical Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 50px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 25px;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-badge {
+    position: absolute;
+    left: -50px;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    z-index: 1;
+}
+
+.timeline-badge .badge {
+    font-size: 1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px white;
+}
+
+.timeline-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border-left: 3px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.timeline-header {
+    margin-bottom: 10px;
+}
+
+.stage-name {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.timeline-body {
+    color: #7f8c8d;
+}
+
+.stage-description {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .timeline {
+        padding-left: 40px;
+    }
+    
+    .timeline::before {
+        left: 20px;
+    }
+    
+    .timeline-badge {
+        left: -40px;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .timeline-badge .badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .timeline-content {
+        padding: 15px;
+    }
+}

@@ -105,7 +105,7 @@
                                     <tbody id="questions-table">
                                         {% for pregunta in empaque.chequeo %}
                                         <tr class="question-row">
-                                            <td>{{ loop.index }}. {{ pregunta.texto }} {{pregunta.check}}</td>
+                                            <td>{{ loop.index }}. {{ pregunta.texto }} </td>
                                             <td class="status-cell">
                                                 <input type="radio" class="status-radio" name="pregunta_{{ loop.index }}" value="si" 
                                                        {% if pregunta.check== true %}checked{% endif %} onchange="updateStatus(this)">

@@ -29,29 +29,13 @@ def a():
         session['project_id'] = projectID
     project = Session.query(Project).filter(Project.id == session['project_id']).first()
 
-    #Generamos resumen
-    comidas=""
-    for p in project.foods:
-       comidas+= "\t"+ p.food_description + "\n"
-    resumen=""
-    if project.name: 
-        resumen+="Nombre: "+ project.name
-     
-    if project.description: 
-        resumen+= "\n Decripción: " + project.description+ "\n Ingredientes: \n"+comidas
+    favorite_prototype = None
 
-    if project.prototypes:
-
-        for pro in project.prototypes:
-            if pro.is_favourite==True: 
-                if pro.name: 
-                    resumen+="\n Prototipo Favorito: " + pro.name
-                for i in pro.food_prototypes:
-                    resumen+= "\t"+ i.food_description + "cantidad: "+ str(i.cantidad) + "\n"
+    for proto in project.prototypes:
+        if proto.is_favourite:
+            favorite_prototype = proto
+            break
     
-    for p in project.prototypes:
-        if p.is_favourite == True:
-            return render_template("funciones/resumen.html", project = project, favorite_prototype=p)
-            
-    return render_template("funciones/resumen.html", project = project)
+    conclusionesIA, tiempo = ModeloIA(prompt="Quiero que me saques unas conclusiones de este proyecto, teniendo en cuenta los prototipos y los alimentos que contiene. No me digas nada más, solo las conclusiones. Devuelve un formato de texto plano ya que no se va a estructurar ni dar estilo. El proyecto es el siguiente: "+ project.resumen())
+    return render_template("funciones/resumen.html", project = project, favorite_prototype= favorite_prototype, conclusiones_IA = conclusionesIA)
 

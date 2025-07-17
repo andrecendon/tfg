@@ -4,181 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumen del Proyecto</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .card {
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .card-header {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-        .nutrient-badge {
-            font-size: 0.9rem;
-            margin-right: 5px;
-        }
-        .food-item {
-            border-bottom: 1px solid #eee;
-            padding: 10px 0;
-        }
-        .packaging-img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        .btn-generate-pdf {
-            background-color: #dc3545;
-            color: white;
-            padding: 10px 25px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-        .empty-state {
-            color: #6c757d;
-            font-style: italic;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="{{ url_for('static', filename='css/resumen.css') }}" rel="stylesheet">
 </head>
 <body>
     <div class="container py-4">
-        <!-- Botón de volver -->
-        <div class="row mb-4">
+         <div class="row mt-4">
             <div class="col-1">
-                <a href="/funciones" class="border-0 bg-transparent">
-                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
+                <a href="/funciones" class="border-0 bg-transparent back-button">
+                    <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Atrás" style="width: 30px; height: 30px;">
                 </a>
             </div>
+            
         </div>
-
-        <!-- Nombre del proyecto -->
-        <div class="card mb-4">
-            <div class="card-header">Información del Proyecto</div>
-            <div class="card-body">
-                {% if project and project.name %}
-                    <h2 class="card-title">{{ project.name }}</h2>
-                {% else %}
-                    <p class="empty-state">No hay nombre de proyecto definido</p>
-                {% endif %}
+        &nbsp;
+        <!-- Header with back button and title -->
+        <div class="project-header mb-4">
+            <div class="d-flex align-items-center">
+                
+                <div class="header-content">
+                    <h1 class="project-title">
+                        <i class="fas fa-clipboard-list me-2"></i>Resumen del Proyecto
+                    </h1>
+                    {% if project and project.name %}
+                        <h2 class="project-name">"{{ project.name }}"</h2>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- Lista de alimentos -->
-        <div class="card mb-4">
-            <div class="card-header">Lista de Alimentos</div>
+        <!-- Food List Section -->
+        <div class="card mb-4 food-card">
+            <div class="card-header section-header">
+                <i class="fas fa-utensils me-2"></i>Lista de Alimentos
+            </div>
             <div class="card-body">
                 {% if project.foods %}
-                    <div class="list-group">
+                    <div class="food-list">
                         {% for food in project.foods %}
                             <div class="food-item">
-                                <h5>{{ food.food_description }}</h5>
-                                
-                                <div>
-                                    <span class="badge badge-primary nutrient-badge">Proteína: {{ food.protein }}g</span>
-                                    <span class="badge badge-success nutrient-badge">Carbs: {{ food.carbohydrates }}g</span>
-                                    <span class="badge badge-warning nutrient-badge">Grasas: {{ food.total_fat }}g</span>
+                                <h5 class="food-name">{{ food.food_description }}</h5>
+                                <div class="nutrient-badges">
+                                    <span class="badge protein-badge">
+                                        <i class="fas fa-drumstick-bite me-1"></i>Proteína: {{ food.protein }}g
+                                    </span>
+                                    <span class="badge carbs-badge">
+                                        <i class="fas fa-bread-slice me-1"></i>Carbs: {{ food.carbohydrates }}g
+                                    </span>
+                                    <span class="badge fat-badge">
+                                        <i class="fas fa-bacon me-1"></i>Grasas: {{ food.total_fat }}g
+                                    </span>
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="empty-state">No se han agregado alimentos al proyecto</p>
+                    <p class="empty-state">
+                        <i class="far fa-folder-open me-2"></i>No se han agregado alimentos al proyecto
+                    </p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Prototipo favorito -->
-        <div class="card mb-4">
-            <div class="card-header">Prototipo Favorito</div>
+        <!-- Favorite Prototype Section -->
+        <div class="card mb-4 prototype-card">
+            <div class="card-header section-header">
+                <i class="fas fa-star me-2"></i>Prototipo Favorito
+            </div>
             <div class="card-body">
                 {% if favorite_prototype %}
-                    <h4>{{ favorite_prototype.name }}</h4>
-                    {% if favorite_prototype.description %}
-                        <p>{{ favorite_prototype.description }}</p>
-                    {% endif %}
+                    <div class="prototype-header">
+                        <h4 class="prototype-name">{{ favorite_prototype.name }}</h4>
+                        {% if favorite_prototype.description %}
+                            <p class="prototype-description">{{ favorite_prototype.description }}</p>
+                        {% endif %}
+                    </div>
                     
-                    <h5 class="mt-3">Composición:</h5>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Alimento</th>
-                                <th>Cantidad</th>
-                                <th>Proteína</th>
-                                <th>Carbohidratos</th>
-                                <th>Grasas</th>
-                            </tr>
-                        </thead>
-                        {% set totals = {'quantity': 0, 'protein': 0, 'carbs': 0, 'fats': 0} %}
+                    <h5 class="composition-title">
+                        <i class="fas fa-percentage me-2"></i>Composición Nutricional:
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm nutrient-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-apple-alt me-1"></i>Alimento</th>
+                                    <th><i class="fas fa-weight me-1"></i>Cantidad</th>
+                                    <th><i class="fas fa-drumstick-bite me-1"></i>Proteína</th>
+                                    <th><i class="fas fa-bread-slice me-1"></i>Carbohidratos</th>
+                                    <th><i class="fas fa-bacon me-1"></i>Grasas</th>
+                                </tr>
+                            </thead>
+                            {% set totals = {'quantity': 0, 'protein': 0, 'carbs': 0, 'fats': 0} %}
 
-                    <tbody>
-                        {% for item in favorite_prototype.food_prototypes %}
-                            {% set protein_real = (item.food.protein * item.cantidad) / 100 %}
-                            {% set carbs_real = (item.food.carbohydrates * item.cantidad) / 100 %}
-                            {% set fats_real = (item.food.total_fat * item.cantidad) / 100 %}
+                            <tbody>
+                                {% for item in favorite_prototype.food_prototypes %}
+                                    {% set protein_real = (item.food.protein * item.cantidad) / 100 %}
+                                    {% set carbs_real = (item.food.carbohydrates * item.cantidad) / 100 %}
+                                    {% set fats_real = (item.food.total_fat * item.cantidad) / 100 %}
 
-                            <tr>
-                                <td>{{ item.food_description }}</td>
-                                <td>{{ item.cantidad }}g</td>
-                                <td>{{ protein_real | round(2) }}g</td>
-                                <td>{{ carbs_real | round(2) }}g</td>
-                                <td>{{ fats_real | round(2) }}g</td>
-                            </tr>
+                                    <tr>
+                                        <td>{{ item.food_description }}</td>
+                                        <td>{{ item.cantidad }}g</td>
+                                        <td>{{ protein_real | round(2) }}g</td>
+                                        <td>{{ carbs_real | round(2) }}g</td>
+                                        <td>{{ fats_real | round(2) }}g</td>
+                                    </tr>
 
-                            {% set _ = totals.update({
-                                'quantity': totals.quantity + item.cantidad,
-                                'protein': totals.protein + protein_real,
-                                'carbs': totals.carbs + carbs_real,
-                                'fats': totals.fats + fats_real
-                            }) %}
-                        {% endfor %}
-                    </tbody>
+                                    {% set _ = totals.update({
+                                        'quantity': totals.quantity + item.cantidad,
+                                        'protein': totals.protein + protein_real,
+                                        'carbs': totals.carbs + carbs_real,
+                                        'fats': totals.fats + fats_real
+                                    }) %}
+                                {% endfor %}
+                            </tbody>
 
-                    <tfoot>
-                        <tr class="table-active">
-                            <th>Total</th>
-                            <th>{{ totals.quantity }}g</th>
-                            <th>{{ totals.protein | round(2) }}g</th>
-                            <th>{{ totals.carbs | round(2) }}g</th>
-                            <th>{{ totals.fats | round(2) }}g</th>
-                        </tr>
-                    </tfoot>
-
-                        
-                        
-                    </table>
+                            <tfoot class="table-active">
+                                <tr>
+                                    <th>Total</th>
+                                    <th>{{ totals.quantity }}g</th>
+                                    <th>{{ totals.protein | round(2) }}g</th>
+                                    <th>{{ totals.carbs | round(2) }}g</th>
+                                    <th>{{ totals.fats | round(2) }}g</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 {% else %}
-                    <p class="empty-state">No se ha seleccionado un prototipo favorito</p>
+                    <p class="empty-state">
+                        <i class="far fa-star me-2"></i>No se ha seleccionado un prototipo favorito
+                    </p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Prototipos de empaque -->
-        <div class="card mb-4">
-            <div class="card-header">Prototipos de Empaque</div>
+        <!-- empaque Prototypes Section -->
+        <div class="card mb-4 empaque-card">
+            <div class="card-header section-header">
+                <i class="fas fa-box-open me-2"></i>Prototipos de Empaque
+            </div>
             <div class="card-body">
-                {% if packaging_prototypes and packaging_prototypes|length > 0 %}
-                    <div class="row">
-                        {% for packaging in packaging_prototypes %}
-                            <div class="col-md-4 mb-3">
-                                <div class="card">
-                                    {% if packaging.image_url %}
-                                        <img src="{{ packaging.image_url }}" class="card-img-top packaging-img" alt="Prototipo de empaque">
+                {% if project.empaques and project.empaques|length > 0 %}
+                    <div class="row empaque-grid">
+                        {% for empaque in project.empaques %}
+                            <div class="col-md-4 mb-4">
+                                <div class="empaque-item card h-100">
+                                    {% if empaque.imagen1 %}
+                                        <img src="{{ url_for('static', filename='empaques/' + project.name + '/' + empaque.imagen1) }}"  class="card-img-top empaque-img" alt="Prototipo de empaque">
                                     {% else %}
-                                        <div class="text-center py-4 empty-state">Sin imagen</div>
+                                        <div class="no-image text-center py-4">
+                                            <i class="far fa-image fa-3x mb-2"></i>
+                                            <p class="mb-0">Sin imagen</p>
+                                        </div>
                                     {% endif %}
                                     <div class="card-body">
-                                        <h5 class="card-title">
-                                            {% if packaging.name %}
-                                                {{ packaging.name }}
+                                         {% if empaque.is_favourite %}
+                                        <i class="fas fa-star me-1 {% if empaque.is_favourite %}text-black{% else %}text-warning{% endif %}"></i>
+                                           
+                                                <span class="text-black">Favorito</span>
+                                            {% endif %}
+                                        <h5 class="card-title empaque-title">
+                                            
+                                            {% if empaque.nombre %}
+                                                <i class="fas fa-tag me-2"></i>{{ empaque.nombre }}
                                             {% else %}
-                                                Prototipo {{ loop.index }}
+                                                <i class="fas fa-box me-2"></i>Prototipo {{ loop.index }}
                                             {% endif %}
                                         </h5>
-                                        {% if packaging.description %}
-                                            <p class="card-text">{{ packaging.description }}</p>
+                                        {% if empaque.caracteristicas %}
+                                            <p class="card-text empaque-description">
+                                                <i class="fas fa-align-left me-2"></i>{{ empaque.caracteristicas }}
+                                            </p>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -186,17 +183,66 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="empty-state">No hay prototipos de empaque registrados</p>
+                    <p class="empty-state">
+                        <i class="far fa-folder-open me-2"></i>No hay prototipos de empaque registrados
+                    </p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Botón para generar PDF -->
-        <div class="text-center">
-            <form action="/funciones/resumen/pdf" method="post">
-                <button type="submit" class="btn btn-generate-pdf">Generar PDF</button>
-            </form>
+       <!-- Production Stages Section - Vertical Layout -->
+        <div class="card mb-4 production-card">
+            <div class="card-header section-header">
+                <i class="fas fa-industry me-2"></i>Etapas de Producción
+            </div>
+            <div class="card-body">
+                {% if project.simulacion_produccion.etapas and project.simulacion_produccion.etapas|length > 0 %}
+                    <div class="timeline">
+                        {% for etapa in project.simulacion_produccion.etapas %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge">
+                                    <span class="badge bg-primary">{{ etapa.numero_etapa }}</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-header">
+                                        <h5 class="stage-name">{{ etapa.nombre }}</h5>
+                                    </div>
+                                    {% if etapa.descripcion %}
+                                        <div class="timeline-body">
+                                            <p class="stage-description">
+                                                <i class="fas fa-info-circle me-2"></i>{{ etapa.descripcion }}
+                                            </p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-state">
+                        <i class="far fa-folder-open me-2"></i>No hay etapas de producción
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Conclusions Section -->
+        <div class="card mb-4 conclusions-card">
+            <div class="card-header section-header">
+                <i class="fas fa-robot me-2"></i>Conclusiones de la IA
+            </div>
+            <div class="card-body">
+                <div class="ai-conclusions">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <div class="conclusions-content">
+                        {{ conclusiones_IA }}
+                    </div>
+                    <i class="fas fa-quote-right quote-icon"></i>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

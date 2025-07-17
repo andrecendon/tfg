@@ -34,11 +34,12 @@
 
 <body>
     <div class="container my-4">
-        <div class="mb-3">
-            <a href="/funciones" class="btn btn-light p-2">
-                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" class="back-icon">
+        <div class="row col-1">
+            <a href="/funciones" class="border-0 bg-transparent">
+                <img src="{{ url_for('static', filename='img/back-icon.png') }}" alt="Volver" style="width: 30px; height: 30px;">
             </a>
         </div>
+        &nbsp;
 
         <div class="mb-4">
             <h2 class="text-primary">Proyecto: {{ proyecto.name }}</h2>

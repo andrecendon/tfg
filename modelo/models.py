@@ -7,7 +7,7 @@ from typing import List
 from flask_login import UserMixin
 from sqlalchemy import Table, UniqueConstraint
 
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.ext.mutable import MutableDict, MutableList
 import json
 # Ensure the directory exists
 
@@ -528,8 +528,11 @@ class Empaque(BaseModel):
     imagen2 = Column(String)
     imagen3 = Column(String)
     notas = Column(String)
+    
 
-    chequeo = Column(JSON) #formulario, por orden se guarda booleano de la pregunta
+    chequeo_inicial = Column(MutableDict.as_mutable(JSON), default=dict)  # Para diccionarios
+
+    chequeo = Column(MutableList.as_mutable(JSON), default=list)  # Almacena lista de int en JSON. Validación empaques
 
 
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))

@@ -1,0 +1,188 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    width: auto; /* Se adapta al contenido */
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+/* Tamaño fijo para todas las celdas */
+td, th {
+    min-width: 100px; /* Cambia este valor según lo necesites */
+    height: 50px; /* Ajusta la altura de las celdas */
+}
+
+/* Opcional: Cambiar tamaño de una columna específica */
+th:nth-child(2), td:nth-child(2) {
+    width: 200px; /* Ajusta el ancho solo de la segunda columna */
+}
+
+/* Resaltar filas al pasar el cursor */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Estilo para el enlace de "Añadir Alimento +" */
+td a {
+    display: block;
+    padding: 10px;
+    background-color: #ffcc00;
+    color: black;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+td a:hover {
+    background-color: #ff9900;
+}
+
+
+
+body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 1200px; /* Increased max-width for better table display */
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            border: none;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .back-button {
+            margin-bottom: 20px;
+        }
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .status-message.complete {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-message.incomplete {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .alimento-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #2ecc71;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+        /* Table specific styles */
+        .table-responsive {
+            overflow-x: auto; /* Enable horizontal scrolling for the table */
+            margin-bottom: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .table th, .table td {
+            padding: 12px 15px;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+            white-space: nowrap; /* Prevent text wrapping in table cells */
+        }
+        .table thead th {
+            background-color: #3498db;
+            color: white;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            text-align: left;
+        }
+        .table tbody tr:nth-of-type(even) {
+            background-color: #f2f2f2;
+        }
+        .table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        .table .total-row {
+            background-color: #e0f2f7;
+            font-weight: bold;
+        }
+        .table .total-row td {
+            border-top: 2px solid #3498db;
+        }
+        .add-food-link {
+            display: block;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #2ecc71;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .add-food-link:hover {
+            background-color: gray;
+            color: white;
+            text-decoration: none;
+        }
+        .remove-food-link {
+            color: white;
+            background-color: #495057;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .remove-food-link:hover {
+            text-decoration: underline;
+            background-color: #495057;
+        }
